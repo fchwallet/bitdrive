@@ -2,7 +2,7 @@
 offchian data sotrage services
 
 
-### 通用：
+- 通用：
 >BaseURL: http://116.62.126.223   
 ```
 时间戳过时时间15秒                              
@@ -15,10 +15,10 @@ offchian data sotrage services
 {"code":"100102","data":"","msg":"验证错误"}  
 ```	  
 
-### 上传  
->/api/upload  
+- 上传  
+>接口名称: /api/upload  
 ```
-传参:  
+参数:  
 	access_key	string		   
 	tnonce		string	时间戳   
 	signature	string	加密后的signature（sha256_HMAC加密）   
@@ -31,25 +31,25 @@ signature参数格式：
         String signature = EncryptUtil.sha256_HMAC(queryParas, "/api/upload", "用户key");  
 ```
   
-### 获取存储列表  
->/api/getList  
+- 获取存储列表  
+>接口名称: /api/getList  
 ```
-传参:  
+参数  
 	access_key	string		  
 	tnonce		string	时间戳  
 	signature	string	加密后的signature（sha256_HMAC加密）  
   
-signature参数格式：  
+signature参数格式  
         TreeMap<String, String> queryParas = new TreeMap<>();  
         queryParas.put("access_key", "用户access_key");  
         queryParas.put("tnonce", 当前时间戳);  
         String signature = EncryptUtil.sha256_HMAC(queryParas, "/api/getList", "用户key");   
 ```
     
-### 下载  
->/api/download  
-传参:
+- 下载  
+>接口名称: /api/download  
 ```
+参数
 	access_key	string		  
 	tnonce		string	时间戳  
 	signature	string	加密后的signature（sha256_HMAC加密）  
