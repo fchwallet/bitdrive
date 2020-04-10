@@ -2,7 +2,7 @@
 offchian data sotrage services
 
 
-### 通用：
+### 通用  
 >BaseURL: http://116.62.126.223   
 ```
 时间戳过时时间15秒                              
