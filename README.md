@@ -3,9 +3,8 @@ offchian data sotrage services
 
 
 ### 通用：
->BaseURL: 
+>BaseURL: http://116.62.126.223   
 ```
-http://116.62.126.223   
 时间戳过时时间15秒                              
   
 加密signature：  
@@ -17,7 +16,7 @@ http://116.62.126.223
 ```	  
 
 ### 上传  
->URL:/api/upload  
+>/api/upload  
 ```
 传参:  
 	access_key	string		   
@@ -33,7 +32,7 @@ signature参数格式：
 ```
   
 ### 获取存储列表  
->URL:/api/getList  
+>/api/getList  
 ```
 传参:  
 	access_key	string		  
@@ -48,7 +47,7 @@ signature参数格式：
 ```
     
 ### 下载  
->URL:/api/download  
+>/api/download  
 传参:
 ```
 	access_key	string		  
