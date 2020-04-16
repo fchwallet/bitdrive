@@ -28,7 +28,7 @@
     </properties>
 
     <dependencies>
-   
+
         <!--代码生成器-->
         <dependency>
             <groupId>cn.stylefeng.guns</groupId>
@@ -135,11 +135,11 @@
         </dependency>
 
         <!--验证码-->
-        <dependency>
+ <!--       <dependency>
             <groupId>com.github.penggle</groupId>
             <artifactId>kaptcha</artifactId>
             <version>${kaptcha.version}</version>
-        </dependency>
+        </dependency>-->
 
         <!--beetl模板引擎-->
         <dependency>
