@@ -1,0 +1,190 @@
+server:
+  port: 8442
+
+guns:
+  swagger-open: true              #是否开启swagger (true/false)
+  kaptcha-open: false             #是否开启登录时验证码 (true/false)
+  #  file-upload-path: d:/tmp     #文件上传目录(不配置的话为java.io.tmpdir目录)
+  spring-session-open: true      #是否开启spring session,如果是多机环境需要开启(true/false)
+  session-invalidate-time: 1800     #session失效时间(只在单机环境下生效，多机环境在SpringSessionConfig类中配置) 单位：秒
+  session-validation-interval: 900  #多久检测一次失效的session(只在单机环境下生效) 单位：秒
+  scheduler-switch:
+    signature: true
+
+beetl:
+  resource-auto-check: true       #热加载beetl模板，开发时候用
+
+spring:
+  profiles:
+    active: @spring.active@
+  mvc:
+    static-path-pattern: /static/**
+    view:
+      prefix: /WEB-INF/view
+  devtools:
+    restart:
+      enabled: false
+      additional-paths: src/main/java
+      exclude: static/**,WEB-INF/view/**
+  servlet:
+    multipart:
+      max-request-size: 100MB
+      max-file-size: 100MB
+      location: /data/upload_tmp
+
+mybatis-plus:
+  typeAliasesPackage: com.xyz.fch_sp.app.modular.system.model
+
+log:
+  path: guns-logs
+
+
+---
+
+spring:
+  profiles: local
+  datasource:
+    url: jdbc:mysql://47.110.137.123:3306/upload?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
+    username: root
+    password: root890*()
+    filters: wall,mergeStat
+    db-name: fch_sp
+
+#多数据源情况的配置
+guns:
+  swagger-open: false              #是否开启swagger (true/false)
+  muti-datasource:
+    open: false
+    driverClassName: org.apache.phoenix.queryserver.client.Driver
+    url: jdbc:phoenix:thin:url=http://113.13.13.123:8765;serialization=PROTOBUF
+    username:
+    password:
+    dataSourceNames:
+      - dataSourceGuns
+      - dataSourceBiz
+
+  scheduler-switch:
+    signature: true
+
+
+redis:
+  host: 47.110.137.123
+  port: 6379
+  password: root890*()
+  database: 11
+  expiration: 300
+---
+
+spring:
+  profiles: dev
+  datasource:
+    url: jdbc:mysql://47.110.137.123:3306/upload?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
+    username: root
+    password: root890*()
+    filters: wall,mergeStat
+    db-name: fch_sp
+
+#多数据源情况的配置
+guns:
+  swagger-open: false              #是否开启swagger (true/false)
+  muti-datasource:
+    open: false
+    driverClassName: org.apache.phoenix.queryserver.client.Driver
+    url: jdbc:phoenix:thin:url=http://10.1.1.130:8765;serialization=PROTOBUF
+    username:
+    password:
+    dataSourceNames:
+      - dataSourceGuns
+      - dataSourceBiz
+
+  scheduler-switch:
+      signature: false
+
+redis:
+  host: 47.110.137.123
+  port: 6379
+  password: root890*()
+  database: 12
+  expiration: 300
+---
+
+
+spring:
+  profiles: test
+  datasource:
+    url: jdbc:mysql://47.110.137.123:3306/upload?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
+    username: root
+    password: root890*()
+    filters: wall,mergeStat
+    db-name: fch_sp
+
+
+#kafka配置
+BOOTSTRAP_SERVERS_CONFIG: 123.123.123.123:9092
+GROUP_ID_CONFIG: 4
+ENABLE_AUTO_COMMIT_CONFIG: true
+AUTO_COMMIT_INTERVAL_MS_CONFIG: 100
+SESSION_TIMEOUT_MS_CONFIG: 15000
+AUTO_STARTUP: false
+
+#多数据源情况的配置
+guns:
+  swagger-open: false              #是否开启swagger (true/false)
+  muti-datasource:
+    open: false
+    driverClassName: org.apache.phoenix.queryserver.client.Driver
+    url: jdbc:phoenix:thin:url=http://123.432.12.35:8765;serialization=PROTOBUF
+    username:
+    password:
+    dataSourceNames:
+      - dataSourceGuns
+      - dataSourceBiz
+
+  scheduler-switch:
+    signature: true
+
+redis:
+  host: 123.123.123.123
+  port: 6379
+  password: 1
+  database: 12
+  expiration: 300
+
+---
+
+spring:
+  profiles: produce
+  datasource:
+    url: jdbc:mysql://47.110.137.123:3306/upload?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
+    username: root
+    password: root890*()
+    filters: wall,mergeStat
+redis:
+  host: 123.123.123.123
+  port: 6289
+  password: 123
+  database: 0
+  expiration: 300
+guns:
+  swagger-open: false              #是否开启swagger (true/false)
+  kaptcha-open: false             #是否开启登录时验证码 (true/false)
+  muti-datasource:
+    open: false
+    driverClassName: org.apache.phoenix.queryserver.client.Driver
+    url: jdbc:phoenix:thin:url=http://123.123.1238.16123:8765;serialization=PROTOBUF
+    username:
+    password:
+    dataSourceNames:
+      - dataSourceGuns
+      - dataSourceBiz
+  scheduler-switch:
+    signature: true
+
+#kafka配置
+BOOTSTRAP_SERVERS_CONFIG: 123.123.123.123:9092
+GROUP_ID_CONFIG: 4
+ENABLE_AUTO_COMMIT_CONFIG: true
+AUTO_COMMIT_INTERVAL_MS_CONFIG: 100
+SESSION_TIMEOUT_MS_CONFIG: 15000
+AUTO_STARTUP: false
+
