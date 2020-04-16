@@ -29,6 +29,7 @@ import com.xyz.upload.app.modular.system.service.*;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -55,7 +56,11 @@ public class ApiController extends BaseController {
     @Autowired
     private UploadService uploadService;
 
+    @Value("${system-address}")
     static String systemAddress = "1CquYrHP2c4bxQ2z5vGvtJYvJ83ShDHhCb";
+
+    @Value("${utxo-url}")
+    private String utxoUrl;
 
 
     @ResponseBody
@@ -161,9 +166,7 @@ public class ApiController extends BaseController {
         params.put("method","getutxo");
         params.put("params", address);
 
-        System.out.println(params);
-        String utxos = HttpUtil.doPost("http://47.110.137.123:8666/", params.toJSONString());
-        System.out.println(utxos);
+        String utxos = HttpUtil.doPost(utxoUrl, params.toJSONString());
         JSONObject data = (JSONObject) JSONObject.parse(utxos);
         JSONObject result = data.getJSONObject("result");
 
@@ -180,7 +183,7 @@ public class ApiController extends BaseController {
      */
     @ResponseBody
     @RequestMapping(value="/upload", method = RequestMethod.POST)
-    public JsonResult getBalanceHistory(@RequestParam("fileName") MultipartFile file, String access_key, String tnonce, String signature) throws Exception {
+    public JsonResult upload(@RequestParam("fileName") MultipartFile file, String access_key, String tnonce, String signature) throws Exception {
 
         if (access_key == null ||tnonce == null || signature == null)
             return new JsonResult(BizExceptionEnum.PARAMETER_CANT_BE_EMPTY.getCode(), BizExceptionEnum.PARAMETER_CANT_BE_EMPTY.getMessage());

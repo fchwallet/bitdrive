@@ -24,19 +24,21 @@
 	signature	string	加密后的signature（sha256_HMAC加密）   
 	fileName	string   
    
+返回结果：         
+    {
+        "code": 200,
+         "data": {
+            "txid": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
+          },
+          "msg": ""
+    }   
+    
 signature参数格式：   
         TreeMap<String, String> queryParas = new TreeMap<>();  
         queryParas.put("access_key", "用户access_key");  
         queryParas.put("tnonce", 当前时间戳);  
         String signature = EncryptUtil.sha256_HMAC(queryParas, "/api/upload", "用户key");  
-        返回结果：         
-        {
-            "code": 200,
-            "data": {
-                "txid": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
-            },
-            "msg": ""
-        }
+     
 ```
   
 ### 获取存储列表  
@@ -47,26 +49,27 @@ signature参数格式：
 	tnonce		string	时间戳  
 	signature	string	加密后的signature（sha256_HMAC加密）  
   
+返回结果：
+    {
+        "code":200,
+        "data":{
+        	"data":[
+        		{
+        			"name":"upload文档.txt",
+        			"openId":1001,
+        			"txid":"95d45cb42ec6081f5712b662bff54dd9f17db78b326b03ebbdef7f359d562573",
+        			"type":""
+        		}
+        	]
+        },
+        "msg":""
+     }    
+  
 signature参数格式  
         TreeMap<String, String> queryParas = new TreeMap<>();  
         queryParas.put("access_key", "用户access_key");  
         queryParas.put("tnonce", 当前时间戳);  
         String signature = EncryptUtil.sha256_HMAC(queryParas, "/api/getList", "用户key"); 
-        返回结果：
-        {
-        	"code":200,
-        	"data":{
-        		"data":[
-        			{
-        				"name":"upload文档.txt",
-        				"openId":1001,
-        				"txid":"95d45cb42ec6081f5712b662bff54dd9f17db78b326b03ebbdef7f359d562573",
-        				"type":""
-        			}
-        		]
-        	},
-        	"msg":""
-        }  
 ```
     
 ### 下载  
@@ -84,3 +87,7 @@ signature参数格式：
         queryParas.put("tnonce", 当前时间戳);  
         String signature = EncryptUtil.sha256_HMAC(queryParas, "/api/download", "用户key");  
 ```
+
+
+部署配置：
+    修改application,yml 数据库地址，系统地址，utxo接口，节点配置即可

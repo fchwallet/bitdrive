@@ -1,6 +1,8 @@
 package com.xyz.upload.app.core.rpc;
 
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import wf.bitcoin.javabitcoindrpcclient.BitcoinJSONRPCClient;
 import wf.bitcoin.javabitcoindrpcclient.BitcoindRpcClient.Block;
 import wf.bitcoin.javabitcoindrpcclient.BitcoindRpcClient.Unspent;
@@ -8,13 +10,36 @@ import wf.bitcoin.javabitcoindrpcclient.BitcoindRpcClient.Unspent;
 import java.net.URL;
 import java.util.List;
 
+@Component
 public class Api {
 
-	private static final String user = "dev";
-	private static final String password = "a";
-	private static final String host = "192.168.0.68";
-	private static final String port = "8332";
+	private static String user;
 
+	private static String password;
+
+	private static String host;
+
+	private static String port;
+
+	@Value("${node.user}")
+	public void setUser(String user) {
+		this.user = user;
+	}
+
+	@Value("${node.password}")
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	@Value("${node.url}")
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+	@Value("${node.port}")
+	public void setPort(String port) {
+		this.port = port;
+	}
 
 	/**
 	 * 返回钱包内的UTXO

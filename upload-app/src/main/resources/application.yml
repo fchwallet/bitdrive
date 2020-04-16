@@ -38,13 +38,22 @@ mybatis-plus:
 log:
   path: guns-logs
 
+system-address: 1CquYrHP2c4bxQ2z5vGvtJYvJ83ShDHhCb    # 系统地址
+
+utxo-url: http://11.11.11.11:8666/         # utxo接口
+
+node:
+  url: 192.168.0.68           # 节点ip
+  port: 8332                  # 节点端口
+  user: dev                   # 节点用户名
+  password: a                 # 节点密码
 
 ---
 
 spring:
   profiles: local
   datasource:
-    url: jdbc:mysql://47.110.137.123:3306/upload?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
+    url: jdbc:mysql://11.11.11.11:3306/upload?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
     username: root
     password: root890*()
     filters: wall,mergeStat
@@ -78,7 +87,7 @@ redis:
 spring:
   profiles: dev
   datasource:
-    url: jdbc:mysql://47.110.137.123:3306/upload?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
+    url: jdbc:mysql://11.11.11.11:3306/upload?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
     username: root
     password: root890*()
     filters: wall,mergeStat
@@ -106,13 +115,14 @@ redis:
   password: root890*()
   database: 12
   expiration: 300
+
 ---
 
 
 spring:
   profiles: test
   datasource:
-    url: jdbc:mysql://47.110.137.123:3306/upload?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
+    url: jdbc:mysql://11.11.11.11:3306/upload?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
     username: root
     password: root890*()
     filters: wall,mergeStat
@@ -155,7 +165,7 @@ redis:
 spring:
   profiles: produce
   datasource:
-    url: jdbc:mysql://47.110.137.123:3306/upload?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
+    url: jdbc:mysql://11.11.11.11:3306/upload?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
     username: root
     password: root890*()
     filters: wall,mergeStat

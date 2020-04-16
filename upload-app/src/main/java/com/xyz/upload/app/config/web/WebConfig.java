@@ -25,8 +25,6 @@ import com.alibaba.druid.support.http.StatViewServlet;
 import com.alibaba.druid.support.http.WebStatFilter;
 import com.alibaba.druid.support.spring.stat.BeanTypeAutoProxyCreator;
 import com.alibaba.druid.support.spring.stat.DruidStatInterceptor;
-import com.google.code.kaptcha.impl.DefaultKaptcha;
-import com.google.code.kaptcha.util.Config;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.JdkRegexpMethodPointcut;
@@ -182,26 +180,7 @@ public class WebConfig implements WebMvcConfigurer {
         return new ServletListenerRegistrationBean<>(new ConfigListener());
     }
 
-    /**
-     * 验证码生成相关
-     */
-    @Bean
-    public DefaultKaptcha kaptcha() {
-        Properties properties = new Properties();
-        properties.put("kaptcha.border", "no");
-        properties.put("kaptcha.border.color", "105,179,90");
-        properties.put("kaptcha.textproducer.font.color", "blue");
-        properties.put("kaptcha.image.width", "125");
-        properties.put("kaptcha.image.height", "45");
-        properties.put("kaptcha.textproducer.font.size", "45");
-        properties.put("kaptcha.session.key", "code");
-        properties.put("kaptcha.textproducer.char.length", "4");
-        properties.put("kaptcha.textproducer.font.names", "宋体,楷体,微软雅黑");
-        Config config = new Config(properties);
-        DefaultKaptcha defaultKaptcha = new DefaultKaptcha();
-        defaultKaptcha.setConfig(config);
-        return defaultKaptcha;
-    }
+
 
     @Bean
     public MultipartConfigElement multipartConfigElement() {
