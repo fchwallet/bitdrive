@@ -57,7 +57,7 @@ public class ApiController extends BaseController {
     private UploadService uploadService;
 
     @Value("${system-address}")
-    static String systemAddress = "1CquYrHP2c4bxQ2z5vGvtJYvJ83ShDHhCb";
+    private String systemAddress;
 
     @Value("${utxo-url}")
     private String utxoUrl;

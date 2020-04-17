@@ -38,24 +38,24 @@ mybatis-plus:
 log:
   path: guns-logs
 
-system-address: 1CquYrHP2c4bxQ2z5vGvtJYvJ83ShDHhCb    # 系统地址
+system-address: 123    # 系统地址
 
-utxo-url: http://11.11.11.11:8666/         # utxo接口
+utxo-url: http://123:8666/         # utxo接口
 
 node:
-  url: 192.168.0.68           # 节点ip
+  url: 123      # 节点ip
   port: 8332                  # 节点端口
-  user: dev                   # 节点用户名
-  password: a                 # 节点密码
+  user: 123                   # 节点用户名
+  password: 123                 # 节点密码
 
 ---
 
 spring:
   profiles: local
   datasource:
-    url: jdbc:mysql://11.11.11.11:3306/upload?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
+    url: jdbc:mysql://123:3306/upload?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
     username: root
-    password: root890*()
+    password: 123
     filters: wall,mergeStat
     db-name: fch_sp
 
@@ -77,7 +77,7 @@ guns:
 
 
 redis:
-  host: 47.110.137.123
+  host: 123
   port: 6379
   password: root890*()
   database: 11
@@ -87,9 +87,9 @@ redis:
 spring:
   profiles: dev
   datasource:
-    url: jdbc:mysql://11.11.11.11:3306/upload?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
+    url: jdbc:mysql://123:3306/upload?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
     username: root
-    password: root890*()
+    password: 123
     filters: wall,mergeStat
     db-name: fch_sp
 
@@ -110,9 +110,9 @@ guns:
       signature: false
 
 redis:
-  host: 47.110.137.123
+  host: 123
   port: 6379
-  password: root890*()
+  password: 123
   database: 12
   expiration: 300
 
@@ -122,15 +122,15 @@ redis:
 spring:
   profiles: test
   datasource:
-    url: jdbc:mysql://11.11.11.11:3306/upload?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
+    url: jdbc:mysql://123:3306/upload?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
     username: root
-    password: root890*()
+    password: 123*()
     filters: wall,mergeStat
     db-name: fch_sp
 
 
 #kafka配置
-BOOTSTRAP_SERVERS_CONFIG: 123.123.123.123:9092
+BOOTSTRAP_SERVERS_CONFIG: 123:9092
 GROUP_ID_CONFIG: 4
 ENABLE_AUTO_COMMIT_CONFIG: true
 AUTO_COMMIT_INTERVAL_MS_CONFIG: 100
@@ -143,7 +143,7 @@ guns:
   muti-datasource:
     open: false
     driverClassName: org.apache.phoenix.queryserver.client.Driver
-    url: jdbc:phoenix:thin:url=http://123.432.12.35:8765;serialization=PROTOBUF
+    url: jdbc:phoenix:thin:url=http://123:8765;serialization=PROTOBUF
     username:
     password:
     dataSourceNames:
@@ -154,8 +154,8 @@ guns:
     signature: true
 
 redis:
-  host: 123.123.123.123
-  port: 6379
+  host: 123
+  port: 123
   password: 1
   database: 12
   expiration: 300
@@ -165,9 +165,9 @@ redis:
 spring:
   profiles: produce
   datasource:
-    url: jdbc:mysql://11.11.11.11:3306/upload?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
+    url: jdbc:mysql://123:3306/upload?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
     username: root
-    password: root890*()
+    password: 123
     filters: wall,mergeStat
 redis:
   host: 123.123.123.123
