@@ -1,5 +1,5 @@
-# fchdrive
-[fchdrive](./bitdrive.pdf) offchian data sotrage services
+# fchdriveJ
+java fchdrive offchian data sotrage services
 
 
 ### 通用  
@@ -11,10 +11,10 @@
 带有page字段的page不需要带入加密参数,sha256_HMAC(所有参数 ,"接口名称", key)所有参数依次	  
    
 错误码：  
-{"code":"100101","data":"","msg":"验证时间超时"}  
-{"code":"100102","data":"","msg":"验证错误"}  
-{"code":"200212","data":"","msg":"上传失败，请联系客服解决"}
-{"code":"200211","data":"","msg":"文件大于15M"}
+{"code":"100101","验证时间超时"}  
+{"code":"100102","验证错误"}  
+{"code":"200212","上传失败，请联系客服解决"}
+{"code":"200211","文件大于15M"}
 
 ```	  
 
@@ -33,7 +33,6 @@
     {
         "code": 200,
 	"drive_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
-        "msg": ""
     }   
     
 ```
@@ -53,7 +52,6 @@
         "code":200,
 	"metadata": {},
 	"data": {}
-        "msg":""
     }    
 ```
     
@@ -70,12 +68,8 @@
 	{
 	   "code":200,
 	   "drive_id": ["f613da5785cfcfbb5c4d47e8dd11156712c8b9fa169881ec4c805ea4f6f1b6b6", "f613da5785cfcfbb5c4d47e8dd11156712c8b9fa169881ec4c805ea4f6f1b6b6"]	
-	   "msg":
 	}
 ```
-
-
-
 
 部署配置：
     修改application,yml 数据库地址，系统地址，utxo接口，节点配置即可
