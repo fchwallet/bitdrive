@@ -18,78 +18,63 @@
 
 ```	  
 
-### 上传  
->接口名称: /api/upload  
+### 存数据到freedrive  
+>接口名称: /api/put
 ```
 参数:  
 	access_key	string		   
 	tnonce		string	时间戳   
 	signature	string	加密后的signature（sha256_HMAC加密）   
-	fileName	string   
+	fch_addr 	string  fch 地址，可多个
+	metadata	string   
+	data 		string
    
 返回结果：         
     {
         "code": 200,
-         "data": {
-            "txid": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
-          },
-          "msg": ""
+	"drive_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
+        "msg": ""
     }   
     
-signature参数格式：   
-        TreeMap<String, String> queryParas = new TreeMap<>();  
-        queryParas.put("access_key", "用户access_key");  
-        queryParas.put("tnonce", 当前时间戳);  
-        String signature = EncryptUtil.sha256_HMAC(queryParas, "/api/upload", "用户key");  
-     
 ```
   
-### 获取存储列表  
->接口名称: /api/getList  
+### 从freedrive获取存储内容
+>接口名称: /api/get
 ```
 参数  
 	access_key	string		  
 	tnonce		string	时间戳  
 	signature	string	加密后的signature（sha256_HMAC加密）  
+	fch_addr	string  fch地址
+	drive_id	string  drive_id
   
 返回结果：
     {
         "code":200,
-        "data":{
-        	"data":[
-        		{
-        			"name":"upload文档.txt",
-        			"openId":1001,
-        			"txid":"95d45cb42ec6081f5712b662bff54dd9f17db78b326b03ebbdef7f359d562573",
-        			"type":""
-        		}
-        	]
-        },
+	"metadata": {},
+	"data": {}
         "msg":""
-     }    
-  
-signature参数格式  
-        TreeMap<String, String> queryParas = new TreeMap<>();  
-        queryParas.put("access_key", "用户access_key");  
-        queryParas.put("tnonce", 当前时间戳);  
-        String signature = EncryptUtil.sha256_HMAC(queryParas, "/api/getList", "用户key"); 
+    }    
 ```
     
 ### 下载  
->接口名称: /api/download  
+>接口名称: /api/get_drive_id
 ```
 参数
 	access_key	string		  
 	tnonce		string	时间戳  
 	signature	string	加密后的signature（sha256_HMAC加密）  
-	txid		string  
+	fch_addr	string  fch 地址
 	    
-signature参数格式：  
-        TreeMap<String, String> queryParas = new TreeMap<>();  
-        queryParas.put("access_key", "用户access_key");  
-        queryParas.put("tnonce", 当前时间戳);  
-        String signature = EncryptUtil.sha256_HMAC(queryParas, "/api/download", "用户key");  
+返回结果：
+	{
+	   "code":200,
+	   "drive_id": ["f613da5785cfcfbb5c4d47e8dd11156712c8b9fa169881ec4c805ea4f6f1b6b6", "f613da5785cfcfbb5c4d47e8dd11156712c8b9fa169881ec4c805ea4f6f1b6b6"]	
+	   "msg":
+	}
 ```
+
+
 
 
 部署配置：
