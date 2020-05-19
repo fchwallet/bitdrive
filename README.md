@@ -1,5 +1,5 @@
-# bitdrive
-[bitdrive](./bitdrive.pdf) offchian data sotrage services
+# freedriveJ
+java freedrive offchian data sotrage services
 
 
 ### 通用  
@@ -11,86 +11,65 @@
 带有page字段的page不需要带入加密参数,sha256_HMAC(所有参数 ,"接口名称", key)所有参数依次	  
    
 错误码：  
-{"code":"100101","data":"","msg":"验证时间超时"}  
-{"code":"100102","data":"","msg":"验证错误"}  
-{"code":"200212","data":"","msg":"上传失败，请联系客服解决"}
-{"code":"200211","data":"","msg":"文件大于15M"}
+{"code":"100101","验证时间超时"}  
+{"code":"100102","验证错误"}  
+{"code":"200212","上传失败，请联系客服解决"}
+{"code":"200211","文件大于15M"}
 
 ```	  
 
-### 上传  
->接口名称: /api/upload  
+### 存数据到freedrive  
+>接口名称: /api/put
 ```
 参数:  
 	access_key	string		   
 	tnonce		string	时间戳   
 	signature	string	加密后的signature（sha256_HMAC加密）   
-	fileName	string   
+	fch_addr 	string  fch 地址，可多个
+	metadata	string   
+	data 		string
    
 返回结果：         
     {
         "code": 200,
-         "data": {
-            "txid": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
-          },
-          "msg": ""
+	"drive_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
     }   
     
-signature参数格式：   
-        TreeMap<String, String> queryParas = new TreeMap<>();  
-        queryParas.put("access_key", "用户access_key");  
-        queryParas.put("tnonce", 当前时间戳);  
-        String signature = EncryptUtil.sha256_HMAC(queryParas, "/api/upload", "用户key");  
-     
 ```
   
-### 获取存储列表  
->接口名称: /api/getList  
+### 从freedrive获取存储内容
+>接口名称: /api/get
 ```
 参数  
 	access_key	string		  
 	tnonce		string	时间戳  
 	signature	string	加密后的signature（sha256_HMAC加密）  
+	fch_addr	string  fch地址
+	drive_id	string  drive_id
   
 返回结果：
     {
         "code":200,
-        "data":{
-        	"data":[
-        		{
-        			"name":"upload文档.txt",
-        			"openId":1001,
-        			"txid":"95d45cb42ec6081f5712b662bff54dd9f17db78b326b03ebbdef7f359d562573",
-        			"type":""
-        		}
-        	]
-        },
-        "msg":""
-     }    
-  
-signature参数格式  
-        TreeMap<String, String> queryParas = new TreeMap<>();  
-        queryParas.put("access_key", "用户access_key");  
-        queryParas.put("tnonce", 当前时间戳);  
-        String signature = EncryptUtil.sha256_HMAC(queryParas, "/api/getList", "用户key"); 
+	"metadata": {},
+	"data": {}
+    }    
 ```
     
-### 下载  
->接口名称: /api/download  
+### 获取FCH地址的存储列表  
+>接口名称: /api/get_drive_id
 ```
 参数
 	access_key	string		  
 	tnonce		string	时间戳  
 	signature	string	加密后的signature（sha256_HMAC加密）  
-	txid		string  
+	fch_addr	string  fch 地址
 	    
-signature参数格式：  
-        TreeMap<String, String> queryParas = new TreeMap<>();  
-        queryParas.put("access_key", "用户access_key");  
-        queryParas.put("tnonce", 当前时间戳);  
-        String signature = EncryptUtil.sha256_HMAC(queryParas, "/api/download", "用户key");  
+返回结果：
+	{
+	   "code":200,
+	   "drive_id": ["f613da5785cfcfbb5c4d47e8dd11156712c8b9fa169881ec4c805ea4f6f1b6b6", "f613da5785cfcfbb5c4d47e8dd11156712c8b9fa169881ec4c805ea4f6f1b6b6"]	
+	}
 ```
-
 
 部署配置：
     修改application,yml 数据库地址，系统地址，utxo接口，节点配置即可
