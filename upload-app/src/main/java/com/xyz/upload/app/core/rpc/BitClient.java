@@ -163,6 +163,110 @@ public class BitClient {
 
 	}
 
+	public String createContractTransaction(List<TxInputDto> inputs, List<CommonTxOputDto> outputs) throws BitcoinRpcException {
+		List<Map> pInputs = new ArrayList<>();
+
+		for (final TxInputDto txInput : inputs) {
+			pInputs.add(new LinkedHashMap() {
+				{
+					put("txid", txInput.txid());
+					put("vout", txInput.vout());
+				}
+			});
+		}
+
+		List<Map> pOutputs = new ArrayList<>();
+		for (CommonTxOputDto contractTxOputDto : outputs) {
+			pOutputs.add(new LinkedHashMap() {
+				{
+					if(contractTxOputDto.getType()==1) {
+						put("address", contractTxOputDto.getAddress());
+						put("amount", contractTxOputDto.getAmount());
+						put("script", contractTxOputDto.getScript());
+					} else if(contractTxOputDto.getType()==2) {
+						put("address", contractTxOputDto.getAddress());
+						put("amount", contractTxOputDto.getAmount());
+					} else if(contractTxOputDto.getType()==3){
+						put("data", contractTxOputDto.getData());
+					}
+				}
+			});
+		}
+		return (String) query("createcontracttransaction", pInputs, pOutputs);
+	}
+
+	public String createSlpppTransaction(List<TxInputDto> inputs, List<CommonTxOputDto> outputs) throws BitcoinRpcException {
+		List<Map> pInputs = new ArrayList<>();
+
+		for (final TxInputDto txInput : inputs) {
+			pInputs.add(new LinkedHashMap() {
+				{
+					put("txid", txInput.txid());
+					put("vout", txInput.vout());
+				}
+			});
+		}
+
+		List<Map> pOutputs = new ArrayList<>();
+
+		for (CommonTxOputDto contractTxOputDto : outputs) {
+			pOutputs.add(new LinkedHashMap() {
+				{
+					if(contractTxOputDto.getType()==1) {
+						put("address", contractTxOputDto.getAddress());
+						put("amount", contractTxOputDto.getAmount());
+						put("script", contractTxOputDto.getScript());
+					} else if(contractTxOputDto.getType()==2) {
+						put("address", contractTxOputDto.getAddress());
+						put("amount", contractTxOputDto.getAmount());
+					} else if(contractTxOputDto.getType()==3){
+						put("data", contractTxOputDto.getData());
+					}
+				}
+			});
+		}
+		return (String) query("createslppptransaction", pInputs, pOutputs);
+	}
+
+
+	public String createDrivetx(List<TxInputDto> inputs, List<CommonTxOputDto> outputs) throws BitcoinRpcException {
+		List<Map> pInputs = new ArrayList<>();
+
+		for (final TxInputDto txInput : inputs) {
+			pInputs.add(new LinkedHashMap() {
+				{
+					put("txid", txInput.txid());
+					put("vout", txInput.vout());
+				}
+			});
+		}
+
+		List<Map> pOutputs = new ArrayList<>();
+
+		for (CommonTxOputDto commonTxOputDto : outputs) {
+			pOutputs.add(new LinkedHashMap() {
+				{
+					if(commonTxOputDto.getType()==1) {
+						put("address", commonTxOputDto.getAddresss());
+						put("amount", commonTxOputDto.getAmount());
+						put("metadata", commonTxOputDto.getMetadata());
+					} else if(commonTxOputDto.getType()==2) {
+						put("address", commonTxOputDto.getAddresss());
+						put("amount", commonTxOputDto.getAmount());
+					} else if(commonTxOputDto.getType()==3){
+						put("data", commonTxOputDto.getData());
+					}
+				}
+			});
+		}
+		return (String) query("createdrivetx", pInputs, pOutputs);
+	}
+
+	public String signDrivetx(String hex, String address) {
+		Map result = (Map) query("signdrivetx", hex, address); // if sigHashType is
+		return (String) result.get("hex");
+	}
+
 	// 签名认证
 	public String signRawTransaction(String hex) throws BitcoinRpcException {
 		return signRawTransaction1(hex);
@@ -179,6 +283,8 @@ public class BitClient {
 //		else
 //			throw new BitcoinRpcException("Incomplete");
 	}
+
+
 
 	public String sendRawTransaction(String hex) throws BitcoinRpcException {
 		return (String) query("sendrawtransaction", hex);
@@ -204,5 +310,12 @@ public class BitClient {
 	    return (boolean) query("verifymessage", bitcoinAddress, signature, message);
 	}
 
+	public String fchtoxsv(String address) throws BitcoinRpcException {
+		return (String) query("fchtoxsv", address);
+	}
+
+	public String getBlock(String blockHash) throws BitcoinRpcException {
+		return JSON.stringify(query("getblock", blockHash));
+	}
 
 }

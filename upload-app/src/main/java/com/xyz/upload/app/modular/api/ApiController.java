@@ -59,9 +59,6 @@ public class ApiController extends BaseController {
     @Value("${system-address}")
     private String systemAddress;
 
-    @Value("${utxo-url}")
-    private String utxoUrl;
-
 
     @ResponseBody
     @RequestMapping(value="/test", method = RequestMethod.POST)
@@ -158,121 +155,105 @@ public class ApiController extends BaseController {
 //    }*/
 
 
-    public JSONObject getUxto(String[] address) throws Exception {
-
-        JSONObject params = new JSONObject();
-        params.put("jsonrpc","1.0");
-        params.put("id","curltest");
-        params.put("method","getutxo");
-        params.put("params", address);
-
-        String utxos = HttpUtil.doPost(utxoUrl, params.toJSONString());
-        JSONObject data = (JSONObject) JSONObject.parse(utxos);
-        JSONObject result = data.getJSONObject("result");
-
-        return result;
-
-    }
 
 
-
-    /**
-     * 上传接口
-     * @return
-     * @throws Exception
-     */
-    @ResponseBody
-    @RequestMapping(value="/upload", method = RequestMethod.POST)
-    public JsonResult upload(@RequestParam("fileName") MultipartFile file, String access_key, String tnonce, String signature) throws Exception {
-
-        if (access_key == null ||tnonce == null || signature == null)
-            return new JsonResult(BizExceptionEnum.PARAMETER_CANT_BE_EMPTY.getCode(), BizExceptionEnum.PARAMETER_CANT_BE_EMPTY.getMessage());
-
-        Long tonceLong = Long.valueOf(tnonce) + 150000;
-        if (System.currentTimeMillis() > tonceLong)
-            return new JsonResult(BizExceptionEnum.API_TIME_OUT_ERROR.getCode(), BizExceptionEnum.API_TIME_OUT_ERROR.getMessage());
-
-        Access access = accessService.findByAccessKey(access_key);
-        TreeMap<String, String> queryParas  = new TreeMap<>();
-        queryParas.put("access_key", access_key);
-        queryParas.put("tnonce", tnonce);
-        String sign = EncryptUtil.sha256_HMAC(queryParas ,"/api/upload", access.getKey());
-
-        if (!signature.equals(sign))
-            return new JsonResult(BizExceptionEnum.API_SIGN_ERROR.getCode(), BizExceptionEnum.API_SIGN_ERROR.getMessage());
-
-
-        Upload upload = new Upload();
-
-        String fileName = file.getOriginalFilename();
-        upload.setName(fileName);
-
-        Long size = file.getSize();                             //文件大小
-        String type = getExtensionName(fileName);
-
-//        String files = new String(file.getBytes(), "UTF-8");
-
-        if (size > 1024 * 1024 * 15) {
-            return new JsonResult(BizExceptionEnum.SIZE_ERROR.getCode(), BizExceptionEnum.SIZE_ERROR.getMessage());
-        }
-
-        String optrun = UnicodeUtil.bytesToHexString(file.getBytes());
-
-        String[] sysAddress = {systemAddress};
-        JSONObject utxoJson = getUxto(sysAddress);
-
-        JSONArray tokenDatas = utxoJson.getJSONArray(systemAddress);
-
-        List<TxInputDto> input = new ArrayList<>();
-        List<TxOutputDto> output = new ArrayList<>();
-
-        BigDecimal value= new BigDecimal("0");
-        JSONArray vins = new JSONArray();
-        for (Object data: tokenDatas) {
-
-            JSONArray dd = (JSONArray) data;
-            String txid = (String)dd.get(0);
-            Integer vout = (Integer)dd.get(1);
-            TxInputDto txinputDto = new TxInputDto(txid, vout, systemAddress);
-            input.add(txinputDto);
-            value = value.add(dd.getBigDecimal(2));
-            JSONObject vin = new JSONObject();
-            vin.put("txid", txid);
-            vin.put("vout", vout);
-            vins.add(vin);
-        }
-
-
-        BigDecimal fee = new BigDecimal("0.00000001").multiply(new BigDecimal(size));
-        BigDecimal v = value.subtract(fee);
-
-        TxOutputDto dd = new TxOutputDto(systemAddress, v);				// 找零系统地址
-        output.add(dd);
-
-        TxOutputDto d = new TxOutputDto(optrun);
-        output.add(d);
-
-
-        String createRawTransaction = Api.CreateRawTransaction(input, output);
-
-        String signhex = Api.SignRawTransaction(createRawTransaction);
-
-        System.out.println(signhex);
-
-        String txid = Api.SendRawTransaction(signhex);
-
-        if (txid == null) {
-            return new JsonResult(BizExceptionEnum.TX_ERROR.getCode(), BizExceptionEnum.TX_ERROR.getMessage());
-        }
-
-        upload.setOpenId(access.getOpenid());
-        upload.setTxid(txid);
-        upload.setType(type);
-        uploadService.insertUpload(upload);
-
-        return new JsonResult().addData("txid", txid);
-
-    }
+//    /**
+//     * 上传接口
+//     * @return
+//     * @throws Exception
+//     */
+//    @ResponseBody
+//    @RequestMapping(value="/upload", method = RequestMethod.POST)
+//    public JsonResult upload(@RequestParam("fileName") MultipartFile file, String access_key, String tnonce, String signature) throws Exception {
+//
+//        if (access_key == null ||tnonce == null || signature == null)
+//            return new JsonResult(BizExceptionEnum.PARAMETER_CANT_BE_EMPTY.getCode(), BizExceptionEnum.PARAMETER_CANT_BE_EMPTY.getMessage());
+//
+//        Long tonceLong = Long.valueOf(tnonce) + 150000;
+//        if (System.currentTimeMillis() > tonceLong)
+//            return new JsonResult(BizExceptionEnum.API_TIME_OUT_ERROR.getCode(), BizExceptionEnum.API_TIME_OUT_ERROR.getMessage());
+//
+//        Access access = accessService.findByAccessKey(access_key);
+//        TreeMap<String, String> queryParas  = new TreeMap<>();
+//        queryParas.put("access_key", access_key);
+//        queryParas.put("tnonce", tnonce);
+//        String sign = EncryptUtil.sha256_HMAC(queryParas ,"/api/upload", access.getKey());
+//
+//        if (!signature.equals(sign))
+//            return new JsonResult(BizExceptionEnum.API_SIGN_ERROR.getCode(), BizExceptionEnum.API_SIGN_ERROR.getMessage());
+//
+//
+//        Upload upload = new Upload();
+//
+//        String fileName = file.getOriginalFilename();
+//        upload.setName(fileName);
+//
+//        Long size = file.getSize();                             //文件大小
+//        String type = getExtensionName(fileName);
+//
+////        String files = new String(file.getBytes(), "UTF-8");
+//
+//        if (size > 1024 * 1024 * 15) {
+//            return new JsonResult(BizExceptionEnum.SIZE_ERROR.getCode(), BizExceptionEnum.SIZE_ERROR.getMessage());
+//        }
+//
+//        String optrun = UnicodeUtil.bytesToHexString(file.getBytes());
+//
+//        String[] sysAddress = {systemAddress};
+//        JSONObject utxoJson = getUxto(sysAddress);
+//
+//        JSONArray tokenDatas = utxoJson.getJSONArray(systemAddress);
+//
+//        List<TxInputDto> input = new ArrayList<>();
+//        List<TxOutputDto> output = new ArrayList<>();
+//
+//        BigDecimal value= new BigDecimal("0");
+//        JSONArray vins = new JSONArray();
+//        for (Object data: tokenDatas) {
+//
+//            JSONArray dd = (JSONArray) data;
+//            String txid = (String)dd.get(0);
+//            Integer vout = (Integer)dd.get(1);
+//            TxInputDto txinputDto = new TxInputDto(txid, vout, systemAddress);
+//            input.add(txinputDto);
+//            value = value.add(dd.getBigDecimal(2));
+//            JSONObject vin = new JSONObject();
+//            vin.put("txid", txid);
+//            vin.put("vout", vout);
+//            vins.add(vin);
+//        }
+//
+//
+//        BigDecimal fee = new BigDecimal("0.00000001").multiply(new BigDecimal(size));
+//        BigDecimal v = value.subtract(fee);
+//
+//        TxOutputDto dd = new TxOutputDto(systemAddress, v);				// 找零系统地址
+//        output.add(dd);
+//
+//        TxOutputDto d = new TxOutputDto(optrun);
+//        output.add(d);
+//
+//
+//        String createRawTransaction = Api.CreateRawTransaction(input, output);
+//
+//        String signhex = Api.SignRawTransaction(createRawTransaction);
+//
+//        System.out.println(signhex);
+//
+//        String txid = Api.SendRawTransaction(signhex);
+//
+//        if (txid == null) {
+//            return new JsonResult(BizExceptionEnum.TX_ERROR.getCode(), BizExceptionEnum.TX_ERROR.getMessage());
+//        }
+//
+//        upload.setOpenId(access.getOpenid());
+//        upload.setTxid(txid);
+//        upload.setType(type);
+//        uploadService.insertUpload(upload);
+//
+//        return new JsonResult().addData("txid", txid);
+//
+//    }
 
     public static String getExtensionName(String filename) {
         if ((filename != null) && (filename.length() > 0)) {

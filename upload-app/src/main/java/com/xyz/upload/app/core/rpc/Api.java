@@ -13,13 +13,13 @@ import java.util.List;
 @Component
 public class Api {
 
-	private static String user;
+	private static String user = "dev";
 
-	private static String password;
+	private static String password = "a";
 
-	private static String host;
+	private static String host = "47.110.137.123";
 
-	private static String port;
+	private static String port = "8332";
 
 	@Value("${node.user}")
 	public void setUser(String user) {
@@ -190,18 +190,33 @@ public class Api {
 
 	}
 
+//	/**
+//	 * 获取指定哈希的区块
+//	 * @param
+//	 * @return
+//	 * @throws Exception
+//	 */
+//	public static Block GetBlock(String blockHash) throws Exception {
+//
+//		URL url = new URL("http://" + user + ':' + password + "@" + host + ":" + port + "/");
+//		BitcoinJSONRPCClient bitcoinClient = new BitcoinJSONRPCClient(url);
+//		Block JSON = bitcoinClient.getBlock(blockHash);
+//		return JSON;
+//
+//	}
+
 	/**
 	 * 获取指定哈希的区块
 	 * @param
 	 * @return
 	 * @throws Exception
 	 */
-	public static Block GetBlock(String blockHash) throws Exception {
+	public static JSONObject GetBlock(String blockHash) throws Exception {
 
 		URL url = new URL("http://" + user + ':' + password + "@" + host + ":" + port + "/");
-		BitcoinJSONRPCClient bitcoinClient = new BitcoinJSONRPCClient(url);
-		Block JSON = bitcoinClient.getBlock(blockHash);
-		return JSON;
+		BitClient bitClient = new BitClient(url);
+		JSONObject relust = (JSONObject)JSONObject.parse(bitClient.getBlock(blockHash));
+		return relust;
 
 	}
 
@@ -234,4 +249,60 @@ public class Api {
 
 	}
 
+	/**
+	 * 获取交易池详情
+	 * @param
+	 * @return
+	 * @throws Exception
+	 */
+	public static List<String> GetRawMemPool() throws Exception {
+
+		URL url = new URL("http://" + user + ':' + password + "@" + host + ":" + port + "/");
+		BitcoinJSONRPCClient bitcoinClient = new BitcoinJSONRPCClient(url);
+		List<String>  blockHash = bitcoinClient.getRawMemPool();
+		return blockHash;
+
+	}
+
+	/**
+	 * 获取区块数量
+	 * @return
+	 * @throws Exception
+	 */
+	public static String CreateDrivetx(List<TxInputDto> inputs, List<CommonTxOputDto> outputs) throws Exception {
+
+		URL url = new URL("http://" + user + ':' + password + "@" + host + ":" + port + "/");
+		BitClient bitClient = new BitClient(url);
+		String relust = bitClient.createDrivetx(inputs, outputs);
+		return relust;
+
+	}
+
+	/**
+	 * 获取区块数量
+	 * @return
+	 * @throws Exception
+	 */
+	public static String SignDrivetx(String hex, String address) throws Exception {
+
+		URL url = new URL("http://" + user + ':' + password + "@" + host + ":" + port + "/");
+		BitClient bitClient = new BitClient(url);
+		String relust = bitClient.signDrivetx(hex, address);
+		return relust;
+
+	}
+
+	/**
+	 * 获取区块数量
+	 * @return
+	 * @throws Exception
+	 */
+	public static String fchtoxsv(String address) throws Exception {
+
+		URL url = new URL("http://" + user + ':' + password + "@" + host + ":" + port + "/");
+		BitClient bitClient = new BitClient(url);
+		String relust = bitClient.fchtoxsv(address);
+		return relust;
+
+	}
 }
