@@ -4,8 +4,6 @@ public class Create {
 
     private Integer id;
 
-    private String fchAddress;
-
     private String txid;
 
     private String driveId;
@@ -14,7 +12,17 @@ public class Create {
 
     private String encryptedPwd;
 
+    private String metadata;
+
     private String data;
+
+    public String getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(String metadata) {
+        this.metadata = metadata;
+    }
 
     public Integer getId() {
         return id;
@@ -22,14 +30,6 @@ public class Create {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public String getFchAddress() {
-        return fchAddress;
-    }
-
-    public void setFchAddress(String fchAddress) {
-        this.fchAddress = fchAddress;
     }
 
     public String getTxid() {

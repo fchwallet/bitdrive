@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.slppp.app.modular.system.dao.BlockCountMapper">
+<mapper namespace="com.xyz.upload.app.modular.system.dao.BlockCountMapper">
 
 	<!-- 通用查询映射结果 -->
-	<resultMap id="BaseResultMap" type="com.slppp.app.modular.system.model.BlockCount">
+	<resultMap id="BaseResultMap" type="com.xyz.upload.app.modular.system.model.BlockCount">
 		<result column="height" property="height" jdbcType="INTEGER"/>
 	</resultMap>
 

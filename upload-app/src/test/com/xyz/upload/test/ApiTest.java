@@ -5,9 +5,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.xyz.upload.app.core.rpc.Api;
 import com.xyz.upload.app.core.rpc.CommonTxOputDto;
 import com.xyz.upload.app.core.rpc.TxInputDto;
+import com.xyz.upload.app.core.util.HttpUtil;
 import com.xyz.upload.app.core.util.Sha256;
 import org.junit.Test;
 
+import java.io.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -91,6 +93,29 @@ public class ApiTest extends ApplicationTest {
 
     }
 
+    @Test
+    public void put() throws Exception {
+
+        InputStream fi = new FileInputStream(new File("C:\\Users\\caiyile\\Desktop\\test\\test2.txt"));
+        InputStreamReader fsr = new InputStreamReader(fi);
+        BufferedReader br = new BufferedReader(fsr);
+        String line = null;
+        StringBuilder sb = new StringBuilder();
+        while((line = br.readLine())!=null){
+            sb.append(line);
+        }
+
+        JSONObject j = new JSONObject();
+        JSONArray jsr = new JSONArray();
+        jsr.add("F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT");
+        j.put("fch_addr", jsr);
+        j.put("metadata","0446454950010201030643524541544532be53e7644ea9c8fed3ff8bda7ac87742a2e1494ac4e777ae396f388bf6e75f490100");
+        j.put("data",sb.toString());
+        String r = HttpUtil.doPost("http://localhost:8442/api/put", j.toJSONString());
+
+        System.out.println(r);
+
+    }
 
 
 }

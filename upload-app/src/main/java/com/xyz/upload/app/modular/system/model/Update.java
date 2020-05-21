@@ -6,7 +6,17 @@ public class Update {
 
     private String driveId;
 
+    private String metadata;
+
     private String data;
+
+    public String getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(String metadata) {
+        this.metadata = metadata;
+    }
 
     public Integer getId() {
         return id;

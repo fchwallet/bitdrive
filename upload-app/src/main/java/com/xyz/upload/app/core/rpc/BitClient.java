@@ -62,11 +62,17 @@ public class BitClient {
 			conn.getOutputStream().write(r);
 			conn.getOutputStream().close();
 			int responseCode = conn.getResponseCode();
-			if (responseCode != 200) {
-				throw new BitcoinRPCException(method, Arrays.deepToString(o), responseCode, conn.getResponseMessage(),
-						new String(loadStream(conn.getErrorStream(), true)));
+			if (responseCode == 500) {
+//				throw new BitcoinRPCException(method, Arrays.deepToString(o), responseCode, conn.getResponseMessage(),
+//						new String(loadStream(conn.getErrorStream(), true)));
+				String a = new String(loadStream(conn.getErrorStream(), true));
+				JSONObject error = (JSONObject) JSONObject.parse(a);
+				JSONObject data = error.getJSONObject("error");
+				Integer code = data.getInteger("code");
+				String message = data.getString("message");
 
 			}
+
 			return loadResponse(conn.getInputStream(), "1", true);
 		} catch (IOException ex) {
 			throw new BitcoinRPCException(method, Arrays.deepToString(o), ex);
@@ -310,12 +316,16 @@ public class BitClient {
 	    return (boolean) query("verifymessage", bitcoinAddress, signature, message);
 	}
 
-	public String fchtoxsv(String address) throws BitcoinRpcException {
-		return (String) query("fchtoxsv", address);
+	public JSONObject fchtoxsv(String address) throws BitcoinRpcException {
+		return (JSONObject) query("fchtoxsv", address);
 	}
 
 	public String getBlock(String blockHash) throws BitcoinRpcException {
 		return JSON.stringify(query("getblock", blockHash));
+	}
+
+	public String validateAddress(String address) throws BitcoinRpcException {
+		return JSON.stringify(query("validateaddress", address));
 	}
 
 }

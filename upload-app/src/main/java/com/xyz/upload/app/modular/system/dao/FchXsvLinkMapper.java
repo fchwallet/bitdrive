@@ -12,4 +12,5 @@ public interface FchXsvLinkMapper {
 
     FchXsvLink findByHash(String addressHash);
 
+
 }

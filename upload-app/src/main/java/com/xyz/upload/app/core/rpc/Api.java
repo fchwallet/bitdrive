@@ -17,7 +17,7 @@ public class Api {
 
 	private static String password = "a";
 
-	private static String host = "47.110.137.123";
+	private static String host = "116.62.126.223";
 
 	private static String port = "8332";
 
@@ -297,11 +297,26 @@ public class Api {
 	 * @return
 	 * @throws Exception
 	 */
-	public static String fchtoxsv(String address) throws Exception {
+	public static JSONObject fchtoxsv(String address) throws Exception {
 
 		URL url = new URL("http://" + user + ':' + password + "@" + host + ":" + port + "/");
 		BitClient bitClient = new BitClient(url);
-		String relust = bitClient.fchtoxsv(address);
+		JSONObject relust = bitClient.fchtoxsv(address);
+		return relust;
+
+	}
+
+	/**
+	 * 地址hash
+	 * @param
+	 * @return
+	 * @throws Exception
+	 */
+	public static JSONObject ValidateAddress(String address) throws Exception {
+
+		URL url = new URL("http://" + user + ':' + password + "@" + host + ":" + port + "/");
+		BitClient bitClient = new BitClient(url);
+		JSONObject relust = (JSONObject)JSONObject.parse(bitClient.validateAddress(address));
 		return relust;
 
 	}

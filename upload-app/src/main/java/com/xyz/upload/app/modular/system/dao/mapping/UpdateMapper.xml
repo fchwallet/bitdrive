@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyz.upload.app.modular.system.dao.UpdateMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xyz.upload.app.modular.system.model.Update">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result column="drive_id" property="driveId" jdbcType="VARCHAR"/>
+		<result column="metadata" property="metadata" jdbcType="VARCHAR" />
+		<result column="data" property="data" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id, drive_id, `data`, metadata, create_date
+	</sql>
+
+	<select id="findByDriveId" resultType="com.xyz.upload.app.modular.system.model.Update">
+		select
+		<include refid="Base_Column_List" />
+		from `update` where drive_id = #{driveId}
+	</select>
+
+	<select id="findByDriveIdLimt" resultType="com.xyz.upload.app.modular.system.model.Update">
+		select
+		<include refid="Base_Column_List" />
+		from `update` where drive_id = #{driveId} order by create_date desc limit 1
+	</select>
+
+	<insert id="insert" parameterType="com.xyz.upload.app.modular.system.model.Update">
+		insert into `update`
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="driveId != null" >
+				drive_id,
+			</if>
+			<if test="data != null" >
+				`data`,
+			</if>
+			<if test="metadata != null" >
+				`metadata`,
+			</if>
+			`create_date`
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="driveId != null" >
+				#{driveId,jdbcType=VARCHAR},
+			</if>
+			<if test="data != null" >
+				#{data,jdbcType=VARCHAR},
+			</if>
+			<if test="metadata != null" >
+				#{metadata,jdbcType=VARCHAR},
+			</if>
+			now()
+		</trim>
+	</insert>
+
+</mapper>

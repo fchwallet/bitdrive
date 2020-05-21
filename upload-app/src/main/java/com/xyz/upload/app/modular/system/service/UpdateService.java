@@ -1,10 +1,10 @@
-package com.xyz.upload.app.modular.system.dao;
+package com.xyz.upload.app.modular.system.service;
 
 import com.xyz.upload.app.modular.system.model.Update;
 
 import java.util.List;
 
-public interface UpdateMapper {
+public interface UpdateService {
 
     List<Update> findByDriveId(String driveId);
 

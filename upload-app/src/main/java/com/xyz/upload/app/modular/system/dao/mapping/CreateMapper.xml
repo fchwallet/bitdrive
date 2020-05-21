@@ -5,16 +5,16 @@
 	<!-- 通用查询映射结果 -->
 	<resultMap id="BaseResultMap" type="com.xyz.upload.app.modular.system.model.Create">
 		<id property="id" column="id" jdbcType="INTEGER"/>
-		<result column="fch_address" property="fch_address" jdbcType="VARCHAR"/>
 		<result column="txid" property="txid" jdbcType="VARCHAR" />
 		<result column="drive_id" property="drive_id" jdbcType="VARCHAR" />
 		<result column="encrypt" property="encrypt" jdbcType="INTEGER" />
 		<result column="encrypted_pwd" property="encrypted_pwd" jdbcType="VARCHAR" />
+		<result column="metadata" property="metadata" jdbcType="VARCHAR"/>
 		<result column="data" property="data" jdbcType="VARCHAR"/>
 	</resultMap>
 
 	<sql id="Base_Column_List">
-		id, fch_address, txid, drive_id, encrypt, encrypted_pwd, `data`
+		id, txid, drive_id, encrypt, encrypted_pwd, `data`, metadata
 	</sql>
 
 	<select id="findByDriveId" resultType="com.xyz.upload.app.modular.system.model.Create">
@@ -26,9 +26,6 @@
 	<insert id="insert" parameterType="com.xyz.upload.app.modular.system.model.Create">
 		insert into `create`
 		<trim prefix="(" suffix=")" suffixOverrides="," >
-			<if test="fchAddress != null" >
-				fch_address,
-			</if>
 			<if test="txid != null" >
 				`txid`,
 			</if>
@@ -41,14 +38,14 @@
 			<if test="encryptedPwd != null" >
 				`encrypted_pwd`,
 			</if>
+			<if test="metadata != null" >
+				`metadata`,
+			</if>
 			<if test="data != null" >
 				`data`,
 			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides="," >
-			<if test="fchAddress != null" >
-				#{fchAddress,jdbcType=VARCHAR},
-			</if>
 			<if test="txid != null" >
 				#{txid,jdbcType=VARCHAR},
 			</if>
@@ -60,6 +57,9 @@
 			</if>
 			<if test="encryptedPwd != null" >
 				#{encryptedPwd,jdbcType=VARCHAR},
+			</if>
+			<if test="metadata != null" >
+				#{metadata,jdbcType=VARCHAR},
 			</if>
 			<if test="data != null" >
 				#{data,jdbcType=VARCHAR},
