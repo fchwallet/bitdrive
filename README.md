@@ -14,7 +14,7 @@ java freedrive offchian data sotrage services
 {"code":"100101","验证时间超时"}  
 {"code":"100102","验证错误"}  
 {"code":"200212","上传失败，请联系客服解决"}
-{"code":"200211","文件大于15M"}
+{"code":"200211","data大于5M"}
 
 ```	  
 
