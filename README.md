@@ -5,11 +5,6 @@ java freedrive offchian data sotrage services
 ### 通用  
 >BaseURL: http://116.62.126.223   
 ```
-时间戳过时时间15秒                              
-  
-加密signature：  
-带有page字段的page不需要带入加密参数,sha256_HMAC(所有参数 ,"接口名称", key)所有参数依次	  
-   
 错误码：  
 {"code":"100101","验证时间超时"}  
 {"code":"100102","验证错误"}  
