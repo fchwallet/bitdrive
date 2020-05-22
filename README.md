@@ -21,55 +21,94 @@ java freedrive offchian data sotrage services
 ### 存数据到freedrive  
 >接口名称: /api/put
 ```
-参数:  
-	access_key	string		   
-	tnonce		string	时间戳   
-	signature	string	加密后的signature（sha256_HMAC加密）   
-	fch_addr 	string  fch 地址，可多个
-	metadata	string   
-	data 		string
+参数  
+{
+"fch_addr": ["F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT"], 
+"metadata":"04464549500102010306555044415445321e6dc8d860dd8a54ce8e6bfe15f52d05a9e594dc75c112156354bd6b461e340932681cc9f485f8e8f47f622de0035b05bfc161869fb46ccc915c36e2366d77ef8d",
+"data": "010101010"
+}   
    
 返回结果：         
-    {
-        "code": 200,
-	"drive_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
-    }   
+{
+  "code": 200,
+  "drive_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
+}   
     
 ```
-  
+
+
+
+### 更新drive_id的内容  
+>接口名称: /api/update
+```
+参数  
+{
+"fch_addr": ["F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT"], 
+"metadata":"04464549500102010306555044415445321e6dc8d860dd8a54ce8e6bfe15f52d05a9e594dc75c112156354bd6b461e340932681cc9f485f8e8f47f622de0035b05bfc161869fb46ccc915c36e2366d77ef8d",
+"data": "010101010",
+"signautre": sign(data),
+"drive_id":  需要更新的drive_id
+}   
+   
+返回结果：         
+{
+  "code": 200,
+  "update_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
+}   
+    
+```
+
+
+
 ### 从freedrive获取存储内容
 >接口名称: /api/get
 ```
+
 参数  
-	access_key	string		  
-	tnonce		string	时间戳  
-	signature	string	加密后的signature（sha256_HMAC加密）  
-	fch_addr	string  fch地址
-	drive_id	string  drive_id
-  
+{
+"drive_id":  "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
+}   
+
+
 返回结果：
-    {
+{
         "code":200,
-	"metadata": {},
-	"data": {}
-    }    
+	"put":
+	{
+	   "metadata": {},
+	   "data": {}
+	}
+	"update":
+	[
+    	 { 
+	   "update_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
+	   "metadata": {},
+	   "data": {}
+	 },
+	 {
+	   "update_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce" 
+	   "metadata": {},
+	   "data": {}
+	 }
+	]
+}    
 ```
     
 ### 获取FCH地址的存储列表  
 >接口名称: /api/get_drive_id
 ```
-参数
-	access_key	string		  
-	tnonce		string	时间戳  
-	signature	string	加密后的signature（sha256_HMAC加密）  
-	fch_addr	string  fch 地址
+
+
+参数  
+{
+"fch_addr":  "f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
+}   
+
 	    
 返回结果：
-	{
-	   "code":200,
-	   "drive_id": ["f613da5785cfcfbb5c4d47e8dd11156712c8b9fa169881ec4c805ea4f6f1b6b6", "f613da5785cfcfbb5c4d47e8dd11156712c8b9fa169881ec4c805ea4f6f1b6b6"]	
-	}
+{
+   "code":200,
+   "drive_id": ["f613da5785cfcfbb5c4d47e8dd11156712c8b9fa169881ec4c805ea4f6f1b6b6", "f613da5785cfcfbb5c4d47e8dd11156712c8b9fa169881ec4c805ea4f6f1b6b6"]	
+}
 ```
 
-部署配置：
-    修改application,yml 数据库地址，系统地址，utxo接口，节点配置即可
