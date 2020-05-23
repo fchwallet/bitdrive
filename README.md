@@ -94,7 +94,6 @@ java freedrive offchian data sotrage services
 {
     "code":200,
     { 
-      "update_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
       "metadata": {},
       "data": {}
     }
