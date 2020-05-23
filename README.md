@@ -3,7 +3,7 @@ java freedrive offchian data sotrage services
 
 
 ### 通用  
->BaseURL: http://116.62.126.223   
+>BaseURL: http://116.62.126.223:8442   
 ```
 错误码：  
 {"code":"100101","验证时间超时"}  
