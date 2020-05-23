@@ -89,7 +89,7 @@ java freedrive offchian data sotrage services
     ]
 }
 
-或者参数传update_id, 查询某次更新记录
+或者参数传update_id, 查询某次更新记录(此接口暂不支持)
 {
 "update_id":  "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
 }    
