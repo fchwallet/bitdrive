@@ -3,7 +3,8 @@ java freedrive offchian data sotrage services
 
 
 ### 通用  
->BaseURL: http://116.62.126.223:8442   
+>BaseURL: http://116.62.126.223:8442     
+所有接口都是post请求.
 ```
 错误码：  
 {"code":"100101","验证时间超时"}  
@@ -14,7 +15,7 @@ java freedrive offchian data sotrage services
 ```	  
 
 ### 存数据到freedrive  
->接口名称: /api/put
+>接口名称: /api/put   
 ```
 参数  
 {
