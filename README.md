@@ -22,7 +22,7 @@ java freedrive offchian data sotrage services
 "fch_addr": ["F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT"], 
 "metadata":"04464549500102010306555044415445321e6dc8d860dd8a54ce8e6bfe15f52d05a9e594dc75c112156354bd6b461e340932681cc9f485f8e8f47f622de0035b05bfc161869fb46ccc915c36e2366d77ef8d",
 "data": "010101010",
-"signature": sign(data)
+"signature": sign(data) 用fch_addr 签名data字段内容的签名
 }   
    
 返回结果：         
@@ -45,7 +45,7 @@ curl http://116.62.126.223:8442/api/put  -X POST  -d @put.json  --header "Conten
 "fch_addr": ["F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT"], 
 "metadata":"04464549500102010306555044415445321e6dc8d860dd8a54ce8e6bfe15f52d05a9e594dc75c112156354bd6b461e340932681cc9f485f8e8f47f622de0035b05bfc161869fb46ccc915c36e2366d77ef8d",
 "data": "010101010",
-"signature": sign(data),
+"signature": sign(data),用fch_addr 签名data字段内容的签名
 "drive_id":  需要更新的drive_id
 }   
    
