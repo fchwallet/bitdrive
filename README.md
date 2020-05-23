@@ -63,29 +63,41 @@ java freedrive offchian data sotrage services
 {
 "drive_id":  "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
 }   
-
-
 返回结果：
 {
-        "code":200,
-	"put":
-	{
-	   "metadata": {},
-	   "data": {}
-	}
-	"update":
-	[
-    	 { 
-	   "update_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
-	   "metadata": {},
-	   "data": {}
-	 },
-	 {
-	   "update_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce" 
-	   "metadata": {},
-	   "data": {}
-	 }
-	]
+    "code":200,
+    "put":
+    {
+      "metadata": {},
+      "data": {}
+    }
+    "update":
+    [
+      { 
+        "update_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
+        "metadata": {},
+        "data": {}
+      },
+      {
+        "update_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce" 
+        "metadata": {},
+        "data": {}
+      }
+    ]
+}
+
+或者参数传update_id, 查询某次更新记录
+{
+"update_id":  "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
+}    
+返回结果
+{
+    "code":200,
+    { 
+      "update_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
+      "metadata": {},
+      "data": {}
+    }
 }    
 ```
     
