@@ -30,9 +30,11 @@ java freedrive offchian data sotrage services
   "code": 200,
   "drive_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
 }   
+
+curl example:
+curl http://116.62.126.223:8442/api/put  -X POST  -d @put.json  --header "Content-Type:application/json"
     
 ```
-
 
 
 ### 更新drive_id的内容  
@@ -52,7 +54,9 @@ java freedrive offchian data sotrage services
   "code": 200,
   "update_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
 }   
-    
+
+curl example:
+curl http://116.62.126.223:8442/api/update  -X POST  -d @update.json  --header "Content-Type:application/json"  
 ```
 
 
@@ -100,7 +104,11 @@ java freedrive offchian data sotrage services
       "metadata": {},
       "data": {}
     }
-}    
+}
+
+
+curl example:
+curl http://116.62.126.223:8442/api/get -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK&drive_id=8d6cc0f1f6aa1f4535262f65466871a5865b0c94bb49ea5c5695917545aead93'      
 ```
     
 ### 获取FCH地址的存储列表  
@@ -119,5 +127,9 @@ java freedrive offchian data sotrage services
    "code":200,
    "drive_id": ["f613da5785cfcfbb5c4d47e8dd11156712c8b9fa169881ec4c805ea4f6f1b6b6", "f613da5785cfcfbb5c4d47e8dd11156712c8b9fa169881ec4c805ea4f6f1b6b6"]	
 }
+
+curl example:
+curl http://116.62.126.223:8442/api/get_drive_id -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK ' 
+
 ```
 
