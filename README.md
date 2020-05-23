@@ -62,6 +62,7 @@ java freedrive offchian data sotrage services
 
 参数  
 {
+"fch_addr": "F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT", 
 "drive_id":  "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
 }   
 返回结果：
