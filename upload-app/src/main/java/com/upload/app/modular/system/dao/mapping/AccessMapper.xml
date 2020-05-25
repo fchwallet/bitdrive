@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.upload.app.modular.system.dao.AccessMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.upload.app.modular.system.model.Access">
+		<id column="openid" property="openid" jdbcType="INTEGER" />
+		<result column="access_key" property="accesskey" jdbcType="VARCHAR"/>
+		<result column="key" property="key" jdbcType="INTEGER"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		openid, access_key, `key`
+	</sql>
+
+	<select id="findByAccessKey" resultMap="BaseResultMap" parameterType="string">
+		select
+		<include refid="Base_Column_List" />
+		from
+		`access`
+		<where>
+			<if test = "accesskey != null">
+				and access_key = #{accesskey,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+
+
+</mapper>
