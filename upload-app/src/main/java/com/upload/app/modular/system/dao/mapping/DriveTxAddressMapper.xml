@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.upload.app.modular.system.dao.DriveTxAddressMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.upload.app.modular.system.model.DriveTxAddress">
+		<result column="txid" property="txid" jdbcType="VARCHAR"/>
+		<result column="n" property="n" jdbcType="INTEGER" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="drive_id" property="driveId" jdbcType="VARCHAR" />
+		<result column="update_id" property="updateId" jdbcType="VARCHAR" />
+		<result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		txid, n, address, drive_id, update_id, create_date
+	</sql>
+
+	<select id="findByAddress" resultType="com.upload.app.modular.system.model.DriveTxAddress">
+		select
+		<include refid="Base_Column_List" />
+		from `drive_tx_address` where address = #{address}
+	</select>
+
+	<select id="findByTxidCount" resultType="long">
+		select
+			count(0)
+		from `drive_tx_address` where txid = #{txid}
+	</select>
+
+	<select id="findByDrive" resultType="com.upload.app.modular.system.model.DriveTxAddress">
+		select
+		<include refid="Base_Column_List" />
+		from `drive_tx_address` where address = #{address} and drive_id = #{driveId} and update_id is null
+	</select>
+
+	<select id="findUpdateByDriveList" resultType="com.upload.app.modular.system.model.DriveTxAddress">
+		select
+		<include refid="Base_Column_List" />
+		from `drive_tx_address` where address = #{address} and drive_id = #{driveId} and update_id is not null order by create_date asc
+	</select>
+
+	<select id="findUpdate" resultType="com.upload.app.modular.system.model.DriveTxAddress">
+		select
+		<include refid="Base_Column_List" />
+		from `drive_tx_address` where address = #{address} and update_id = #{updateId}
+	</select>
+
+	<select id="findByTxidAndN" resultType="com.upload.app.modular.system.model.DriveTxAddress">
+		select
+		<include refid="Base_Column_List" />
+		from `drive_tx_address` where txid = #{txid} and  n = #{n}
+	</select>
+
+	<insert id="insert" parameterType="com.upload.app.modular.system.model.DriveTxAddress">
+		insert into `drive_tx_address`
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="txid != null" >
+				txid,
+			</if>
+			<if test="n != null" >
+				`n`,
+			</if>
+			<if test="address != null" >
+				`address`,
+			</if>
+			<if test="driveId != null" >
+				`drive_id`,
+			</if>
+			<if test="updateId != null" >
+				`update_id`,
+			</if>
+			<if test="createDate != null" >
+				`create_date`,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="txid != null" >
+				#{txid,jdbcType=VARCHAR},
+			</if>
+			<if test="n != null" >
+				#{n,jdbcType=INTEGER},
+			</if>
+			<if test="address != null" >
+				#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="driveId != null" >
+				#{driveId,jdbcType=VARCHAR},
+			</if>
+			<if test="updateId != null" >
+				#{updateId,jdbcType=VARCHAR},
+			</if>
+			<if test="createDate != null" >
+				#{createDate,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+
+</mapper>

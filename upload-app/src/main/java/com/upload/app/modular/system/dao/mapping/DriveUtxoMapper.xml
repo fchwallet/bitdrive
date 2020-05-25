@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.upload.app.modular.system.dao.DriveUtxoMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.upload.app.modular.system.model.DriveUtxo">
+		<result column="txid" property="txid" jdbcType="VARCHAR"/>
+		<result column="n" property="n" jdbcType="INTEGER" />
+		<result column="value" property="value" jdbcType="VARCHAR" />
+		<result column="drive_id" property="driveId" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		txid, n, `value`, drive_id
+	</sql>
+
+	<select id="findByDriveId" resultType="com.upload.app.modular.system.model.DriveUtxo">
+		select
+		<include refid="Base_Column_List" />
+		from `drive_utxo` where drive_id = #{driveId}
+	</select>
+
+	<select id="findByTxidAndN" resultType="com.upload.app.modular.system.model.DriveUtxo">
+		select
+		<include refid="Base_Column_List" />
+		from `drive_utxo` where txid = #{txid} and  n = #{n}
+	</select>
+
+	<insert id="insert" parameterType="com.upload.app.modular.system.model.DriveUtxo">
+		insert into `drive_utxo`
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="txid != null" >
+				txid,
+			</if>
+			<if test="n != null" >
+				`n`,
+			</if>
+			<if test="value != null" >
+				`value`,
+			</if>
+			<if test="driveId != null" >
+				`drive_id`,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="txid != null" >
+				#{txid,jdbcType=VARCHAR},
+			</if>
+			<if test="n != null" >
+				#{n,jdbcType=INTEGER},
+			</if>
+			<if test="value != null" >
+				#{value,jdbcType=VARCHAR},
+			</if>
+			<if test="driveId != null" >
+				#{driveId,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+
+	<delete id="delete">
+    	delete from drive_utxo where txid = #{txid} and n = #{n}
+	</delete>
+
+</mapper>
