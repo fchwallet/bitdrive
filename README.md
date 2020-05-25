@@ -93,8 +93,9 @@ curl http://116.62.126.223:8442/api/update  -X POST  -d @update.json  --header "
     ]
 }
 
-或者参数传update_id, 查询某次更新记录(此接口暂不支持)
+或者参数传update_id, 查询某次更新记录  
 {
+"fch_addr": "F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT", 
 "update_id":  "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
 }    
 返回结果
