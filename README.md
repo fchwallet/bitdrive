@@ -20,7 +20,7 @@ java freedrive offchian data sotrage services
 ```	  
 
 ### 存数据到freedrive
-><a id="id">接口名称: /api/put</a>   
+><a id="put">接口名称: /api/put</a>   
 ```
 参数  
 {
