@@ -174,15 +174,20 @@ public class ApiController extends BaseController {
 
         }
 
+        Integer metadatasize = metadata.getBytes().length;
+        BigDecimal metadatafee = new BigDecimal("0.00000001").multiply(new BigDecimal(metadatasize)).divide(new BigDecimal("2"));
+        if (metadatafee.compareTo(new BigDecimal("0.00002")) < 0)
+            metadatafee = new BigDecimal("0.00002");
+
         fchAddress.add("1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
         String[] address = fchAddress.toArray(new String[0]);
-        CommonTxOputDto c1 = new CommonTxOputDto(address, new BigDecimal("0.00001"), metadata, 1);
+        CommonTxOputDto c1 = new CommonTxOputDto(address, metadatafee, metadata, 1);
         outputs.add(c1);
 
 
         BigDecimal fee = new BigDecimal("0.00000001").multiply(new BigDecimal(size)).divide(new BigDecimal("2"));
 
-        BigDecimal fvalue = v.subtract(fee).subtract(new BigDecimal("0.00002"));
+        BigDecimal fvalue = v.subtract(fee).subtract(new BigDecimal("0.00001").subtract(metadatafee));
         String[] sysad = {"1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
         CommonTxOputDto c2 = new CommonTxOputDto(sysad, fvalue, 2);
         outputs.add(c2);                                //找零
@@ -327,15 +332,20 @@ public class ApiController extends BaseController {
             fchAddress.add(f.getXsvAddress());
         }
 
+        Integer metadatasize = metadata.getBytes().length;
+        BigDecimal metadatafee = new BigDecimal("0.00000001").multiply(new BigDecimal(metadatasize)).divide(new BigDecimal("2"));
+        if (metadatafee.compareTo(new BigDecimal("0.00002")) < 0)
+            metadatafee = new BigDecimal("0.00002");
+
         fchAddress.add("1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
         String[] address = fchAddress.toArray(new String[0]);
-        CommonTxOputDto c1 = new CommonTxOputDto(address, new BigDecimal("0.00001"), metadata, 1);
+        CommonTxOputDto c1 = new CommonTxOputDto(address, metadatafee, metadata, 1);
         outputs.add(c1);
 
 
         BigDecimal fee = new BigDecimal("0.00000001").multiply(new BigDecimal(size)).divide(new BigDecimal("2"));
 
-        BigDecimal fvalue = v.subtract(fee).subtract(new BigDecimal("0.00002"));
+        BigDecimal fvalue = v.subtract(fee).subtract(new BigDecimal("0.00001")).subtract(metadatafee);
         String[] sysad = {"1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
         CommonTxOputDto c2 = new CommonTxOputDto(sysad, fvalue, 2);
         outputs.add(c2);                                //找零

@@ -1,6 +1,7 @@
 package com.upload.app.core.rpc;
 
 import com.alibaba.fastjson.JSONObject;
+import com.upload.app.core.exception.XsvException;
 import wf.bitcoin.javabitcoindrpcclient.BitcoinRpcException;
 import wf.bitcoin.krotjson.Base64Coder;
 import wf.bitcoin.krotjson.JSON;
@@ -42,7 +43,7 @@ public class BitClient {
 				: String.valueOf(Base64Coder.encode(rpc.getUserInfo().getBytes(Charset.forName("ISO8859-1"))));
 	}
 
-	public Object query(String method, Object... o) {
+	public Object query(String method, Object... o) throws XsvException.InvalidBitcoinAddressException {
 		HttpURLConnection conn;
 		try {
 			conn = (HttpURLConnection) noAuthURL.openConnection();
@@ -70,7 +71,7 @@ public class BitClient {
 				JSONObject data = error.getJSONObject("error");
 				Integer code = data.getInteger("code");
 				String message = data.getString("message");
-
+				throw new XsvException.InvalidBitcoinAddressException(code, message);
 			}
 
 			return loadResponse(conn.getInputStream(), "1", true);
@@ -129,7 +130,7 @@ public class BitClient {
 		return o.toByteArray();
 	}
 
-	public String createRawTransaction(List<TxInputDto> inputs, List<TxOutputDto> outputs) throws BitcoinRpcException {
+	public String createRawTransaction(List<TxInputDto> inputs, List<TxOutputDto> outputs) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
 		List<Map> pInputs = new ArrayList<>();
 
 		for (final TxInputDto txInput : inputs) {
@@ -169,7 +170,7 @@ public class BitClient {
 
 	}
 
-	public String createContractTransaction(List<TxInputDto> inputs, List<CommonTxOputDto> outputs) throws BitcoinRpcException {
+	public String createContractTransaction(List<TxInputDto> inputs, List<CommonTxOputDto> outputs) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
 		List<Map> pInputs = new ArrayList<>();
 
 		for (final TxInputDto txInput : inputs) {
@@ -201,7 +202,7 @@ public class BitClient {
 		return (String) query("createcontracttransaction", pInputs, pOutputs);
 	}
 
-	public String createSlpppTransaction(List<TxInputDto> inputs, List<CommonTxOputDto> outputs) throws BitcoinRpcException {
+	public String createSlpppTransaction(List<TxInputDto> inputs, List<CommonTxOputDto> outputs) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
 		List<Map> pInputs = new ArrayList<>();
 
 		for (final TxInputDto txInput : inputs) {
@@ -235,7 +236,7 @@ public class BitClient {
 	}
 
 
-	public String createDrivetx(List<TxInputDto> inputs, List<CommonTxOputDto> outputs) throws BitcoinRpcException {
+	public String createDrivetx(List<TxInputDto> inputs, List<CommonTxOputDto> outputs) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
 		List<Map> pInputs = new ArrayList<>();
 
 		for (final TxInputDto txInput : inputs) {
@@ -268,17 +269,17 @@ public class BitClient {
 		return (String) query("createdrivetx", pInputs, pOutputs);
 	}
 
-	public String signDrivetx(String hex, String address) {
+	public String signDrivetx(String hex, String address) throws XsvException.InvalidBitcoinAddressException {
 		Map result = (Map) query("signdrivetx", hex, address); // if sigHashType is
 		return (String) result.get("hex");
 	}
 
 	// 签名认证
-	public String signRawTransaction(String hex) throws BitcoinRpcException {
+	public String signRawTransaction(String hex) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
 		return signRawTransaction1(hex);
 	}
 
-	public String signRawTransaction1(String hex) {
+	public String signRawTransaction1(String hex) throws XsvException.InvalidBitcoinAddressException {
 
 		Map result = (Map) query("signrawtransaction", hex); // if sigHashType is
 																// null it will return
@@ -292,39 +293,39 @@ public class BitClient {
 
 
 
-	public String sendRawTransaction(String hex) throws BitcoinRpcException {
+	public String sendRawTransaction(String hex) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
 		return (String) query("sendrawtransaction", hex);
 	}
 
-	public String getRawTransactionHex(String txid, Boolean format) throws BitcoinRpcException {
+	public String getRawTransactionHex(String txid, Boolean format) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
 		return JSONObject.toJSONString(query("getrawtransaction", txid, format));
 	}
 
-	public String decodeRawTransaction(String hex) throws BitcoinRpcException {
+	public String decodeRawTransaction(String hex) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
 		return JSON.stringify(query("decoderawtransaction", hex));
 	}
 
-	public String getNewAddress() throws BitcoinRpcException {
+	public String getNewAddress() throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
 		return (String) query("getnewaddress");
 	}
 
-	public String signMessage(String bitcoinAdress, String message) throws BitcoinRpcException {
+	public String signMessage(String bitcoinAdress, String message) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
 	    return (String) query("signmessage", bitcoinAdress, message);
 	}
 
-	public boolean verifyMessage(String bitcoinAddress, String signature, String message) throws BitcoinRpcException {
+	public boolean verifyMessage(String bitcoinAddress, String signature, String message) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
 	    return (boolean) query("verifymessage", bitcoinAddress, signature, message);
 	}
 
-	public JSONObject fchtoxsv(String address) throws BitcoinRpcException {
+	public JSONObject fchtoxsv(String address) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
 		return (JSONObject) query("fchtoxsv", address);
 	}
 
-	public String getBlock(String blockHash) throws BitcoinRpcException {
+	public String getBlock(String blockHash) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
 		return JSON.stringify(query("getblock", blockHash));
 	}
 
-	public String validateAddress(String address) throws BitcoinRpcException {
+	public String validateAddress(String address) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
 		return JSON.stringify(query("validateaddress", address));
 	}
 
