@@ -180,9 +180,43 @@ public class DecodeServiceImpl implements DecodeService {
                         content = content.replaceFirst(a6, "");
 
                         String totalLength_Hex = content.substring(0, 2);
-                        Integer totalLength = UnicodeUtil.decodeHEX(totalLength_Hex);
+
                         content = content.replaceFirst(totalLength_Hex, "");
-                        String metadata = content.substring(0, totalLength * 2);
+
+                        if ("4c".equals(totalLength_Hex)) {
+
+                            String length_hex = content.substring(0, 2);
+                            Integer length = UnicodeUtil.decodeHEX(length_hex);
+                            content = content.replaceFirst(length_hex, "");
+                            content = content.substring(0, length*2);
+
+
+                        } else if ("4d".equals(totalLength_Hex)) {
+
+                            String length_hex = content.substring(0, 4);
+                            Integer length = UnicodeUtil.decodeHEX(length_hex);
+                            content = content.replaceFirst(length_hex, "");
+                            content = content.substring(0, length*2);
+
+                        } else if ("4e".equals(totalLength_Hex)) {
+
+                            String length_hex = content.substring(0, 6);
+                            Integer length = UnicodeUtil.decodeHEX(length_hex);
+                            content = content.replaceFirst(length_hex, "");
+                            content = content.substring(0, length*2);
+
+                        } else {
+
+                            Integer length = UnicodeUtil.decodeHEX(totalLength_Hex);
+                            content = content.replaceFirst(totalLength_Hex, "");
+                            content = content.substring(0, length*2);
+
+
+                        }
+
+
+
+                        String metadata = content;
 
 
                         jb.put("driveId", driveId);
@@ -410,9 +444,43 @@ public class DecodeServiceImpl implements DecodeService {
                         content = content.replaceFirst(a6, "");
 
                         String totalLength_Hex = content.substring(0, 2);
-                        Integer totalLength = UnicodeUtil.decodeHEX(totalLength_Hex);
+
                         content = content.replaceFirst(totalLength_Hex, "");
-                        String metadata = content.substring(0, totalLength * 2);
+
+                        if ("4c".equals(totalLength_Hex)) {
+
+                            String length_hex = content.substring(0, 2);
+                            Integer length = UnicodeUtil.decodeHEX(length_hex);
+                            content = content.replaceFirst(length_hex, "");
+                            content = content.substring(0, length*2);
+
+
+                        } else if ("4d".equals(totalLength_Hex)) {
+
+                            String length_hex = content.substring(0, 4);
+                            Integer length = UnicodeUtil.decodeHEX(length_hex);
+                            content = content.replaceFirst(length_hex, "");
+                            content = content.substring(0, length*2);
+
+                        } else if ("4e".equals(totalLength_Hex)) {
+
+                            String length_hex = content.substring(0, 6);
+                            Integer length = UnicodeUtil.decodeHEX(length_hex);
+                            content = content.replaceFirst(length_hex, "");
+                            content = content.substring(0, length*2);
+
+                        } else {
+
+                            Integer length = UnicodeUtil.decodeHEX(totalLength_Hex);
+                            content = content.replaceFirst(totalLength_Hex, "");
+                            content = content.substring(0, length*2);
+
+
+                        }
+
+
+
+                        String metadata = content;
 
 
                         jb.put("driveId", driveId);
