@@ -64,7 +64,6 @@ curl http://116.62.126.223:8442/api/update  -X POST  -d @update.json  --header "
 ### 从freedrive获取存储内容
 >接口名称: /api/get
 ```
-
 参数  
 {
 "fch_addr": "F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT", 
@@ -117,13 +116,10 @@ curl http://116.62.126.223:8442/api/get -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfE
 ### 获取FCH地址的存储列表  
 >接口名称: /api/get_drive_id
 ```
-
-
 参数  
 {
 "fch_addr":  "f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
 }   
-
 	    
 返回结果：
 {
