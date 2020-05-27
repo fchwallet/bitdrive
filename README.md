@@ -92,8 +92,9 @@ curl http://116.62.126.223:8442/api/update  -X POST  -d @update.json  --header "
       }
     ]
 }
-
-或者参数传update_id, 查询某次更新记录  
+```   
+或者参数传update_id, 查询某次更新记录    
+```
 {
 "fch_addr": "F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT", 
 "update_id":  "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
@@ -107,7 +108,8 @@ curl http://116.62.126.223:8442/api/update  -X POST  -d @update.json  --header "
     }
 }
 
-
+```  
+```
 curl example:
 curl http://116.62.126.223:8442/api/get -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK&drive_id=8d6cc0f1f6aa1f4535262f65466871a5865b0c94bb49ea5c5695917545aead93'      
 ```
