@@ -1,6 +1,11 @@
 # freedriveJ
 java freedrive offchian data sotrage services
 
+目录
+## put, 存数据到freedrive 
+## update, 更新drive_id的内容
+## get， 获取drive_id 或update_id的变更记录
+## get_drive_id，获取存储列表
 
 ### 通用  
 >BaseURL: http://116.62.126.223:8442     
