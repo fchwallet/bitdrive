@@ -187,7 +187,7 @@ public class ApiController extends BaseController {
 
         BigDecimal fee = new BigDecimal("0.00000001").multiply(new BigDecimal(size)).divide(new BigDecimal("2"));
 
-        BigDecimal fvalue = v.subtract(fee).subtract(new BigDecimal("0.00001").subtract(metadatafee));
+        BigDecimal fvalue = v.subtract(fee).subtract(new BigDecimal("0.00001")).subtract(metadatafee);
         String[] sysad = {"1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
         CommonTxOputDto c2 = new CommonTxOputDto(sysad, fvalue, 2);
         outputs.add(c2);                                //找零
@@ -302,7 +302,7 @@ public class ApiController extends BaseController {
 
         DriveUtxo du = driveUtxoService.findByDriveId(drive_id);
         if (du == null) {
-            result.put("1000", "utxo遗失");
+            result.put("1000", "该drive_id不存在");
             return result;
         }
 
