@@ -1,6 +1,11 @@
 # freedriveJ
 java freedrive offchian data sotrage services
 
+### 目录
+#### [put](#put)
+#### [update](#update)
+#### [get](#get)
+#### [get_drive_id](#get_drive_id)
 
 ### 通用  
 >BaseURL: http://116.62.126.223:8442     
@@ -14,8 +19,8 @@ java freedrive offchian data sotrage services
 
 ```	  
 
-### 存数据到freedrive  
->接口名称: /api/put   
+### 存数据到freedrive
+><a name="put">接口名称:/api/put</a>   
 ```
 参数  
 {
@@ -25,20 +30,21 @@ java freedrive offchian data sotrage services
 "signature": sign(data) 用fch_addr 签名data字段内容的签名
 }   
    
-返回结果：         
+返回结果         
 {
   "code": 200,
   "drive_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
 }   
-
-curl example:
+```
+curl example
+```
 curl http://116.62.126.223:8442/api/put  -X POST  -d @put.json  --header "Content-Type:application/json"
     
 ```
 
 
 ### 更新drive_id的内容  
->接口名称: /api/update
+><a name="update">接口名称: /api/update</a>
 ```
 参数  
 {
@@ -54,17 +60,19 @@ curl http://116.62.126.223:8442/api/put  -X POST  -d @put.json  --header "Conten
   "code": 200,
   "update_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
 }   
-
-curl example:
+```
+curl example
+```
 curl http://116.62.126.223:8442/api/update  -X POST  -d @update.json  --header "Content-Type:application/json"  
 ```
 
 
 
-### 从freedrive获取存储内容
+### <a name="get">从freedrive获取存储内容</a>
 >接口名称: /api/get
-```
 
+查询单个drive_id的所有变更记录
+```
 参数  
 {
 "fch_addr": "F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT", 
@@ -92,8 +100,10 @@ curl http://116.62.126.223:8442/api/update  -X POST  -d @update.json  --header "
       }
     ]
 }
-
-或者参数传update_id, 查询某次更新记录  
+```   
+或者参数传update_id, 查询某次更新记录    
+```
+参数
 {
 "fch_addr": "F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT", 
 "update_id":  "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
@@ -107,29 +117,28 @@ curl http://116.62.126.223:8442/api/update  -X POST  -d @update.json  --header "
     }
 }
 
-
-curl example:
+```  
+curl example
+```
 curl http://116.62.126.223:8442/api/get -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK&drive_id=8d6cc0f1f6aa1f4535262f65466871a5865b0c94bb49ea5c5695917545aead93'      
 ```
     
-### 获取FCH地址的存储列表  
+### <a name="get_drive_id">获取FCH地址的存储列表</a>
 >接口名称: /api/get_drive_id
 ```
-
-
 参数  
 {
 "fch_addr":  "f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
 }   
-
 	    
 返回结果：
 {
    "code":200,
    "drive_id": ["f613da5785cfcfbb5c4d47e8dd11156712c8b9fa169881ec4c805ea4f6f1b6b6", "f613da5785cfcfbb5c4d47e8dd11156712c8b9fa169881ec4c805ea4f6f1b6b6"]	
 }
-
-curl example:
+```
+curl example
+```
 curl http://116.62.126.223:8442/api/get_drive_id -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK ' 
 
 ```
