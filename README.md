@@ -7,7 +7,7 @@ java implementation freedrive
 [4. get_drive_id](#get-drive-id)  
 
 ### 通用  
->BaseURL: http://116.62.126.223:8442     
+>BaseURL: http://freedrive.fchwallet.com:8442     
 所有接口都是post请求.
 ```
 错误码：  
@@ -38,7 +38,7 @@ java implementation freedrive
 ```
 curl example
 ```
-curl http://116.62.126.223:8442/api/put  -X POST  -d @put.json  --header "Content-Type:application/json"
+curl http://freedrive.fchwallet.com:8442/api/put  -X POST  -d @put.json  --header "Content-Type:application/json"
 ```
 
 
@@ -63,7 +63,7 @@ curl http://116.62.126.223:8442/api/put  -X POST  -d @put.json  --header "Conten
 ```
 curl example
 ```
-curl http://116.62.126.223:8442/api/update  -X POST  -d @update.json  --header "Content-Type:application/json"  
+curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  --header "Content-Type:application/json"
 ```
 
 
@@ -121,7 +121,7 @@ curl http://116.62.126.223:8442/api/update  -X POST  -d @update.json  --header "
 ```  
 curl example
 ```
-curl http://116.62.126.223:8442/api/get -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK&drive_id=8d6cc0f1f6aa1f4535262f65466871a5865b0c94bb49ea5c5695917545aead93'      
+curl http://freedrive.fchwallet.com:8442/api/get -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK&drive_id=8d6cc0f1f6aa1f4535262f65466871a5865b0c94bb49ea5c5695917545aead93'      
 ```
     
 ### get drive id
@@ -141,6 +141,6 @@ curl http://116.62.126.223:8442/api/get -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfE
 ```
 curl example
 ```
-curl http://116.62.126.223:8442/api/get_drive_id -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK ' 
+curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK ' 
 ```
 
