@@ -2,10 +2,10 @@
 java freedrive offchian data sotrage services
 
 ### 目录
-#### [put](#put)
-#### [update](#update)
-#### [get](#get)
-#### [get_drive_id](#get-drive-id)
+#### [1. put](#put)
+#### [2. update](#update)
+#### [3. get](#get)
+#### [4. get_drive_id](#get-drive-id)
 
 ### 通用  
 >BaseURL: http://116.62.126.223:8442     
@@ -19,8 +19,8 @@ java freedrive offchian data sotrage services
 
 ```	  
 
-### put 
->存数据到freedrive
+### put   
+>存数据到freedrive   
 >接口名称: /api/put
 ```
 参数  
