@@ -7,7 +7,7 @@ java implementation freedrive
 [4. get_drive_id](#get-drive-id)  
 
 ### 通用  
->BaseURL: http://freedrive.fchwallet.com:8442     
+>BaseURL: http://freedrive.fchwallet.com:8442       
 所有接口都是post请求.
 ```
 错误码：  
@@ -19,7 +19,7 @@ java implementation freedrive
 ```	  
 
 ### put   
->存数据到freedrive   
+>存数据到freedrive      
 >接口名称: /api/put
 ```
 参数  
@@ -69,7 +69,7 @@ curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  -
 
 
 ### get
->从freedrive获取存储内容
+>从freedrive获取存储内容   
 >接口名称: /api/get
 
 查询单个drive_id的所有变更记录
@@ -125,7 +125,7 @@ curl http://freedrive.fchwallet.com:8442/api/get -X POST  -d 'fch_addr=F8Z2aQkHk
 ```
     
 ### get drive id
->获取FCH地址的存储列表
+>获取FCH地址的存储列表     
 >接口名称: /api/get_drive_id
 ```
 参数  
