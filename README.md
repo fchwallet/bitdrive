@@ -5,7 +5,7 @@ java freedrive offchian data sotrage services
 #### [put](#put)
 #### [update](#update)
 #### [get](#get)
-#### [get_drive_id](#get_drive_id)
+#### [get_drive_id](#get-drive-id)
 
 ### 通用  
 >BaseURL: http://116.62.126.223:8442     
@@ -19,8 +19,9 @@ java freedrive offchian data sotrage services
 
 ```	  
 
-### 存数据到freedrive
-><a name="put">接口名称:/api/put</a>   
+### put 
+>存数据到freedrive
+>接口名称: /api/put
 ```
 参数  
 {
@@ -43,8 +44,9 @@ curl http://116.62.126.223:8442/api/put  -X POST  -d @put.json  --header "Conten
 ```
 
 
-### 更新drive_id的内容  
-><a name="update">接口名称: /api/update</a>
+### update
+>更新drive_id的内容  
+>接口名称: /api/update
 ```
 参数  
 {
@@ -68,7 +70,8 @@ curl http://116.62.126.223:8442/api/update  -X POST  -d @update.json  --header "
 
 
 
-### <a name="get">从freedrive获取存储内容</a>
+### get
+>从freedrive获取存储内容
 >接口名称: /api/get
 
 查询单个drive_id的所有变更记录
@@ -123,7 +126,8 @@ curl example
 curl http://116.62.126.223:8442/api/get -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK&drive_id=8d6cc0f1f6aa1f4535262f65466871a5865b0c94bb49ea5c5695917545aead93'      
 ```
     
-### <a name="get_drive_id">获取FCH地址的存储列表</a>
+### get drive id
+>获取FCH地址的存储列表
 >接口名称: /api/get_drive_id
 ```
 参数  
