@@ -39,7 +39,6 @@ java implementation freedrive
 curl example
 ```
 curl http://116.62.126.223:8442/api/put  -X POST  -d @put.json  --header "Content-Type:application/json"
-    
 ```
 
 
@@ -143,6 +142,5 @@ curl http://116.62.126.223:8442/api/get -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfE
 curl example
 ```
 curl http://116.62.126.223:8442/api/get_drive_id -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK ' 
-
 ```
 
