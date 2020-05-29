@@ -1,6 +1,5 @@
 # freedriveJ
-java freedrive offchian data sotrage services
-
+java implementation freedrive
 ### 目录
 #### [1. put](#put)
 #### [2. update](#update)
