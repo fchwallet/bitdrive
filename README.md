@@ -7,7 +7,7 @@ java implementation freedrive
 [4. get_drive_id](#get-drive-id)  
 
 ### 通用  
->BaseURL: http://freedrive.fchwallet.com:8442       
+>URL: http://freedrive.fchwallet.com:8442       
 所有接口都是post请求.
 ```
 错误码：  
