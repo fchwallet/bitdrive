@@ -1,14 +1,13 @@
 # freedriveJ
-java freedrive offchian data sotrage services
-
+java implementation freedrive
 ### 目录
-#### [put](#put)
-#### [update](#update)
-#### [get](#get)
-#### [get_drive_id](#get_drive_id)
+[1. put](#put)  
+[2. update](#update)  
+[3. get](#get)  
+[4. get_drive_id](#get-drive-id)  
 
 ### 通用  
->BaseURL: http://116.62.126.223:8442     
+>URL: http://freedrive.fchwallet.com:8442       
 所有接口都是post请求.
 ```
 错误码：  
@@ -19,8 +18,9 @@ java freedrive offchian data sotrage services
 
 ```	  
 
-### 存数据到freedrive
-><a name="put">接口名称:/api/put</a>   
+### put   
+>存数据到freedrive      
+>接口名称: /api/put
 ```
 参数  
 {
@@ -38,13 +38,13 @@ java freedrive offchian data sotrage services
 ```
 curl example
 ```
-curl http://116.62.126.223:8442/api/put  -X POST  -d @put.json  --header "Content-Type:application/json"
-    
+curl http://freedrive.fchwallet.com:8442/api/put  -X POST  -d @put.json  --header "Content-Type:application/json"
 ```
 
 
-### 更新drive_id的内容  
-><a name="update">接口名称: /api/update</a>
+### update
+>更新drive_id的内容  
+>接口名称: /api/update
 ```
 参数  
 {
@@ -63,12 +63,13 @@ curl http://116.62.126.223:8442/api/put  -X POST  -d @put.json  --header "Conten
 ```
 curl example
 ```
-curl http://116.62.126.223:8442/api/update  -X POST  -d @update.json  --header "Content-Type:application/json"  
+curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  --header "Content-Type:application/json"
 ```
 
 
 
-### <a name="get">从freedrive获取存储内容</a>
+### get
+>从freedrive获取存储内容   
 >接口名称: /api/get
 
 查询单个drive_id的所有变更记录
@@ -120,10 +121,11 @@ curl http://116.62.126.223:8442/api/update  -X POST  -d @update.json  --header "
 ```  
 curl example
 ```
-curl http://116.62.126.223:8442/api/get -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK&drive_id=8d6cc0f1f6aa1f4535262f65466871a5865b0c94bb49ea5c5695917545aead93'      
+curl http://freedrive.fchwallet.com:8442/api/get -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK&drive_id=8d6cc0f1f6aa1f4535262f65466871a5865b0c94bb49ea5c5695917545aead93'      
 ```
     
-### <a name="get_drive_id">获取FCH地址的存储列表</a>
+### get drive id
+>获取FCH地址的存储列表     
 >接口名称: /api/get_drive_id
 ```
 参数  
@@ -139,7 +141,6 @@ curl http://116.62.126.223:8442/api/get -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfE
 ```
 curl example
 ```
-curl http://116.62.126.223:8442/api/get_drive_id -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK ' 
-
+curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK ' 
 ```
 
