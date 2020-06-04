@@ -194,14 +194,20 @@ public class DecodeServiceImpl implements DecodeService {
                         } else if ("4d".equals(totalLength_Hex)) {
 
                             String length_hex = content.substring(0, 4);
-                            Integer length = UnicodeUtil.decodeHEX(length_hex);
+                            String b = length_hex.substring(0,2);
+                            String a = length_hex.substring(2,4);
+                            String c = a+b;
+                            Integer length = UnicodeUtil.decodeHEX(c);
                             content = content.replaceFirst(length_hex, "");
                             content = content.substring(0, length*2);
 
                         } else if ("4e".equals(totalLength_Hex)) {
 
-                            String length_hex = content.substring(0, 6);
-                            Integer length = UnicodeUtil.decodeHEX(length_hex);
+                            String length_hex = content.substring(0, 8);
+                            String b = length_hex.substring(0,4);
+                            String a = length_hex.substring(4,8);
+                            String c = a+b;
+                            Integer length = UnicodeUtil.decodeHEX(c);
                             content = content.replaceFirst(length_hex, "");
                             content = content.substring(0, length*2);
 
@@ -458,14 +464,20 @@ public class DecodeServiceImpl implements DecodeService {
                         } else if ("4d".equals(totalLength_Hex)) {
 
                             String length_hex = content.substring(0, 4);
-                            Integer length = UnicodeUtil.decodeHEX(length_hex);
+                            String b = length_hex.substring(0,2);
+                            String a = length_hex.substring(2,4);
+                            String c = a+b;
+                            Integer length = UnicodeUtil.decodeHEX(c);
                             content = content.replaceFirst(length_hex, "");
                             content = content.substring(0, length*2);
 
                         } else if ("4e".equals(totalLength_Hex)) {
 
-                            String length_hex = content.substring(0, 6);
-                            Integer length = UnicodeUtil.decodeHEX(length_hex);
+                            String length_hex = content.substring(0, 8);
+                            String b = length_hex.substring(0,4);
+                            String a = length_hex.substring(4,8);
+                            String c = a+b;
+                            Integer length = UnicodeUtil.decodeHEX(c);
                             content = content.replaceFirst(length_hex, "");
                             content = content.substring(0, length*2);
 
