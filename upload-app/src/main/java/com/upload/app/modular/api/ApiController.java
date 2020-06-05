@@ -93,7 +93,6 @@ public class ApiController extends BaseController {
     }
 
 
-
     @ResponseBody
     @RequestMapping(value="/put", method = RequestMethod.POST)
     public JSONObject put(@RequestBody String json) throws Exception {
@@ -175,9 +174,12 @@ public class ApiController extends BaseController {
         }
 
         Integer metadatasize = metadata.getBytes().length;
-        BigDecimal metadatafee = new BigDecimal("0.00000001").multiply(new BigDecimal(metadatasize)).divide(new BigDecimal("2"));
+        BigDecimal metadatasizefree = new BigDecimal(metadatasize).divide(new BigDecimal("2")).setScale(8);    // 设置8位小数
+        BigDecimal metadatafee = new BigDecimal("0.00000001").multiply(metadatasizefree);
         if (metadatafee.compareTo(new BigDecimal("0.00002")) < 0)
-            metadatafee = new BigDecimal("0.00002");
+            metadatafee = new BigDecimal("0.00004");
+        else
+            metadatafee = metadatafee.multiply(new BigDecimal("2"));
 
         fchAddress.add("1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
         String[] address = fchAddress.toArray(new String[0]);
@@ -185,7 +187,8 @@ public class ApiController extends BaseController {
         outputs.add(c1);
 
 
-        BigDecimal fee = new BigDecimal("0.00000001").multiply(new BigDecimal(size)).divide(new BigDecimal("2"));
+        BigDecimal sizefree = new BigDecimal(size).divide(new BigDecimal("2")).setScale(8);    // 设置8位小数
+        BigDecimal fee = new BigDecimal("0.00000001").multiply(sizefree);
 
         BigDecimal fvalue = v.subtract(fee).subtract(new BigDecimal("0.00001")).subtract(metadatafee);
         String[] sysad = {"1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
@@ -333,17 +336,20 @@ public class ApiController extends BaseController {
         }
 
         Integer metadatasize = metadata.getBytes().length;
-        BigDecimal metadatafee = new BigDecimal("0.00000001").multiply(new BigDecimal(metadatasize)).divide(new BigDecimal("2"));
+        BigDecimal metadatasizefree = new BigDecimal(metadatasize).divide(new BigDecimal("2")).setScale(8);    // 设置8位小数
+        BigDecimal metadatafee = new BigDecimal("0.00000001").multiply(metadatasizefree);
         if (metadatafee.compareTo(new BigDecimal("0.00002")) < 0)
-            metadatafee = new BigDecimal("0.00002");
+            metadatafee = new BigDecimal("0.00004");
+        else
+            metadatafee = metadatafee.multiply(new BigDecimal("2"));
 
         fchAddress.add("1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
         String[] address = fchAddress.toArray(new String[0]);
         CommonTxOputDto c1 = new CommonTxOputDto(address, metadatafee, metadata, 1);
         outputs.add(c1);
 
-
-        BigDecimal fee = new BigDecimal("0.00000001").multiply(new BigDecimal(size)).divide(new BigDecimal("2"));
+        BigDecimal sizefree = new BigDecimal(size).divide(new BigDecimal("2")).setScale(8);    // 设置8位小数
+        BigDecimal fee = new BigDecimal("0.00000001").multiply(sizefree);
 
         BigDecimal fvalue = v.subtract(fee).subtract(new BigDecimal("0.00001")).subtract(metadatafee);
         String[] sysad = {"1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
