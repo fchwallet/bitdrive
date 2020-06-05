@@ -114,8 +114,16 @@ public class ApiController extends BaseController {
             return result;
         }
 
+        String ad = fch_addr.getString(0);
+        String adfrist = ad.substring(0,1);
+        String fchXSVaddress = null;
+        if ("F".equals(adfrist) && "f".equals(adfrist)) {
+            fchXSVaddress = Api.fchtoxsv(fch_addr.getString(0)).getString("address");
+        } else if ("1".equals(adfrist)) {
+            fchXSVaddress = ad;
+        }
 
-        String fchXSVaddress = Api.fchtoxsv(fch_addr.getString(0)).getString("address");
+
         Boolean b = Api.VerifyMessage(fchXSVaddress, signautre, data);
 
         if (!b) {
@@ -246,8 +254,14 @@ public class ApiController extends BaseController {
         }
 
         String fchadd = fch_addr.getString(0);
+        String adfrist = fchadd.substring(0,1);
+        String fchXSVaddress = null;
+        if ("F".equals(adfrist) && "f".equals(adfrist)) {
+            fchXSVaddress = Api.fchtoxsv(fch_addr.getString(0)).getString("address");
+        } else if ("1".equals(adfrist)) {
+            fchXSVaddress = fchadd;
+        }
 
-        String fchXSVaddress = Api.fchtoxsv(fch_addr.getString(0)).getString("address");
         Boolean b = Api.VerifyMessage(fchXSVaddress, signautre, data);
 
         if (!b) {
