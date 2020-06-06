@@ -117,7 +117,7 @@ public class ApiController extends BaseController {
         String ad = fch_addr.getString(0);
         String adfrist = ad.substring(0,1);
         String fchXSVaddress = null;
-        if ("F".equals(adfrist) && "f".equals(adfrist)) {
+        if ("F".equals(adfrist) || "f".equals(adfrist)) {
             fchXSVaddress = Api.fchtoxsv(fch_addr.getString(0)).getString("address");
         } else if ("1".equals(adfrist)) {
             fchXSVaddress = ad;
@@ -168,7 +168,7 @@ public class ApiController extends BaseController {
                 f.getXsvAddress();
             else {
                 String xsvaddress = null;
-                if ("F".equals(adfrist) && "f".equals(adfrist)) {
+                if ("F".equals(adfrist) || "f".equals(adfrist)) {
                     xsvaddress = Api.fchtoxsv(fch_addr.getString(0)).getString("address");
                 } else if ("1".equals(adfrist)) {
                     xsvaddress = ad;
@@ -263,7 +263,7 @@ public class ApiController extends BaseController {
         String fchadd = fch_addr.getString(0);
         String adfrist = fchadd.substring(0,1);
         String fchXSVaddress = null;
-        if ("F".equals(adfrist) && "f".equals(adfrist)) {
+        if ("F".equals(adfrist) || "f".equals(adfrist)) {
             fchXSVaddress = Api.fchtoxsv(fch_addr.getString(0)).getString("address");
         } else if ("1".equals(adfrist)) {
             fchXSVaddress = fchadd;
@@ -345,7 +345,7 @@ public class ApiController extends BaseController {
                 f.getXsvAddress();
             else {
                 String xsvaddress = null;
-                if ("F".equals(adfrist) && "f".equals(adfrist)) {
+                if ("F".equals(adfrist) || "f".equals(adfrist)) {
                     xsvaddress = Api.fchtoxsv(addr).getString("address");
                 } else if ("1".equals(adfrist)) {
                     xsvaddress = fchadd;
