@@ -167,10 +167,17 @@ public class ApiController extends BaseController {
             if (f != null)
                 f.getXsvAddress();
             else {
-                String xsvaddress = Api.fchtoxsv(addr).getString("address");
+                String xsvaddress = null;
+                if ("F".equals(adfrist) && "f".equals(adfrist)) {
+                    xsvaddress = Api.fchtoxsv(fch_addr.getString(0)).getString("address");
+                } else if ("1".equals(adfrist)) {
+                    xsvaddress = ad;
+                }
                 FchXsvLink insert = new FchXsvLink();
                 insert.setFchAddress(addr);
                 insert.setXsvAddress(xsvaddress);
+
+
                 String addressHash = Api.ValidateAddress(xsvaddress).getString("scriptPubKey").replaceFirst("76a914", "").replaceFirst("88ac", "");
                 insert.setAddressHash(addressHash);
                 fchXsvLinkService.insert(insert);
@@ -337,7 +344,12 @@ public class ApiController extends BaseController {
             if (f != null)
                 f.getXsvAddress();
             else {
-                String xsvaddress = Api.fchtoxsv(addr).getString("address");
+                String xsvaddress = null;
+                if ("F".equals(adfrist) && "f".equals(adfrist)) {
+                    xsvaddress = Api.fchtoxsv(addr).getString("address");
+                } else if ("1".equals(adfrist)) {
+                    xsvaddress = fchadd;
+                }
                 FchXsvLink insert = new FchXsvLink();
                 insert.setFchAddress(addr);
                 insert.setXsvAddress(xsvaddress);
