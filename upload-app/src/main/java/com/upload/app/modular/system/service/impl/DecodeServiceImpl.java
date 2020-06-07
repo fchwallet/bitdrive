@@ -236,12 +236,50 @@ public class DecodeServiceImpl implements DecodeService {
                         String content = scriptPubKey.getString("hex");
                         content = content.replaceFirst("006a","");
                         String length_hex = content.substring(0,2);
-                        Integer length = UnicodeUtil.decodeHEX(length_hex);
                         content = content.replaceFirst(length_hex,"");
-                        String contentData = content.substring(0, length * 2);
 
-                        data.append(contentData);
-                        jb.put("data", contentData);
+                        if ("4c".equals(length_hex)) {
+
+                            Integer length = UnicodeUtil.decodeHEX(length_hex);
+                            content = content.replaceFirst(length_hex,"");
+                            String contentData = content.substring(0, length * 2);
+                            data.append(contentData);
+                            jb.put("data", contentData);
+
+                        } else if ("4d".equals(length_hex)) {
+
+                            length_hex = content.substring(0, 4);
+                            String b = length_hex.substring(0,2);
+                            String a = length_hex.substring(2,4);
+                            String c = a+b;
+                            Integer length = UnicodeUtil.decodeHEX(c);
+                            content = content.replaceFirst(length_hex,"");
+                            String contentData = content.substring(0, length * 2);
+                            data.append(contentData);
+                            jb.put("data", contentData);
+
+                        } else if ("4e".equals(length_hex)) {
+
+                            length_hex = content.substring(0, 8);
+                            String b = length_hex.substring(0,4);
+                            String a = length_hex.substring(4,8);
+                            String c = a+b;
+                            Integer length = UnicodeUtil.decodeHEX(c);
+                            content = content.replaceFirst(length_hex, "");
+                            String contentData = content.substring(0, length * 2);
+                            data.append(contentData);
+                            jb.put("data", contentData);
+
+                        } else {
+
+                            Integer length = UnicodeUtil.decodeHEX(length_hex);
+                            String contentData = content.substring(0, length*2);
+                            data.append(contentData);
+                            jb.put("data", contentData);
+
+
+                        }
+
 
                     }
 
@@ -506,12 +544,51 @@ public class DecodeServiceImpl implements DecodeService {
                         String content = scriptPubKey.getString("hex");
                         content = content.replaceFirst("006a","");
                         String length_hex = content.substring(0,2);
-                        Integer length = UnicodeUtil.decodeHEX(length_hex);
                         content = content.replaceFirst(length_hex,"");
-                        String contentData = content.substring(0, length * 2);
 
-                        data.append(contentData);
-                        jb.put("data", contentData);
+                        if ("4c".equals(length_hex)) {
+
+                            Integer length = UnicodeUtil.decodeHEX(length_hex);
+                            content = content.replaceFirst(length_hex,"");
+                            String contentData = content.substring(0, length * 2);
+                            data.append(contentData);
+                            jb.put("data", contentData);
+
+                        } else if ("4d".equals(length_hex)) {
+
+                            length_hex = content.substring(0, 4);
+                            String b = length_hex.substring(0,2);
+                            String a = length_hex.substring(2,4);
+                            String c = a+b;
+                            Integer length = UnicodeUtil.decodeHEX(c);
+                            content = content.replaceFirst(length_hex,"");
+                            String contentData = content.substring(0, length * 2);
+                            data.append(contentData);
+                            jb.put("data", contentData);
+
+                        } else if ("4e".equals(length_hex)) {
+
+                            length_hex = content.substring(0, 8);
+                            String b = length_hex.substring(0,4);
+                            String a = length_hex.substring(4,8);
+                            String c = a+b;
+                            Integer length = UnicodeUtil.decodeHEX(c);
+                            content = content.replaceFirst(length_hex, "");
+                            String contentData = content.substring(0, length * 2);
+                            data.append(contentData);
+                            jb.put("data", contentData);
+
+                        } else {
+
+                            Integer length = UnicodeUtil.decodeHEX(length_hex);
+                            String contentData = content.substring(0, length*2);
+                            data.append(contentData);
+                            jb.put("data", contentData);
+
+
+                        }
+
+
 
                     }
 
