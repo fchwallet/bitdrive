@@ -163,12 +163,15 @@ public class ApiController extends BaseController {
                 f.getXsvAddress();
             else {
                 String xsvaddress = null;
+                FchXsvLink insert = new FchXsvLink();
                 if ("F".equals(adfrist) || "f".equals(adfrist)) {
                     xsvaddress = Api.fchtoxsv(fch_addr.getString(0)).getString("address");
+                    insert.setType(0);
                 } else if ("1".equals(adfrist)) {
                     xsvaddress = ad;
+                    insert.setType(1);
                 }
-                FchXsvLink insert = new FchXsvLink();
+
                 insert.setFchAddress(addr);
                 insert.setXsvAddress(xsvaddress);
 
@@ -200,6 +203,8 @@ public class ApiController extends BaseController {
         BigDecimal sizefree = new BigDecimal(size).divide(new BigDecimal("2")).setScale(8);    // 设置8位小数
         BigDecimal fee = new BigDecimal("0.00000001").multiply(sizefree);
 
+        BigDecimal sumFee = fee.add(metadatafee);
+
         BigDecimal fvalue = v.subtract(fee).subtract(new BigDecimal("0.00001")).subtract(metadatafee);
         String[] sysad = {"1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
         CommonTxOputDto c2 = new CommonTxOputDto(sysad, fvalue, 2);
@@ -217,7 +222,7 @@ public class ApiController extends BaseController {
         JSONArray put = new JSONArray();
         put.add(a);
 
-        String drive_id = decodeService.decodeCreate(put, null);
+        String drive_id = decodeService.decodeCreate(put, sumFee,null);
 
         result.put("code", 200);
         result.put("drive_id",drive_id);
@@ -340,12 +345,15 @@ public class ApiController extends BaseController {
                 f.getXsvAddress();
             else {
                 String xsvaddress = null;
+                FchXsvLink insert = new FchXsvLink();
                 if ("F".equals(adfrist) || "f".equals(adfrist)) {
                     xsvaddress = Api.fchtoxsv(addr).getString("address");
+                    insert.setType(0);
                 } else if ("1".equals(adfrist)) {
                     xsvaddress = fchadd;
+                    insert.setType(1);
                 }
-                FchXsvLink insert = new FchXsvLink();
+
                 insert.setFchAddress(addr);
                 insert.setXsvAddress(xsvaddress);
                 String addressHash = Api.ValidateAddress(xsvaddress).getString("scriptPubKey").replaceFirst("76a914", "").replaceFirst("88ac", "");
@@ -372,7 +380,9 @@ public class ApiController extends BaseController {
         BigDecimal sizefree = new BigDecimal(size).divide(new BigDecimal("2")).setScale(8);    // 设置8位小数
         BigDecimal fee = new BigDecimal("0.00000001").multiply(sizefree);
 
+        BigDecimal sumFee = fee.add(metadatafee);
         BigDecimal fvalue = v.subtract(fee).subtract(new BigDecimal("0.00001")).subtract(metadatafee);
+
         String[] sysad = {"1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
         CommonTxOputDto c2 = new CommonTxOputDto(sysad, fvalue, 2);
         outputs.add(c2);                                //找零
@@ -389,7 +399,7 @@ public class ApiController extends BaseController {
         JSONArray put = new JSONArray();
         put.add(a);
 
-        String update_id = decodeService.decodeCreate(put, drive_id);
+        String update_id = decodeService.decodeCreate(put, sumFee, drive_id);
 
         result.put("code", 200);
         result.put("update_id",update_id);
@@ -478,7 +488,7 @@ public class ApiController extends BaseController {
 
         FchXsvLink fchXsvLink = fchXsvLinkService.findByFch(fch_addr);
 
-        List<AddressDriveLink> addressDriveLink = addressDriveLinkService.findByAddress(fchXsvLink.getAddressHash());
+        List<AddressDriveLink> addressDriveLink = addressDriveLinkService.findByAddress(fchXsvLink.getAddressHash(), 0);
         List<String> list = new ArrayList<>();
         for (AddressDriveLink ad : addressDriveLink) {
             list.add(ad.getDriveId());

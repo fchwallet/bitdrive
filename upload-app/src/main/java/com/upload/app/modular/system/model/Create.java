@@ -1,5 +1,6 @@
 package com.upload.app.modular.system.model;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 public class Create {
@@ -17,6 +18,16 @@ public class Create {
     private String data;
 
     private Date createDate;
+
+    private BigDecimal fee;
+
+    public BigDecimal getFee() {
+        return fee;
+    }
+
+    public void setFee(BigDecimal fee) {
+        this.fee = fee;
+    }
 
     public Integer getN() {
         return n;

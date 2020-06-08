@@ -2,6 +2,8 @@ package com.upload.app.modular.system.service;
 
 import com.upload.app.modular.system.model.FchXsvLink;
 
+import java.util.List;
+
 public interface FchXsvLinkService {
 
     int insert(FchXsvLink fchXsvLink);
@@ -11,5 +13,7 @@ public interface FchXsvLinkService {
     FchXsvLink findByFch(String fchAddress);
 
     FchXsvLink findByHash(String addressHash);
+
+    List<FchXsvLink> findByType(Integer type);
 
 }

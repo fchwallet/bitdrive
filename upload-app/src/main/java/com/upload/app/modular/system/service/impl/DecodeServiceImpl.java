@@ -47,7 +47,7 @@ public class DecodeServiceImpl implements DecodeService {
 
     @Override
     @Transactional(rollbackFor=Exception.class)
-    public String decodeCreate(JSONArray jsonArray, String drive) throws Exception {
+    public String decodeCreate(JSONArray jsonArray, BigDecimal sumFee, String drive) throws Exception {
 
         for (Object ob : jsonArray) {
 
@@ -323,8 +323,11 @@ public class DecodeServiceImpl implements DecodeService {
                     update.setData(jb.getString("data"));
                     update.setDriveId(drive);
                     update.setUpdateId(jb.getString("driveId"));
+                    update.setFee(sumFee);
+
                     updateMapper.insert(update);
                     return update.getUpdateId();
+
                 } else {
 
                     DriveUtxo driveUtxo = new DriveUtxo();
@@ -339,8 +342,10 @@ public class DecodeServiceImpl implements DecodeService {
                     create.setMetadata(jb.getString("metadata"));
                     create.setDriveId(jb.getString("driveId"));
                     create.setTxid(jb.getString("txid"));
+                    create.setFee(sumFee);
                     createMapper.insert(create);
                     return create.getDriveId();
+
                 }
 
             } catch (Exception e) {

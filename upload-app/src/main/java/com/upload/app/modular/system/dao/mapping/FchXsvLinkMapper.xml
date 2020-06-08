@@ -7,10 +7,11 @@
 		<result column="fch_address" property="fchAddress" />
 		<result column="xsv_address" property="xsvAddress" />
 		<result column="address_hash" property="addressHash" />
+		<result column="type" property="type" />
 	</resultMap>
 
 	<sql id="Base_Column_List">
-		fch_address, xsv_address, address_hash
+		fch_address, xsv_address, address_hash, `type`
 	</sql>
 
 	<select id="findByXsv" resultType="com.upload.app.modular.system.model.FchXsvLink">
@@ -23,6 +24,12 @@
 		select
 		<include refid="Base_Column_List" />
 		from fch_xsv_link where fch_address = #{fchAddress}
+	</select>
+
+	<select id="findByType" resultType="com.upload.app.modular.system.model.FchXsvLink">
+		select
+		<include refid="Base_Column_List" />
+		from fch_xsv_link where `type` = #{type}
 	</select>
 
 	<select id="findByHash" resultType="com.upload.app.modular.system.model.FchXsvLink">
@@ -43,6 +50,9 @@
 			<if test="addressHash != null" >
 				`address_hash`,
 			</if>
+			<if test="type != null" >
+				`type`,
+			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides="," >
 			<if test="fchAddress != null" >
@@ -53,6 +63,9 @@
 			</if>
 			<if test="addressHash != null" >
 				#{addressHash,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null" >
+				#{type,jdbcType=INTEGER},
 			</if>
 		</trim>
 	</insert>

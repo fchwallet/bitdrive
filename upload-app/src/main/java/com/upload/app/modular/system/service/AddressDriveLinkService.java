@@ -8,7 +8,7 @@ public interface AddressDriveLinkService {
 
     int insert(AddressDriveLink addressDriveLinke);
 
-    List<AddressDriveLink> findByAddress(String address);
+    List<AddressDriveLink> findByAddress(String address, Integer status);
 
     AddressDriveLink findByAddressAndDriveId(String address, String driveId);
 

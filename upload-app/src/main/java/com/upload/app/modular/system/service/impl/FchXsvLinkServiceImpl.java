@@ -6,6 +6,7 @@ import com.upload.app.modular.system.service.FchXsvLinkService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 public class FchXsvLinkServiceImpl implements FchXsvLinkService {
@@ -31,6 +32,11 @@ public class FchXsvLinkServiceImpl implements FchXsvLinkService {
     @Override
     public FchXsvLink findByHash(String addressHash) {
         return fchXsvLinkMapper.findByHash(addressHash);
+    }
+
+    @Override
+    public List<FchXsvLink> findByType(Integer type) {
+        return fchXsvLinkMapper.findByType(type);
     }
 
 

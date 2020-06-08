@@ -21,8 +21,8 @@ public class AddressDriveLinkServiceImpl implements AddressDriveLinkService {
     }
 
     @Override
-    public List<AddressDriveLink> findByAddress(String address) {
-        return addressDriveLinkMapper.findByAddress(address);
+    public List<AddressDriveLink> findByAddress(String address, Integer status) {
+        return addressDriveLinkMapper.findByAddress(address, status);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.upload.app.modular.system.model;
 
-import cn.hutool.core.date.DateTime;
-
+import java.math.BigDecimal;
 import java.util.Date;
 
 public class Update {
@@ -17,6 +16,16 @@ public class Update {
     private String data;
 
     private Date createDate;
+
+    private BigDecimal fee;
+
+    public BigDecimal getFee() {
+        return fee;
+    }
+
+    public void setFee(BigDecimal fee) {
+        this.fee = fee;
+    }
 
     public Date getCreateDate() {
         return createDate;

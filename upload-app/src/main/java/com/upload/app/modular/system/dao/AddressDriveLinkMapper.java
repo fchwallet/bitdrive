@@ -9,7 +9,7 @@ public interface AddressDriveLinkMapper {
 
     int insert(AddressDriveLink addressDriveLinke);
 
-    List<AddressDriveLink> findByAddress(String address);
+    List<AddressDriveLink> findByAddress(@Param("address") String address, @Param("status") Integer status);
 
     List<AddressDriveLink> findDriveByAddress(String address);
 

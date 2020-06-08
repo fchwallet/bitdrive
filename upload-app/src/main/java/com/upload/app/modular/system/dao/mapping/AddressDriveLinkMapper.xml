@@ -16,7 +16,7 @@
 	<select id="findByAddress" resultType="com.upload.app.modular.system.model.AddressDriveLink">
 		select
 		<include refid="Base_Column_List" />
-		from `address_drive_link` where address = #{address} and status = 0
+		from `address_drive_link` where address = #{address} and status = #{status}
 	</select>
 
     <select id="findDriveByAddress" resultType="com.upload.app.modular.system.model.AddressDriveLink">
