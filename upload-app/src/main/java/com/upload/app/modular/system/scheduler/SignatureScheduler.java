@@ -27,7 +27,7 @@ public class SignatureScheduler {
     @Autowired
     private BlockCountService blockCountService;
 
-    @Scheduled(cron = "0/5 * * * * ?")
+//    @Scheduled(cron = "0/5 * * * * ?")
     public void work() throws Exception {
         self.start();
     }

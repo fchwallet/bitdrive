@@ -20,6 +20,8 @@ java implementation freedrive
 {"code":"400","参数错误"}
 {"code":"1000","当前操作没有权限"}
 {"code":"1002","该drive_id不存在"}
+{"code":"1005","当前地址找不到相应记录"}
+{"code":"1006","找不到更新记录"}
 
 ```	  
 

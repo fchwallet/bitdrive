@@ -326,7 +326,7 @@ public class ApiController extends BaseController {
 
         DriveUtxo du = driveUtxoService.findByDriveId(drive_id);
         if (du == null) {
-            result.put("1000", "该drive_id不存在");
+            result.put("1002", "该drive_id不存在");
             return result;
         }
 
@@ -421,6 +421,13 @@ public class ApiController extends BaseController {
 
         FchXsvLink fchXsvLink = fchXsvLinkService.findByFch(fch_addr);
 
+        if (fchXsvLink == null) {
+            json.put("code", 1005);
+            json.put("msg", "当前地址找不到相应记录，请检查参数");
+            return json;
+        }
+
+
         if (drive_id != null && !drive_id.equals("")) {
 
             DriveTxAddress driveTxad = driveTxAddressService.findByDrive(fchXsvLink.getAddressHash(), drive_id);
@@ -458,6 +465,12 @@ public class ApiController extends BaseController {
 
             DriveTxAddress driveTxAddress = driveTxAddressService.findUpdate(fchXsvLink.getAddressHash(), update_id);
 
+            if (driveTxAddress == null) {
+                json.put("update", "找不到更新记录,请检查参数");
+                json.put("code", 1006);
+                return json;
+            }
+
             Update up = updateService.findByDriveId(driveTxAddress.getDriveId(), driveTxAddress.getUpdateId());
 
             JSONObject ob = new JSONObject();
@@ -488,14 +501,24 @@ public class ApiController extends BaseController {
 
         FchXsvLink fchXsvLink = fchXsvLinkService.findByFch(fch_addr);
 
-        List<AddressDriveLink> addressDriveLink = addressDriveLinkService.findByAddress(fchXsvLink.getAddressHash(), 0);
-        List<String> list = new ArrayList<>();
-        for (AddressDriveLink ad : addressDriveLink) {
-            list.add(ad.getDriveId());
+        if (fchXsvLink != null) {
+
+            List<AddressDriveLink> addressDriveLink = addressDriveLinkService.findByAddress(fchXsvLink.getAddressHash(), 0);
+            List<String> list = new ArrayList<>();
+            for (AddressDriveLink ad : addressDriveLink) {
+                list.add(ad.getDriveId());
+            }
+
+            json.put("code", 200);
+            json.put("drive_id", list);
+
+        } else {
+
+            json.put("code", 200);
+            json.put("drive_id", "");
+
         }
 
-        json.put("code", 200);
-        json.put("drive_id", list);
         return json;
 
     }
