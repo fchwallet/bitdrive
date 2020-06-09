@@ -83,10 +83,8 @@ curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  -
 查询单个drive_id的所有变更记录
 ```
 参数类型: ["application/x-www-form-urlencoded"]  
-{
-"fch_addr": "F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT", 
-"drive_id":  "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
-}   
+'fch_addr=F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT&drive_id=1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce'
+  
 返回结果：
 {
     "code":200,
@@ -113,10 +111,9 @@ curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  -
 或者参数传update_id, 查询某次更新记录    
 ```
 参数类型: ["application/x-www-form-urlencoded"]  
-{
-"fch_addr": "F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT", 
-"update_id":  "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
-}    
+
+'fch_addr=F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT&update_id=1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce'
+    
 返回结果
 {
     "code":200,
@@ -137,9 +134,9 @@ curl http://freedrive.fchwallet.com:8442/api/get -X POST  -d 'fch_addr=F8Z2aQkHk
 >接口名称: /api/get_drive_id
 ```
 参数类型: ["application/x-www-form-urlencoded"]    
-{
-"fch_addr":  "f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
-}   
+
+'fch_addr=f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce'
+   
 	    
 返回结果：
 {
