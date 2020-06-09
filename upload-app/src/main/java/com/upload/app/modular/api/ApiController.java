@@ -74,6 +74,9 @@ public class ApiController extends BaseController {
     @Autowired
     private DriveTxAddressService driveTxAddressService;
 
+    @Autowired
+    private SystemUtxoService systemUtxoService;
+
     final Base64.Decoder decoder = Base64.getDecoder();
 
     @ResponseBody
@@ -93,8 +96,14 @@ public class ApiController extends BaseController {
     public JSONObject put(@RequestBody String json) throws Exception {
 
         JSONObject result = new JSONObject();
-
-        JSONObject param = (JSONObject) JSONObject.parse(json);
+        JSONObject param = null;
+        try {
+            param = (JSONObject) JSONObject.parse(json);
+        } catch (Exception e) {
+            result.put("code",1009);
+            result.put("msg","请传正确的json数据");
+            return result;
+        }
 
         JSONArray fch_addr = param.getJSONArray("fch_addr");
 
@@ -136,23 +145,6 @@ public class ApiController extends BaseController {
             return result;
         }
 
-        Map query = new HashedMap();
-        query.put("address", "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
-        JSONObject utxo = (JSONObject) JSONObject.parse(HttpUtil.doPost("http://47.110.137.123:8433/rest/Api/getUtxo",query));
-        JSONObject udata = utxo.getJSONObject("data");
-        JSONArray utxos = udata.getJSONArray("utxo");
-        List<TxInputDto> inputs = new ArrayList<>();
-        BigDecimal v = new BigDecimal("0");                 //总的utxo钱
-        for (Object ob : utxos) {
-            JSONObject ux = (JSONObject) ob;
-            TxInputDto input = new TxInputDto(ux.getString("txid"),ux.getInteger("n"),"");
-            v = v.add(new BigDecimal(ux.getString("value")));
-            inputs.add(input);
-        }
-
-        List<CommonTxOputDto> outputs = new ArrayList<>();
-
-
         List<String> fchAddress = new ArrayList<>();
         for (Object o : fch_addr) {
 
@@ -186,46 +178,26 @@ public class ApiController extends BaseController {
 
         }
 
-        Integer metadatasize = metadata.getBytes().length;
-        BigDecimal metadatasizefree = new BigDecimal(metadatasize).divide(new BigDecimal("2")).setScale(8);    // 设置8位小数
-        BigDecimal metadatafee = new BigDecimal("0.00000001").multiply(metadatasizefree);
-        if (metadatafee.compareTo(new BigDecimal("0.00002")) < 0)
-            metadatafee = new BigDecimal("0.00004");
-        else
-            metadatafee = metadatafee.multiply(new BigDecimal("2"));
+        Map<String, Object> map = systemUtxoService.spendUtxo(metadata, fchAddress, size, data, null,1);   //1表示create
 
-        fchAddress.add("1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
-        String[] address = fchAddress.toArray(new String[0]);
-        CommonTxOputDto c1 = new CommonTxOputDto(address, metadatafee, metadata, 1);
-        outputs.add(c1);
-
-
-        BigDecimal sizefree = new BigDecimal(size).divide(new BigDecimal("2")).setScale(8);    // 设置8位小数
-        BigDecimal fee = new BigDecimal("0.00000001").multiply(sizefree);
-
-        BigDecimal sumFee = fee.add(metadatafee);
-
-        BigDecimal fvalue = v.subtract(fee).subtract(new BigDecimal("0.00001")).subtract(metadatafee);
-        String[] sysad = {"1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
-        CommonTxOputDto c2 = new CommonTxOputDto(sysad, fvalue, 2);
-        outputs.add(c2);                                //找零
-
-
-        CommonTxOputDto c3 = new CommonTxOputDto(data, 3);
-        outputs.add(c3);                            //文件
-
-
-        String createHex = Api.CreateDrivetx(inputs, outputs);
-        String signHex = Api.SignDrivetx(createHex, "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
-        String a = Api.SendRawTransaction(signHex);
+        String hex = (String)map.get("hex");
+        Object sf = map.get("sumFee");
 
         JSONArray put = new JSONArray();
-        put.add(a);
+        if (!StringUtils.isEmpty(hex) && sf != null) {
+            put.add(hex);
+            BigDecimal sumFee = (BigDecimal) sf;
+            String drive_id = decodeService.decodeCreate(put, sumFee, null);
+            result.put("code", 200);
+            result.put("drive_id",drive_id);
 
-        String drive_id = decodeService.decodeCreate(put, sumFee,null);
+        } else {
 
-        result.put("code", 200);
-        result.put("drive_id",drive_id);
+            result.put("code", 500);
+            result.put("msg", "处理异常,联系客服");
+
+        }
+
         return result;
 
     }
@@ -237,11 +209,14 @@ public class ApiController extends BaseController {
 
         JSONObject result = new JSONObject();
 
-//        JSONObject j = (JSONObject) JSONObject.parse(json);
-
-//        String plaintext = (new String(decoder.decode(j.getString("value")), "UTF-8"));
-
-        JSONObject param = (JSONObject) JSONObject.parse(json);
+        JSONObject param = null;
+        try {
+            param = (JSONObject) JSONObject.parse(json);
+        } catch (Exception e) {
+            result.put("code",1009);
+            result.put("msg","请传正确的json数据");
+            return result;
+        }
 
         JSONArray fch_addr = param.getJSONArray("fch_addr");
 
@@ -310,32 +285,6 @@ public class ApiController extends BaseController {
             return result;
         }
 
-        Map query = new HashedMap();
-        query.put("address", "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
-        JSONObject utxo = (JSONObject) JSONObject.parse(HttpUtil.doPost("http://47.110.137.123:8433/rest/Api/getUtxo",query));
-        JSONObject udata = utxo.getJSONObject("data");
-        JSONArray utxos = udata.getJSONArray("utxo");
-        List<TxInputDto> inputs = new ArrayList<>();
-        BigDecimal v = new BigDecimal("0");                 //总的utxo钱
-        for (Object ob : utxos) {
-            JSONObject ux = (JSONObject) ob;
-            TxInputDto input = new TxInputDto(ux.getString("txid"),ux.getInteger("n"),"");
-            v = v.add(new BigDecimal(ux.getString("value")));
-            inputs.add(input);
-        }
-
-        DriveUtxo du = driveUtxoService.findByDriveId(drive_id);
-        if (du == null) {
-            result.put("1002", "该drive_id不存在");
-            return result;
-        }
-
-        TxInputDto input = new TxInputDto(du.getTxid(), du.getN(),"");
-        inputs.add(input);
-        v = v.add(new BigDecimal(du.getValue()));
-
-        List<CommonTxOputDto> outputs = new ArrayList<>();
-
 
         List<String> fchAddress = new ArrayList<>();
         for (Object o : fch_addr) {
@@ -353,7 +302,6 @@ public class ApiController extends BaseController {
                     xsvaddress = fchadd;
                     insert.setType(1);
                 }
-
                 insert.setFchAddress(addr);
                 insert.setXsvAddress(xsvaddress);
                 String addressHash = Api.ValidateAddress(xsvaddress).getString("scriptPubKey").replaceFirst("76a914", "").replaceFirst("88ac", "");
@@ -364,48 +312,36 @@ public class ApiController extends BaseController {
             fchAddress.add(f.getXsvAddress());
         }
 
-        Integer metadatasize = metadata.getBytes().length;
-        BigDecimal metadatasizefree = new BigDecimal(metadatasize).divide(new BigDecimal("2")).setScale(8);    // 设置8位小数
-        BigDecimal metadatafee = new BigDecimal("0.00000001").multiply(metadatasizefree);
-        if (metadatafee.compareTo(new BigDecimal("0.00002")) < 0)
-            metadatafee = new BigDecimal("0.00004");
-        else
-            metadatafee = metadatafee.multiply(new BigDecimal("2"));
+        DriveUtxo du = driveUtxoService.findByDriveId(drive_id);
+        if (du == null) {
+            result.put("1002", "该drive_id不存在");
+            return result;
+        }
 
-        fchAddress.add("1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
-        String[] address = fchAddress.toArray(new String[0]);
-        CommonTxOputDto c1 = new CommonTxOputDto(address, metadatafee, metadata, 1);
-        outputs.add(c1);
+        Map<String, Object> map = systemUtxoService.spendUtxo(metadata, fchAddress, size, data, du,2);   //1表示create
 
-        BigDecimal sizefree = new BigDecimal(size).divide(new BigDecimal("2")).setScale(8);    // 设置8位小数
-        BigDecimal fee = new BigDecimal("0.00000001").multiply(sizefree);
-
-        BigDecimal sumFee = fee.add(metadatafee);
-        BigDecimal fvalue = v.subtract(fee).subtract(new BigDecimal("0.00001")).subtract(metadatafee);
-
-        String[] sysad = {"1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
-        CommonTxOputDto c2 = new CommonTxOputDto(sysad, fvalue, 2);
-        outputs.add(c2);                                //找零
-
-
-        CommonTxOputDto c3 = new CommonTxOputDto(data, 3);
-        outputs.add(c3);                            //文件
-
-
-        String createHex = Api.CreateDrivetx(inputs, outputs);
-        String signHex = Api.SignDrivetx(createHex, "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
-        String a = Api.SendRawTransaction(signHex);
+        String hex = (String)map.get("hex");
+        Object sf = map.get("sumFee");
 
         JSONArray put = new JSONArray();
-        put.add(a);
+        if (!StringUtils.isEmpty(hex) && sf != null) {
+            put.add(hex);
+            BigDecimal sumFee = (BigDecimal) sf;
+            String update_id = decodeService.decodeCreate(put, sumFee, drive_id);
+            result.put("code", 200);
+            result.put("update_id",update_id);
 
-        String update_id = decodeService.decodeCreate(put, sumFee, drive_id);
+        } else {
 
-        result.put("code", 200);
-        result.put("update_id",update_id);
+            result.put("code", 500);
+            result.put("msg", "处理异常,联系客服");
+
+        }
+
         return result;
 
     }
+
 
     @ResponseBody
     @RequestMapping(value="/get", method = RequestMethod.POST)

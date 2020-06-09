@@ -22,6 +22,7 @@ java implementation freedrive
 {"code":"1002","该drive_id不存在"}
 {"code":"1005","当前地址找不到相应记录"}
 {"code":"1006","找不到更新记录"}
+{"code":"1009","请传正确的json数据"}
 
 ```	  
 
