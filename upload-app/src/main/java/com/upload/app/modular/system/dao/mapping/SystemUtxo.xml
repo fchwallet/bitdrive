@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.upload.app.modular.system.dao.SystemUtxoMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.upload.app.modular.system.model.SystemUtxo">
+		<result column="address" property="address" jdbcType="VARCHAR"/>
+		<result column="n" property="n" jdbcType="INTEGER"/>
+		<result column="txid" property="txid" jdbcType="VARCHAR"/>
+		<result column="value" property="value" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		address, n, txid, `value`
+	</sql>
+
+	<select id="findByAddress" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		`system_utxo` where address = #{address}
+	</select>
+
+	<select id="isExistence" resultType="java.lang.Boolean">
+		select
+			count(0)
+		from
+		`system_utxo` where txid = #{txid} and n = #{n}
+	</select>
+
+	<insert id="insert" parameterType="com.upload.app.modular.system.model.SystemUtxo">
+		insert into `system_utxo`
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="address != null" >
+				address,
+			</if>
+			<if test="n != null" >
+				`n`,
+			</if>
+			<if test="txid != null" >
+				`txid`,
+			</if>
+			<if test="value != null" >
+				`value`,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="address != null" >
+				#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="n != null" >
+				#{n,jdbcType=INTEGER},
+			</if>
+			<if test="txid != null" >
+				#{txid,jdbcType=VARCHAR},
+			</if>
+			<if test="value != null" >
+				#{value,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+
+	<delete id="delete">
+		delete from system_utxo where txid = #{txid} and n = #{n}
+	</delete>
+
+</mapper>

@@ -12,6 +12,7 @@ import javax.net.ssl.SSLSocketFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.*;
 import java.nio.charset.Charset;
 import java.util.*;
@@ -327,6 +328,10 @@ public class BitClient {
 
 	public String validateAddress(String address) throws BitcoinRpcException, XsvException.InvalidBitcoinAddressException {
 		return JSON.stringify(query("validateaddress", address));
+	}
+
+	public String sendToAddress(String toAddress, BigDecimal amount) throws XsvException.InvalidBitcoinAddressException {
+		return (String) query("sendtoaddress", toAddress, amount);
 	}
 
 }
