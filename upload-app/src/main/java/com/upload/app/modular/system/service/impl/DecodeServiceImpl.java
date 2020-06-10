@@ -203,8 +203,14 @@ public class DecodeServiceImpl implements DecodeService {
 
                             String length_hex = content.substring(0, 8);
                             String b = length_hex.substring(0,4);
+                            String b2 = b.substring(0,2);
+                            String b1 = b.substring(2,4);
+                            String bb = b1 + b2;
                             String a = length_hex.substring(4,8);
-                            String c = a+b;
+                            String a2 = a.substring(0,2);
+                            String a1 = a.substring(2,4);
+                            String aa = a1+a2;
+                            String c = aa+bb;
                             Integer length = UnicodeUtil.decodeHEX(c);
                             content = content.replaceFirst(length_hex, "");
                             content = content.substring(0, length*2);
@@ -262,8 +268,14 @@ public class DecodeServiceImpl implements DecodeService {
 
                             length_hex = content.substring(0, 8);
                             String b = length_hex.substring(0,4);
+                            String b2 = b.substring(0,2);
+                            String b1 = b.substring(2,4);
+                            String bb = b1 + b2;
                             String a = length_hex.substring(4,8);
-                            String c = a+b;
+                            String a2 = a.substring(0,2);
+                            String a1 = a.substring(2,4);
+                            String aa = a1+a2;
+                            String c = aa+bb;
                             Integer length = UnicodeUtil.decodeHEX(c);
                             content = content.replaceFirst(length_hex, "");
                             String contentData = content.substring(0, length * 2);
@@ -516,8 +528,14 @@ public class DecodeServiceImpl implements DecodeService {
 
                             String length_hex = content.substring(0, 8);
                             String b = length_hex.substring(0,4);
+                            String b2 = b.substring(0,2);
+                            String b1 = b.substring(2,4);
+                            String bb = b1 + b2;
                             String a = length_hex.substring(4,8);
-                            String c = a+b;
+                            String a2 = a.substring(0,2);
+                            String a1 = a.substring(2,4);
+                            String aa = a1+a2;
+                            String c = aa+bb;
                             Integer length = UnicodeUtil.decodeHEX(c);
                             content = content.replaceFirst(length_hex, "");
                             content = content.substring(0, length*2);
@@ -575,8 +593,14 @@ public class DecodeServiceImpl implements DecodeService {
 
                             length_hex = content.substring(0, 8);
                             String b = length_hex.substring(0,4);
+                            String b2 = b.substring(0,2);
+                            String b1 = b.substring(2,4);
+                            String bb = b1 + b2;
                             String a = length_hex.substring(4,8);
-                            String c = a+b;
+                            String a2 = a.substring(0,2);
+                            String a1 = a.substring(2,4);
+                            String aa = a1+a2;
+                            String c = aa+bb;
                             Integer length = UnicodeUtil.decodeHEX(c);
                             content = content.replaceFirst(length_hex, "");
                             String contentData = content.substring(0, length * 2);
