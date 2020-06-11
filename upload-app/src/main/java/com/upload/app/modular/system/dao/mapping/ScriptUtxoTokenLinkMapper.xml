@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.upload.app.modular.system.dao.ScriptUtxoTokenLinkMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.upload.app.modular.system.model.ScriptUtxoTokenLink">
+		<result column="script" property="script" jdbcType="VARCHAR"/>
+		<result column="txid" property="txid" jdbcType="VARCHAR"/>
+		<result column="n" property="n" jdbcType="INTEGER"/>
+		<result column="value" property="value" jdbcType="VARCHAR"/>
+		<result column="address" property="address" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		script, txid, n, `value`, address
+	</sql>
+
+	<insert id="insert" parameterType="com.upload.app.modular.system.model.ScriptUtxoTokenLink">
+		insert into script_utxo_token_link
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="script != null" >
+				`script`,
+			</if>
+			<if test="txid != null" >
+				`txid`,
+			</if>
+			<if test="n != null" >
+				`n`,
+			</if>
+			<if test="value != null" >
+				`value`,
+			</if>
+			<if test="address != null" >
+				`address`,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="script != null" >
+				#{script,jdbcType=VARCHAR},
+			</if>
+			<if test="txid != null" >
+				#{txid,jdbcType=VARCHAR},
+			</if>
+			<if test="n != null" >
+				#{n,jdbcType=INTEGER},
+			</if>
+			<if test="value != null" >
+				#{value,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null" >
+				#{address,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+
+	<delete id="deleteUtxoToken">
+		delete from script_utxo_token_link where txid = #{txid} and n = #{n}
+	</delete>
+
+	<select id="findListByScript" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List" />
+		FROM
+		`script_utxo_token_link` where script in
+		<foreach collection="script" item="address" index="index" open="(" close=")" separator=",">
+			#{address}
+		</foreach>
+	</select>
+
+</mapper>

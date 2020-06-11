@@ -336,4 +336,20 @@ public class Api {
 		return relust;
 
 	}
+
+	/**
+	 * 签名消息
+	 * @param address
+	 * @param message
+	 * @return
+	 * @throws Exception
+	 */
+	public static String FchSignMessage(String address, String message) throws Exception {
+
+		URL url = new URL("http://" + user + ':' + password + "@" + "47.75.35.123" + ":" + port + "/");
+		BitClient bitClient = new BitClient(url);
+		String relust = bitClient.signMessage(address, message);
+		return relust;
+
+	}
 }

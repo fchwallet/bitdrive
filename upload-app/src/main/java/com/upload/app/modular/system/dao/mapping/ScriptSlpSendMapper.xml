@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.upload.app.modular.system.dao.ScriptSlpSendMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.upload.app.modular.system.model.ScriptSlpSend">
+		<result column="txid" property="txid" jdbcType="VARCHAR"/>
+		<result column="token_id" property="tokenId" jdbcType="VARCHAR"/>
+		<result column="vout" property="vout" jdbcType="INTEGER"/>
+		<result column="precition" property="precition" jdbcType="INTEGER"/>
+		<result column="script" property="script" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		txid, token_id, token_output_quantity, vout, precition, script
+	</sql>
+
+
+	<insert id="insertSlpSend" parameterType="com.upload.app.modular.system.model.ScriptSlpSend">
+		insert into script_slp_send
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="txid != null" >
+				`txid`,
+			</if>
+			<if test="tokenId != null" >
+				`token_id`,
+			</if>
+			<if test="tokenOutputQuantity != null" >
+				token_output_quantity,
+			</if>
+			<if test="vout != null" >
+				vout,
+			</if>
+			<if test="precition != null" >
+				precition,
+			</if>
+			<if test="script != null" >
+				script,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="txid != null" >
+				#{txid,jdbcType=VARCHAR},
+			</if>
+			<if test="tokenId != null" >
+				#{tokenId,jdbcType=VARCHAR},
+			</if>
+			<if test="tokenOutputQuantity != null" >
+				#{tokenOutputQuantity,jdbcType=VARCHAR},
+			</if>
+			<if test="vout != null" >
+				#{vout,jdbcType=INTEGER},
+			</if>
+			<if test="precition != null" >
+				#{precition,jdbcType=INTEGER},
+			</if>
+			<if test="script != null" >
+				#{script,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+
+</mapper>

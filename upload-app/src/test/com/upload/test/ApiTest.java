@@ -96,7 +96,7 @@ public class ApiTest extends ApplicationTest {
     @Test
     public void put() throws Exception {
 
-        InputStream fi = new FileInputStream(new File("C:\\Users\\caiyile\\Desktop\\test\\test.txt"));
+        InputStream fi = new FileInputStream(new File("C:\\Users\\caiyile\\Desktop\\test\\test2.txt"));
         InputStreamReader fsr = new InputStreamReader(fi);
         BufferedReader br = new BufferedReader(fsr);
         String line = null;
@@ -107,16 +107,97 @@ public class ApiTest extends ApplicationTest {
 
         JSONObject j = new JSONObject();
         JSONArray jsr = new JSONArray();
-        jsr.add("F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT");
+        jsr.add("FAXr2MSU3HJrXyk4UMJKx5fX3KPX33sEiq");
         j.put("fch_addr", jsr);
-        j.put("metadata", "0446454950010201030643524541544532be53e7644ea9c8fed3ff8bda7ac87742a2e1494ac4e777ae396f388bf6e75f490100");
+        j.put("metadata", "464f43507c337c317c4352454154457c343335393566373637303431373637633434343534363439346534393534343934663465376365383837616165373934623165373865623065393837393137636538383761616537393462316537386562306539383739316536393861666539383039616538626638376539396439656535616662396537613762306535616638366537613038316536386138306536396361666535393238636537383262396535616662396537383262396537626439316537626239636535626262616537616238626535386562626534623861646535626638336535386339366537396138346538623461376535623838316537623362626537626239666566626338636535386462336534623838306537613738646535386562626534623861646535626638336535386339366537396138346535616638366537613038316538623461376535623838316533383038326538383761616537393462316537386562306539383739316537626261376536383962666534626138366536616639346537383962396535623838316535393238636536616639346537383962396535623838316537386562306539383739316537396138346535626139356535623138326536396562366536396538346566626338636535613239656535386161306534626138366536623262626537393038366535396662616539383739316535393238636536623262626537393038366536396362616535383862366566626338636536393838656537613161656534626138366536396538346535626262616535616638366537613038316537626238666536623538656537396138346536383062626534626439336537396261656536613038376533383038327c307c7c6e756c6c");
         j.put("data", sb.toString());
-        String r = HttpUtil.doPost("http://localhost:8442/api/put", j.toJSONString());
+        j.put("signature", "HzaMGOWbp/nFjEEBAizKLh+IXV7PJzg1Q1+1XVoDkYaIK/edhcAicmHv0lje9lQVqTWErythCXums2jRH39/C0w=");
+        String r = HttpUtil.doPost("http://116.62.126.223:8442/api/put", j.toJSONString());
 
         System.out.println(r);
 
     }
 
+    @Test
+    public void add() throws Exception {
+        BigDecimal amount = new BigDecimal("0.1");
+
+        for (int i = 0; i < 100; i++) {
+            Api.SendToAddress("1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx", amount);
+        }
+
+    }
+
+    @Test
+    public void sgin() throws Exception {
+
+        InputStream fi = new FileInputStream(new File("C:\\Users\\caiyile\\Desktop\\test\\test2.txt"));
+        InputStreamReader fsr = new InputStreamReader(fi);
+        BufferedReader br = new BufferedReader(fsr);
+        String line = null;
+        StringBuilder sb = new StringBuilder();
+        while((line = br.readLine())!=null) {
+            sb.append(line);
+        }
+
+        String a = Api.FchSignMessage("FAXr2MSU3HJrXyk4UMJKx5fX3KPX33sEiq", sb.toString());
+        System.out.println(a);
+
+    }
+
+    @Test
+    public void createGenniss() throws Exception {
+
+        List<TxInputDto> inputs = new ArrayList<>();
+
+        //0.081345
+        TxInputDto tx = new TxInputDto("f216d04a33626f22eb12105ca3dd9b3f5719444b6be4b1df0d06cd750eaafe63", 1,"");
+        inputs.add(tx);
+
+        List<CommonTxOputDto> outputs = new ArrayList<>();
+        String[] a = {"FAXr2MSU3HJrXyk4UMJKx5fX3KPX33sEiq","1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
+        CommonTxOputDto c1 = new CommonTxOputDto(a, new BigDecimal("0.0001"), "06534c502b2b000202010747454e45534953045553445423546574686572204c74642e20555320646f6c6c6172206261636b656420746f6b656e734168747470733a2f2f7465746865722e746f2f77702d636f6e74656e742f75706c6f6164732f323031362f30362f546574686572576869746550617065722e70646620db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec77793139160108010108002386f26fc10000", 1);
+        outputs.add(c1);
+        String[] sysad = {"1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
+        CommonTxOputDto c2 = new CommonTxOputDto(sysad, new BigDecimal("0.081145"), 2);
+        outputs.add(c2);                                //找零
+
+        String createHex = Api.CreateDrivetx(inputs, outputs);
+        String signHex = Api.SignDrivetx(createHex, "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
+        String hex = Api.SendRawTransaction(signHex);
+        System.out.println(hex);
+
+    }
+
+
+    @Test
+    public void createSend() throws Exception {
+
+        List<TxInputDto> inputs = new ArrayList<>();
+
+        //0.0973044
+        TxInputDto tx = new TxInputDto("86bb47d0f330d62f468311a53375ecc8738fd4d62b6a3d20964b412115dce6b8", 0,"");
+        TxInputDto tx1 = new TxInputDto("f216d04a33626f22eb12105ca3dd9b3f5719444b6be4b1df0d06cd750eaafe63", 1,"");
+        inputs.add(tx);
+        inputs.add(tx1);
+
+        List<CommonTxOputDto> outputs = new ArrayList<>();
+        String[] a = {"15hjZZ1PBy6Buos2cfeAyh8z1fNWBQVsZN","1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
+        String[] my = {"1P1KYzTrhVyjPe8HXzbavVwWSQ2rEgD4oi","1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};   // 找零
+        CommonTxOputDto c1 = new CommonTxOputDto(a, new BigDecimal("0.0001"), "06534c502b2b000202010453454e44205ccd3d59da869896140c3175b2a541eec48d3ad2f43eeb273d299c19e7d67e430800000002540be400", 1);
+        outputs.add(c1);
+        CommonTxOputDto c11 = new CommonTxOputDto(my, new BigDecimal("0.0001"), "06534c502b2b000202010453454e44205ccd3d59da869896140c3175b2a541eec48d3ad2f43eeb273d299c19e7d67e43080163456115131800", 1);
+        outputs.add(c11);         //找零
+        String[] sysad = {"1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
+        CommonTxOputDto c2 = new CommonTxOputDto(sysad, new BigDecimal("0.081145"), 2);
+        outputs.add(c2);
+
+        String createHex = Api.CreateDrivetx(inputs, outputs);
+        String signHex = Api.SignDrivetx(createHex, "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
+        String hex = Api.SendRawTransaction(signHex);
+        System.out.println(hex);
+
+    }
 
 }
 

@@ -13,6 +13,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 @ConditionalOnProperty(prefix = "guns.scheduler-switch", name = "signature", havingValue = "true")
 @Slf4j
@@ -22,13 +25,13 @@ public class SignatureScheduler {
     private SignatureScheduler self;
 
     @Autowired
-    private DecodeService dcodeService;
+    private DecodeService decodeService;
 
     @Autowired
     private BlockCountService blockCountService;
 
     @Scheduled(cron = "0/5 * * * * ?")
-    public void work() throws Exception {
+    public void work() {
         self.start();
     }
 
@@ -43,16 +46,13 @@ public class SignatureScheduler {
             Integer json = 0;
 
             try {
-
                 json = Api.GetBlockCount();
-
             } catch (Exception e) {
-
                 e.printStackTrace();
-
             }
 
             if (count < json + 1) {
+
                 JSONObject block = new JSONObject();
 
                 try {
@@ -65,13 +65,34 @@ public class SignatureScheduler {
                 JSONArray jsonArray = block.getJSONArray("tx");
 
                 try {
-                    dcodeService.blockDecode(jsonArray);
+                    decodeService.blockDecode(jsonArray);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
                 count ++;
                 blockCountService.updateBlock(count);
+
+            } else {
+
+                List<String> txList = new ArrayList<>();
+
+                try {
+                    txList = Api.GetRawMemPool();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                JSONArray jsonArray = new JSONArray();
+                for (String tx: txList) {
+                    jsonArray.add(tx);
+                }
+
+                try {
+                    decodeService.blockDecode(jsonArray);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
             }
 

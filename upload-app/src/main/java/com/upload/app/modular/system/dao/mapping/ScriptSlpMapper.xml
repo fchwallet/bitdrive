@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.upload.app.modular.system.dao.ScriptSlpMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.upload.app.modular.system.model.ScriptSlp">
+		<result column="transaction_type" property="transactionType" jdbcType="VARCHAR"/>
+		<result column="token_ticker" property="tokenTicker" jdbcType="VARCHAR"/>
+		<result column="token_name" property="tokenName" jdbcType="VARCHAR"/>
+		<result column="token_document_url" property="tokenDocumentUrl" jdbcType="VARCHAR"/>
+		<result column="token_document_hash" property="tokenDocumentHash" jdbcType="VARCHAR"/>
+		<result column="token_decimal" property="tokenDecimal" jdbcType="INTEGER"/>
+		<result column="mint_baton_vout" property="mintBatonVout" jdbcType="INTEGER"/>
+		<result column="initial_token_mint_quantity" property="initialTokenMintQuantity" jdbcType="VARCHAR"/>
+		<result column="txid" property="txid" jdbcType="VARCHAR"/>
+		<result column="original_scrpit" property="originalScrpit" jdbcType="VARCHAR"/>
+		<result column="init_issue_address" property="initIssueAddress" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		transaction_type, token_ticker, token_name, token_document_url, token_document_hash, token_decimal, mint_baton_vout, initial_token_mint_quantity, txid,
+		original_scrpit, init_issue_address
+	</sql>
+
+	<select id="findByTokenId" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+		`script_slp` where txid = #{tokenId}
+	</select>
+
+	<select id="queryTokenInfoList" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM `script_slp`
+		 <where>
+		 	<if test="tokenName != null">
+		 	    and token_name =#{tokenName}
+			</if>
+			<if test="txid != null">
+			    and txid =#{txid}
+			</if>
+		 </where>
+		limit #{offset},#{limit}
+	</select>
+
+	<select id="queryTokenInfoCount" resultType="long">
+		SELECT
+			count(0)
+		FROM `script_slp`
+		<where>
+			<if test="tokenName != null">
+				and token_name =#{tokenName}
+			</if>
+			<if test="txid != null">
+				and txid =#{txid}
+			</if>
+		</where>
+
+	</select>
+
+	<insert id="insertSlp" parameterType="com.upload.app.modular.system.model.ScriptSlp">
+		insert into script_slp
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="transactionType != null" >
+				`transaction_type`,
+			</if>
+			<if test="tokenTicker != null" >
+				`token_ticker`,
+			</if>
+			<if test="tokenName != null" >
+				token_name,
+			</if>
+			<if test="tokenDocumentUrl != null" >
+				token_document_url,
+			</if>
+			<if test="tokenDocumentHash != null" >
+				token_document_hash,
+			</if>
+			<if test="tokenDecimal != null" >
+				token_decimal,
+			</if>
+			<if test="mintBatonVout != null" >
+				mint_baton_vout,
+			</if>
+			<if test="initialTokenMintQuantity != null" >
+				initial_token_mint_quantity,
+			</if>
+			<if test="txid != null" >
+				txid,
+			</if>
+			<if test="originalScrpit != null" >
+				original_scrpit,
+			</if>
+			<if test="initIssueAddress != null" >
+				init_issue_address,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="transactionType != null" >
+				#{transactionType,jdbcType=VARCHAR},
+			</if>
+			<if test="tokenTicker != null" >
+				#{tokenTicker,jdbcType=VARCHAR},
+			</if>
+			<if test="tokenName != null" >
+				#{tokenName,jdbcType=VARCHAR},
+			</if>
+			<if test="tokenDocumentUrl != null" >
+				#{tokenDocumentUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="tokenDocumentHash != null" >
+				#{tokenDocumentHash,jdbcType=VARCHAR},
+			</if>
+			<if test="tokenDecimal != null" >
+				#{tokenDecimal,jdbcType=INTEGER},
+			</if>
+			<if test="mintBatonVout != null" >
+				#{mintBatonVout,jdbcType=INTEGER},
+			</if>
+			<if test="initialTokenMintQuantity != null" >
+				#{initialTokenMintQuantity,jdbcType=VARCHAR},
+			</if>
+			<if test="txid != null" >
+				#{txid,jdbcType=VARCHAR},
+			</if>
+			<if test="originalScrpit != null" >
+				#{originalScrpit,jdbcType=VARCHAR},
+			</if>
+			<if test="initIssueAddress != null" >
+				#{initIssueAddress,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+
+</mapper>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.upload.app.modular.system.dao.GenesisAddressMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.upload.app.modular.system.model.GenesisAddress">
+		<result column="txid" property="txid" jdbcType="VARCHAR"/>
+		<result column="issue_address" property="issueAddress" jdbcType="VARCHAR"/>
+		<result column="raise_address" property="raiseAddress" jdbcType="VARCHAR"/>
+		<result column="issue_vout" property="issueVout" jdbcType="INTEGER"/>
+		<result column="raise_vout" property="raiseVout" jdbcType="INTEGER"/>
+		<result column="raise_txid" property="raiseTxid" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		txid, issue_address, raise_address, issue_vout, raise_vout, raise_txid
+	</sql>
+
+	<select id="findByTxidAndRaiseVout" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+		`genesis_address` where txid = #{txid} and raise_vout = #{raiseVout}
+	</select>
+
+	<select id="findByRaiseTxidAndRaiseVout" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+		`genesis_address` where raise_txid = #{raiseTxid} and raise_vout = #{raiseVout}
+	</select>
+
+	<select id="findRaiseAddress" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+		`genesis_address` where raise_address = #{raiseAddress} and txid = #{tokenId}
+	</select>
+
+	<update id="updateGensisAddress"  parameterType="com.upload.app.modular.system.model.GenesisAddress">
+		UPDATE genesis_address
+		<trim prefix= "set" suffixOverrides= ",">
+			<if test="raiseAddress != null">
+				raise_address = #{raiseAddress},
+			</if>
+			<if test="raiseTxid != null">
+				raise_txid = #{raiseTxid},
+			</if>
+			<if test="raiseVout != null">
+				raise_vout = #{raiseVout},
+			</if>
+		</trim>
+		WHERE txid = #{txid}
+	</update>
+
+	<insert id="insertGenesisAddress" parameterType="com.upload.app.modular.system.model.GenesisAddress">
+		insert into genesis_address
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="txid != null" >
+				`txid`,
+			</if>
+			<if test="issueAddress != null" >
+				`issue_address`,
+			</if>
+			<if test="raiseAddress != null" >
+				raise_address,
+			</if>
+			<if test="issueVout != null" >
+				issue_vout,
+			</if>
+			<if test="raiseVout != null" >
+				raise_vout,
+			</if>
+			<if test="raiseTxid != null" >
+				raise_txid,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="txid != null" >
+				#{txid,jdbcType=VARCHAR},
+			</if>
+			<if test="issueAddress != null" >
+				#{issueAddress,jdbcType=VARCHAR},
+			</if>
+			<if test="raiseAddress != null" >
+				#{raiseAddress,jdbcType=VARCHAR},
+			</if>
+			<if test="issueVout != null" >
+				#{issueVout,jdbcType=INTEGER},
+			</if>
+			<if test="raiseVout != null" >
+				#{raiseVout,jdbcType=INTEGER},
+			</if>
+			<if test="raiseTxid != null" >
+				#{raiseTxid,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+
+</mapper>

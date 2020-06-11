@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.upload.app.modular.system.dao.AddressScriptLinkMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.upload.app.modular.system.model.AddressScriptLink">
+		<result column="address" property="address" jdbcType="VARCHAR"/>
+		<result column="script" property="script" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		address, script
+	</sql>
+
+	<insert id="insert" parameterType="com.upload.app.modular.system.model.AddressScriptLink">
+		insert into address_script_link
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="address != null" >
+				`address`,
+			</if>
+			<if test="script != null" >
+				`script`,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="address != null" >
+				#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="script != null" >
+				#{script,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+
+	<select id="findCount" resultType="int">
+		SELECT
+			count(0)
+		FROM
+		`address_script_link` where address = #{address} and script = #{script}
+	</select>
+
+	<select id="findListByAddress" resultType="java.lang.String">
+		SELECT
+			script
+		FROM
+		`address_script_link` where address = #{address}
+	</select>
+
+</mapper>

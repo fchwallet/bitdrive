@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -77,7 +78,21 @@ public class ApiController extends BaseController {
     @Autowired
     private SystemUtxoService systemUtxoService;
 
+    @Autowired
+    private BlockchainPaymentService blockchainPaymentService;
+
+    @Autowired
+    private AddressScriptLinkService addressScriptLinkService;
+
+    @Autowired
+    private ScriptTokenLinkService scriptTokenLinkService;
+
+    @Autowired
+    private ScriptUtxoTokenLinkService scriptUtxoTokenLinkService;
+
     final Base64.Decoder decoder = Base64.getDecoder();
+
+    final String tokenId = "5ccd3d59da869896140c3175b2a541eec48d3ad2f43eeb273d299c19e7d67e43";
 
     @ResponseBody
     @RequestMapping(value="/test", method = RequestMethod.POST)
@@ -145,6 +160,30 @@ public class ApiController extends BaseController {
             return result;
         }
 
+        FchXsvLink fchXsvLink = fchXsvLinkService.findByFch(ad);
+
+        List<String> scriptList = addressScriptLinkService.findListByAddress(fchXsvLink.getAddressHash());
+
+        if (scriptList == null || scriptList.size() < 1) {
+            result.put("code", 200212);
+            result.put("msg", "用户积分不足");
+            return result;
+        }
+
+        List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList);
+        BigInteger balance = new BigInteger("0");
+
+        for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
+            BigInteger amount = scriptTokenLinkService.selectFAToken(tokenId, sut.getTxid(), sut.getN());
+            balance = balance.add(amount);
+        }
+
+        if (balance.compareTo(new BigInteger("1000000000")) < 0) {
+            result.put("code", 200212);
+            result.put("msg", "用户积分不足");
+            return result;
+        }
+
         List<String> fchAddress = new ArrayList<>();
         for (Object o : fch_addr) {
 
@@ -178,6 +217,7 @@ public class ApiController extends BaseController {
 
         }
 
+
         Map<String, Object> map = systemUtxoService.spendUtxo(metadata, fchAddress, size, data, null,1);   //1表示create
 
         String hex = (String)map.get("hex");
@@ -185,11 +225,13 @@ public class ApiController extends BaseController {
 
         JSONArray put = new JSONArray();
         if (!StringUtils.isEmpty(hex) && sf != null) {
+
             put.add(hex);
             BigDecimal sumFee = (BigDecimal) sf;
             String drive_id = decodeService.decodeCreate(put, sumFee, null);
             result.put("code", 200);
             result.put("drive_id",drive_id);
+            blockchainPaymentService.payment(ad,1);         // 查询钱,付费
 
         } else {
 

@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.upload.app.core.util.UnicodeUtil;
 import com.upload.app.modular.system.dao.*;
 import com.upload.app.modular.system.model.*;
-import com.upload.app.modular.system.service.DecodeService;
+import com.upload.app.modular.system.service.*;
 import com.upload.app.core.rpc.Api;
 import com.upload.app.core.util.Sha256;
 import org.springframework.stereotype.Service;
@@ -17,9 +17,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -43,6 +45,24 @@ public class DecodeServiceImpl implements DecodeService {
     @Resource
     private DriveUtxoMapper driveUtxoMapper;
 
+    @Resource
+    private TokenDecodeService tokenDecodeService;
+
+    @Resource
+    private ScriptSlpSendService scriptSlpSendService;
+
+    @Resource
+    private ScriptTokenLinkService scriptTokenLinkService;
+
+    @Resource
+    private ScriptUtxoTokenLinkService scriptUtxoTokenLinkService;
+
+    @Resource
+    private AddressScriptLinkService addressScriptLinkService;
+
+    @Resource
+    private ScriptTokenDestructionService scriptTokenDestructionService;
+
     static String deposeFilesDir = "C:\\Users\\caiyile\\Desktop\\test\\";
 
     @Override
@@ -61,8 +81,8 @@ public class DecodeServiceImpl implements DecodeService {
             try {
 
                 JSONObject txTransaction = Api.GetRawTransaction(tx);
-
-                authorityVins(txTransaction.getJSONArray("vin"));
+                JSONArray vins = txTransaction.getJSONArray("vin");
+                authorityVins(vins);
 
                 JSONArray vouts = txTransaction.getJSONArray("vout");
 
@@ -98,6 +118,9 @@ public class DecodeServiceImpl implements DecodeService {
                             continue;
                         }
 
+                        List<String> addressList = new ArrayList<>();
+                        StringBuffer script = new StringBuffer();
+
                         content = content.replaceFirst(ifHex, "");
 
                         String oph = content.substring(0, 6);
@@ -109,6 +132,7 @@ public class DecodeServiceImpl implements DecodeService {
                         content = content.replaceFirst(oph, "");
 
                         String address1 = content.substring(0, 40);
+                        addressList.add(address1);
 
                         FchXsvLink fchXsvLink1 = fchXsvLinkMapper.findByHash(address1);
 
@@ -125,6 +149,8 @@ public class DecodeServiceImpl implements DecodeService {
 
                         String opa = content.substring(0, 4);
 
+                        script.append(ifHex).append(oph).append(address1).append(opa);
+
                         if (!"88ac".equals(opa)) {
                             continue;
                         }
@@ -137,7 +163,7 @@ public class DecodeServiceImpl implements DecodeService {
 
                         if ("67".equals(if67)) {
 
-                            String fs = list67(content, addressDriveList, driveId);
+                            String fs = list67(content, addressDriveList, driveId, addressList, script);
 
                             if (fs == null)
                                 continue;
@@ -146,7 +172,7 @@ public class DecodeServiceImpl implements DecodeService {
                                 content = fs;
 
                                 while (true) {
-                                    fs = list67(content, addressDriveList, driveId);
+                                    fs = list67(content, addressDriveList, driveId, addressList, script);
                                     if (fs == null)
                                         break;
                                     content = fs;
@@ -218,16 +244,13 @@ public class DecodeServiceImpl implements DecodeService {
                         } else {
 
                             Integer length = UnicodeUtil.decodeHEX(totalLength_Hex);
-                            content = content.replaceFirst(totalLength_Hex, "");
                             content = content.substring(0, length*2);
-
 
                         }
 
-
-
                         String metadata = content;
 
+//                        tokenDecodeService.decodeToken(tx, vins, vouts, vout, content, scriptPubKey, voutn, script, addressList);
 
                         jb.put("driveId", driveId);
                         jb.put("metadata", metadata);
@@ -283,15 +306,11 @@ public class DecodeServiceImpl implements DecodeService {
                             jb.put("data", contentData);
 
                         } else {
-
                             Integer length = UnicodeUtil.decodeHEX(length_hex);
                             String contentData = content.substring(0, length*2);
                             data.append(contentData);
                             jb.put("data", contentData);
-
-
                         }
-
 
                     }
 
@@ -386,7 +405,9 @@ public class DecodeServiceImpl implements DecodeService {
 
                 JSONObject txTransaction = Api.GetRawTransaction(tx);
 
-                List<String> driveList = authorityVinsList(txTransaction.getJSONArray("vin"));
+                JSONArray vins = txTransaction.getJSONArray("vin");
+
+                List<String> driveList = authorityVinsList(vins);
 
                 JSONArray vouts = txTransaction.getJSONArray("vout");
 
@@ -397,6 +418,11 @@ public class DecodeServiceImpl implements DecodeService {
 
                 String consValue = "";
 
+                List<ScriptSlpSend> SlpSendList = new ArrayList<>();
+                List<ScriptTokenLink> TokenAssetsList = new ArrayList<>();
+                List<ScriptUtxoTokenLink> UtxoTokenList = new ArrayList<>();
+                List<AddressScriptLink> addressScriptLink = new ArrayList<>();
+                Boolean sendFlag = false;
 
                 for (Object v : vouts) {
 
@@ -415,6 +441,7 @@ public class DecodeServiceImpl implements DecodeService {
                     if ("nonstandard".equals(type)) {
 
                         String content = scriptPubKey.getString("hex");
+
                         String driveId = Sha256.getSHA256(tx+n);
 
                         String ifHex = content.substring(0, 2);
@@ -422,6 +449,9 @@ public class DecodeServiceImpl implements DecodeService {
                         if (!"63".equals(ifHex)) {
                             continue;
                         }
+
+                        List<String> addressList = new ArrayList<>();
+                        StringBuffer script = new StringBuffer();
 
                         content = content.replaceFirst(ifHex, "");
 
@@ -434,6 +464,7 @@ public class DecodeServiceImpl implements DecodeService {
                         content = content.replaceFirst(oph, "");
 
                         String address1 = content.substring(0, 40);
+                        addressList.add(address1);
 
                         FchXsvLink fchXsvLink1 = fchXsvLinkMapper.findByHash(address1);
 
@@ -449,7 +480,7 @@ public class DecodeServiceImpl implements DecodeService {
                         content = content.replaceFirst(address1, "");
 
                         String opa = content.substring(0, 4);
-
+                        script.append(ifHex).append(oph).append(address1).append(opa);
                         if (!"88ac".equals(opa)) {
                             continue;
                         }
@@ -462,7 +493,7 @@ public class DecodeServiceImpl implements DecodeService {
 
                         if ("67".equals(if67)) {
 
-                            String fs = list67(content, addressDriveList, driveId);
+                            String fs = list67(content, addressDriveList, driveId, addressList, script);
 
                             if (fs == null)
                                 continue;
@@ -471,7 +502,7 @@ public class DecodeServiceImpl implements DecodeService {
                                 content = fs;
 
                                 while (true) {
-                                    fs = list67(content, addressDriveList, driveId);
+                                    fs = list67(content, addressDriveList, driveId, addressList, script);
                                     if (fs == null)
                                         break;
                                     content = fs;
@@ -543,16 +574,120 @@ public class DecodeServiceImpl implements DecodeService {
                         } else {
 
                             Integer length = UnicodeUtil.decodeHEX(totalLength_Hex);
-                            content = content.replaceFirst(totalLength_Hex, "");
                             content = content.substring(0, length*2);
-
 
                         }
 
 
-
                         String metadata = content;
 
+                        Map<String, Object> map = tokenDecodeService.decodeToken(tx, vins, vouts, vout, content, scriptPubKey, voutn, script, addressList);
+
+//                        if (map != null) {
+//
+//                            Object fob = map.get("flag");
+//
+//                            if (falg != null) {
+//                                Boolean flag = (Boolean)fob;
+//                            }
+//
+//                            Object slpOb = map.get("SlpSendList");
+//                            if (slpOb != null) {
+//                                SlpSendList.add((ScriptSlpSend) slpOb);
+//                            }
+//
+//                            Object tokenOb = map.get("TokenAssetsList");
+//                            if (tokenOb != null) {
+//                                TokenAssetsList.add((ScriptTokenLink)tokenOb);
+//                            }
+//
+//                            Object utOb = map.get("UtxoTokenList");
+//                            if (utOb != null) {
+//                                UtxoTokenList.add((ScriptUtxoTokenLink)utOb);
+//                            }
+//
+//                            Object asOb = map.get("addressScriptLink");
+//                            if (asOb != null) {
+//                                addressScriptLink.add((AddressScriptLink)asOb);
+//                            }
+//
+//                            Object sfOb = map.get("sendFlag");
+//                            if (sfOb != null) {
+//
+//                                if ((Boolean) sfOb || sendFlag)
+//                                    sendFlag = true;
+//
+//                            }
+
+//                            if (sendFlag && hashmap.get(0).compareTo(hashmap.get(1)) >= 0) {
+//
+//                                if (SlpSendList != null) {
+//                                    for (ScriptSlpSend slpSend : SlpSendList) {
+//                                        scriptSlpSendService.insertSlpSend(slpSend);
+//                                    }
+//                                }
+//
+//                                if (TokenAssetsList != null) {
+//                                    for (ScriptTokenLink st : TokenAssetsList) {
+//                                        scriptTokenLinkService.insert(st);
+//                                    }
+//                                }
+//
+//                                if (utxoTokenList != null) {
+//                                    for (ScriptUtxoTokenLink sut : utxoTokenList) {
+//                                        scriptUtxoTokenLinkService.insert(sut);
+//                                    }
+//                                }
+//
+//                                if (addressScriptLink != null) {
+//                                    for (AddressScriptLink asl: addressScriptLink) {
+//                                        addressScriptLinkService.insert(asl);
+//                                    }
+//                                }
+//
+//
+//                                if (hashmap.get(0).compareTo(hashmap.get(1)) > 0) {
+//                                    BigInteger amt = hashmap.get(0).subtract(hashmap.get(1));
+//
+//                                    ScriptTokenDestruction tokenDestruction = new ScriptTokenDestruction();
+//                                    tokenDestruction.setScript(scriptTokenLink.get(0).getScript());
+//                                    tokenDestruction.setTxid(txid);
+//                                    tokenDestruction.setN(scriptTokenLink.get(0).getVout());
+//                                    scriptTokenDestructionService.insert(tokenDestruction);
+//                                    ScriptTokenLink update = new ScriptTokenLink();
+//                                    update.setTokenId(scriptTokenLink.get(0).getTokenId());
+//                                    update.setStatus(3);
+//                                    update.setTxid(txid);
+//                                    update.setToken(amt);
+//                                    update.setScript(scriptTokenLink.get(0).getScript());
+//                                    scriptTokenLinkService.insert(update);
+//
+//                                }
+//                            }
+//
+//                            if (!flag && scriptTokenLink != null) {            //销毁
+//
+//                                if (scriptTokenLink != null) {
+//
+//                                    for (ScriptTokenLink scriptToken : scriptTokenLink) {
+//
+//                                        ScriptTokenDestruction tokenDestruction = new ScriptTokenDestruction();
+//                                        tokenDestruction.setScript(scriptToken.getScript());
+//                                        tokenDestruction.setTxid(txid);
+//                                        tokenDestruction.setN(scriptToken.getVout());
+//                                        scriptTokenDestructionService.insert(tokenDestruction);
+//                                        ScriptTokenLink update = new ScriptTokenLink();
+//                                        update.setTokenId(scriptToken.getTokenId());
+//                                        update.setStatus(3);
+//                                        update.setTxid(txid);
+//                                        update.setToken(scriptToken.getToken());
+//                                        update.setScript(scriptToken.getScript());
+//                                        scriptTokenLinkService.insert(update);
+//
+//                                    }
+//                                }
+//                            }
+//                        }
 
                         jb.put("driveId", driveId);
                         jb.put("metadata", metadata);
@@ -745,7 +880,7 @@ public class DecodeServiceImpl implements DecodeService {
         return driveList;
     }
 
-    public String list67(String content, List<AddressDriveLink> addressDriveList, String driveId) {
+    public String list67(String content, List<AddressDriveLink> addressDriveList, String driveId, List<String> addressList, StringBuffer script) {
 
         String if67 = content.substring(0, 2);
 
@@ -761,6 +896,7 @@ public class DecodeServiceImpl implements DecodeService {
 
             content = content.replaceFirst(oph1, "");
             String address2 = content.substring(0, 40);
+            addressList.add(address2);
 
             FchXsvLink fchXsvLink2 = fchXsvLinkMapper.findByHash(address2);
 
@@ -776,6 +912,8 @@ public class DecodeServiceImpl implements DecodeService {
             content = content.replaceFirst(address2, "");
 
             String opa = content.substring(0, 4);
+
+            script.append(if67).append(oph1).append(address2).append(opa);
 
             if (!"88ac".equals(opa)) {
                 return null;

@@ -50,15 +50,12 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
         BigDecimal metadatasizefree = new BigDecimal(metadatasize).divide(new BigDecimal("2")).setScale(8);    // 设置8位小数
         BigDecimal metadatafee = new BigDecimal("0.00000001").multiply(metadatasizefree);
         if (metadatafee.compareTo(new BigDecimal("0.00002")) < 0)
-            metadatafee = new BigDecimal("0.00004");
+            metadatafee = new BigDecimal("0.00002");
         else
-            metadatafee = metadatafee.multiply(new BigDecimal("2"));
+            metadatafee = metadatafee;
 
         fchAddress.add("1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
         String[] address = fchAddress.toArray(new String[0]);
-        CommonTxOputDto c1 = new CommonTxOputDto(address, metadatafee, metadata, 1);
-        outputs.add(c1);
-
 
         BigDecimal sizefree = new BigDecimal(size).divide(new BigDecimal("2")).setScale(8);    // 设置8位小数
         BigDecimal fee = new BigDecimal("0.00000001").multiply(sizefree);
@@ -86,8 +83,11 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
             v = v.add(new BigDecimal(du.getValue()));
         }
 
-        BigDecimal fvalue = v.subtract(fee).subtract(new BigDecimal("0.00001")).subtract(metadatafee);
+        BigDecimal metadataNum = (metadatafee.add(fee).add(new BigDecimal("0.00001"))).multiply(new BigDecimal("3"));
+        BigDecimal fvalue = v.subtract(fee).subtract(new BigDecimal("0.00001")).subtract(metadatafee).subtract(metadataNum);
 
+        CommonTxOputDto c1 = new CommonTxOputDto(address, metadataNum, metadata, 1);
+        outputs.add(c1);
         String[] sysad = {"1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
         CommonTxOputDto c2 = new CommonTxOputDto(sysad, fvalue, 2);
         outputs.add(c2);                                //找零

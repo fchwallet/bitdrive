@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.upload.app.modular.system.dao.ScriptTokenLinkMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.upload.app.modular.system.model.ScriptTokenLink">
+		<result column="script" property="script" jdbcType="VARCHAR"/>
+		<result column="token" property="token" jdbcType="BIGINT"/>
+		<result column="token_id" property="tokenId" jdbcType="VARCHAR"/>
+		<result column="txid" property="txid" jdbcType="VARCHAR"/>
+		<result column="vout" property="vout" jdbcType="INTEGER"/>
+		<result column="from_script" property="fromScript" jdbcType="VARCHAR"/>
+		<result column="status" property="status" jdbcType="INTEGER"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		script, token, token_id, txid, vout, from_script, status
+	</sql>
+
+	<select id="findByTokenAssets" resultType="com.upload.app.modular.system.model.ScriptTokenLink">
+		SELECT
+			*
+		FROM
+		`script_token_link` where txid = #{txid} and vout = #{vout} and token_id = #{tokenId}
+	</select>
+
+	<select id="selectFAToken" resultType="java.math.BigInteger">
+		SELECT
+			token
+		FROM
+		`script_token_link` where txid = #{txid} and vout = #{vout} and token_id = #{tokenId}
+	</select>
+
+	<insert id="insert" parameterType="com.upload.app.modular.system.model.ScriptTokenLink">
+		insert into script_token_link
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="script != null" >
+				`script`,
+			</if>
+			<if test="token != null" >
+				`token`,
+			</if>
+			<if test="tokenId != null" >
+				`token_id`,
+			</if>
+			<if test="txid != null" >
+				`txid`,
+			</if>
+			<if test="vout != null" >
+				`vout`,
+			</if>
+			<if test="fromScript != null" >
+				`from_script`,
+			</if>
+			<if test="status != null" >
+				`status`,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="script != null" >
+				#{script,jdbcType=VARCHAR},
+			</if>
+			<if test="token != null" >
+				#{token,jdbcType=BIGINT},
+			</if>
+			<if test="tokenId != null" >
+				#{tokenId,jdbcType=VARCHAR},
+			</if>
+			<if test="txid != null" >
+				#{txid,jdbcType=VARCHAR},
+			</if>
+			<if test="vout != null" >
+				#{vout,jdbcType=INTEGER},
+			</if>
+			<if test="fromScript != null" >
+				#{fromScript,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null" >
+				#{status,jdbcType=INTEGER},
+			</if>
+		</trim>
+	</insert>
+
+	<select id="findByTokenAssetsStatus" resultType="com.upload.app.modular.system.model.ScriptTokenLink">
+		SELECT
+			*
+		FROM
+		`script_token_link` where txid = #{txid} and vout = #{vout} and status != 3
+	</select>
+
+	<select id="selectByTxid" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+		`script_token_link` where txid = #{txid}
+	</select>
+
+	<select id="findToTokenByScript" resultType="java.math.BigInteger">
+		SELECT
+			sum(token)
+		FROM
+		`script_token_link` where script in
+		<foreach collection="script" item="address" index="index" open="(" close=")" separator=",">
+			#{address}
+		</foreach>
+  		 and status != 3
+	</select>
+
+	<select id="findFromTokenByScript" resultType="java.math.BigInteger">
+		SELECT
+			sum(token)
+		FROM
+		`script_token_link` where from_script in
+		<foreach collection="script" item="address" index="index" open="(" close=")" separator=",">
+			#{address}
+		</foreach>
+	</select>
+
+</mapper>

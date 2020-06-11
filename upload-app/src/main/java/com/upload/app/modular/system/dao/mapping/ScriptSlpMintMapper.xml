@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.upload.app.modular.system.dao.ScriptSlpMintMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.upload.app.modular.system.model.ScriptSlpMint">
+		<result column="transaction_type" property="transactionType" jdbcType="VARCHAR"/>
+		<result column="token_id" property="tokenId" jdbcType="VARCHAR"/>
+		<result column="mint_baton_vout" property="mintBatonVout" jdbcType="INTEGER"/>
+		<result column="additional_token_quantity" property="additionalTokenQuantity" jdbcType="VARCHAR"/>
+		<result column="script" property="script" jdbcType="VARCHAR"/>
+		<result column="status" property="status" jdbcType="INTEGER"/>
+		<result column="minter_address" property="minterAddress" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		transaction_type, token_id, mint_baton_vout, additional_token_quantity, script, status, minter_address
+	</sql>
+
+	<select id="findByToken" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List" />
+		FROM
+		`script_slp_mint` where token_id = #{tokenId} and  script = #{script}
+	</select>
+
+	<insert id="insertSlpMint" parameterType="com.upload.app.modular.system.model.ScriptSlpMint">
+		insert into script_slp_mint
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="transactionType != null" >
+				`transaction_type`,
+			</if>
+			<if test="tokenId != null" >
+				`token_id`,
+			</if>
+			<if test="mintBatonVout != null" >
+				mint_baton_vout,
+			</if>
+			<if test="additionalTokenQuantity != null" >
+				additional_token_quantity,
+			</if>
+			<if test="script != null" >
+				script,
+			</if>
+			<if test="status != null" >
+				status,
+			</if>
+			<if test="minterAddress != null" >
+				minter_address,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="transactionType != null" >
+				#{transactionType, jdbcType=VARCHAR},
+			</if>
+			<if test="tokenId != null" >
+				#{tokenId, jdbcType=VARCHAR},
+			</if>
+			<if test="mintBatonVout != null" >
+				#{mintBatonVout, jdbcType=INTEGER},
+			</if>
+			<if test="additionalTokenQuantity != null" >
+				#{additionalTokenQuantity, jdbcType=VARCHAR},
+			</if>
+			<if test="script != null" >
+				#{script, jdbcType=VARCHAR},
+			</if>
+			<if test="status != null" >
+				#{status, jdbcType=INTEGER},
+			</if>
+			<if test="minterAddress != null" >
+				#{minterAddress, jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+
+</mapper>
