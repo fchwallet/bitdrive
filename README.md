@@ -4,7 +4,7 @@ java implementation freedrive, see [architecture](./Freedrive-architecture.pdf)
 [1. put](#put)  
 [2. update](#update)  
 [3. get](#get)  
-[4. get_drive_id](#get-drive-id)  
+[4. get_drive_id](#get-drive_id)  
 [5. get_balance](#get-balance)  
 [6. frozen_drive_id](#frozen-drive_id)  
 
@@ -133,7 +133,7 @@ curl example
 curl http://freedrive.fchwallet.com:8442/api/get -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK&drive_id=8d6cc0f1f6aa1f4535262f65466871a5865b0c94bb49ea5c5695917545aead93'      
 ```
     
-### get drive id
+### get drive_id
 >获取FCH地址的存储列表     
 >接口名称: /api/get_drive_id
 ```
