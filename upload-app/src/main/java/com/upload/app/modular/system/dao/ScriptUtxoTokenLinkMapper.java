@@ -11,6 +11,6 @@ public interface ScriptUtxoTokenLinkMapper {
 
     int deleteUtxoToken(@Param("txid") String txid, @Param("n") Integer n);
 
-    List<ScriptUtxoTokenLink> findListByScript(@Param("script") List<String> script);
+    List<ScriptUtxoTokenLink> findListByScript(@Param("script") List<String> script, @Param("addressHash") String addressHash);
 
 }

@@ -92,7 +92,7 @@ public class ApiController extends BaseController {
 
     final Base64.Decoder decoder = Base64.getDecoder();
 
-    final String tokenId = "5ccd3d59da869896140c3175b2a541eec48d3ad2f43eeb273d299c19e7d67e43";
+    final String tokenId = "1a47f6d520fa0048d9de19bae99fa61e1d91f35f49dd6d1fc472926b70f51cb3";
 
     @ResponseBody
     @RequestMapping(value="/test", method = RequestMethod.POST)
@@ -170,7 +170,7 @@ public class ApiController extends BaseController {
             return result;
         }
 
-        List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList);
+        List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fchXsvLink.getAddressHash());
         BigInteger balance = new BigInteger("0");
 
         for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
@@ -231,7 +231,13 @@ public class ApiController extends BaseController {
             String drive_id = decodeService.decodeCreate(put, sumFee, null);
             result.put("code", 200);
             result.put("drive_id",drive_id);
-            blockchainPaymentService.payment(ad,1);         // 查询钱,付费
+            Boolean f = blockchainPaymentService.payment(ad,1);         // 查询钱,付费
+            if (f != null && !f) {
+                result.put("code", 100457);
+                result.put("msg", "付费失败");
+                return result;
+            }
+
 
         } else {
 
@@ -295,6 +301,29 @@ public class ApiController extends BaseController {
         }
 
         FchXsvLink fxl = fchXsvLinkService.findByFch(fchadd);
+
+        List<String> scriptList = addressScriptLinkService.findListByAddress(fxl.getAddressHash());
+
+        if (scriptList == null || scriptList.size() < 1) {
+            result.put("code", 200212);
+            result.put("msg", "用户积分不足");
+            return result;
+        }
+
+        List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fxl.getAddressHash());
+        BigInteger balance = new BigInteger("0");
+
+        for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
+            BigInteger amount = scriptTokenLinkService.selectFAToken(tokenId, sut.getTxid(), sut.getN());
+            balance = balance.add(amount);
+        }
+
+        if (balance.compareTo(new BigInteger("1000000000")) < 0) {
+            result.put("code", 200212);
+            result.put("msg", "用户积分不足");
+            return result;
+        }
+
         List<AddressDriveLink> ad = addressDriveLinkService.findDriveByAddress(fxl.getAddressHash());
         if (ad.size() <= 0) {
             result.put("code", 1000);
@@ -373,6 +402,13 @@ public class ApiController extends BaseController {
             result.put("code", 200);
             result.put("update_id",update_id);
 
+            Boolean f = blockchainPaymentService.payment(fchadd,1);         // 查询钱,付费
+            if (f != null && !f) {
+                result.put("code", 100457);
+                result.put("msg", "付费失败");
+                return result;
+            }
+
         } else {
 
             result.put("code", 500);
@@ -387,7 +423,7 @@ public class ApiController extends BaseController {
 
     @ResponseBody
     @RequestMapping(value="/get", method = RequestMethod.POST)
-    public JSONObject get(String fch_addr, String drive_id, String update_id) {
+    public JSONObject get(String fch_addr, String drive_id, String update_id) throws Exception {
 
         JSONObject json = new JSONObject();
 
@@ -402,6 +438,36 @@ public class ApiController extends BaseController {
         if (fchXsvLink == null) {
             json.put("code", 1005);
             json.put("msg", "当前地址找不到相应记录，请检查参数");
+            return json;
+        }
+
+
+        List<String> scriptList = addressScriptLinkService.findListByAddress(fchXsvLink.getAddressHash());
+
+        if (scriptList == null || scriptList.size() < 1) {
+            json.put("code", 200212);
+            json.put("msg", "用户积分不足");
+            return json;
+        }
+
+        List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fchXsvLink.getAddressHash());
+        BigInteger balance = new BigInteger("0");
+
+        for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
+            BigInteger amount = scriptTokenLinkService.selectFAToken(tokenId, sut.getTxid(), sut.getN());
+            balance = balance.add(amount);
+        }
+
+        if (balance.compareTo(new BigInteger("1000000000")) < 0) {
+            json.put("code", 200212);
+            json.put("msg", "用户积分不足");
+            return json;
+        }
+
+        Boolean f = blockchainPaymentService.payment(fch_addr,2);         // 查询钱,付费
+        if (f != null && !f) {
+            json.put("code", 100457);
+            json.put("msg", "付费失败");
             return json;
         }
 
@@ -460,6 +526,7 @@ public class ApiController extends BaseController {
 
         }
 
+
         return json;
 
     }
@@ -467,7 +534,7 @@ public class ApiController extends BaseController {
 
     @ResponseBody
     @RequestMapping(value="/get_drive_id", method = RequestMethod.POST)
-    public JSONObject getDriveId(String fch_addr) {
+    public JSONObject getDriveId(String fch_addr) throws Exception {
 
         JSONObject json = new JSONObject();
 
@@ -478,6 +545,35 @@ public class ApiController extends BaseController {
         }
 
         FchXsvLink fchXsvLink = fchXsvLinkService.findByFch(fch_addr);
+
+        List<String> scriptList = addressScriptLinkService.findListByAddress(fchXsvLink.getAddressHash());
+
+        if (scriptList == null || scriptList.size() < 1) {
+            json.put("code", 200212);
+            json.put("msg", "用户积分不足");
+            return json;
+        }
+
+        List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fchXsvLink.getAddressHash());
+        BigInteger balance = new BigInteger("0");
+
+        for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
+            BigInteger amount = scriptTokenLinkService.selectFAToken(tokenId, sut.getTxid(), sut.getN());
+            balance = balance.add(amount);
+        }
+
+        if (balance.compareTo(new BigInteger("1000000000")) < 0) {
+            json.put("code", 200212);
+            json.put("msg", "用户积分不足");
+            return json;
+        }
+
+        Boolean f = blockchainPaymentService.payment(fch_addr,2);         // 查询钱,付费
+        if (f != null && !f) {
+            json.put("code", 100457);
+            json.put("msg", "付费失败");
+            return json;
+        }
 
         if (fchXsvLink != null) {
 

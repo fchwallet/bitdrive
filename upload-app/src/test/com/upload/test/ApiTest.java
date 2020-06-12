@@ -150,17 +150,46 @@ public class ApiTest extends ApplicationTest {
 
         List<TxInputDto> inputs = new ArrayList<>();
 
-        //0.081345
-        TxInputDto tx = new TxInputDto("f216d04a33626f22eb12105ca3dd9b3f5719444b6be4b1df0d06cd750eaafe63", 1,"");
+        //0.0888504
+        TxInputDto tx = new TxInputDto("9df873a5c4e7c4c0e40c21886c63675ee0207cef72590a6e01acb5bdb2160703", 2,"");
         inputs.add(tx);
 
         List<CommonTxOputDto> outputs = new ArrayList<>();
-        String[] a = {"FAXr2MSU3HJrXyk4UMJKx5fX3KPX33sEiq","1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
+        String[] a = {"15hjZZ1PBy6Buos2cfeAyh8z1fNWBQVsZN","1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
         CommonTxOputDto c1 = new CommonTxOputDto(a, new BigDecimal("0.0001"), "06534c502b2b000202010747454e45534953045553445423546574686572204c74642e20555320646f6c6c6172206261636b656420746f6b656e734168747470733a2f2f7465746865722e746f2f77702d636f6e74656e742f75706c6f6164732f323031362f30362f546574686572576869746550617065722e70646620db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec77793139160108010108002386f26fc10000", 1);
         outputs.add(c1);
         String[] sysad = {"1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
-        CommonTxOputDto c2 = new CommonTxOputDto(sysad, new BigDecimal("0.081145"), 2);
+        CommonTxOputDto c2 = new CommonTxOputDto(sysad, new BigDecimal("0.0886504"), 2);
         outputs.add(c2);                                //找零
+
+        String createHex = Api.CreateDrivetx(inputs, outputs);
+        String signHex = Api.SignDrivetx(createHex, "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
+        String hex = Api.SendRawTransaction(signHex);
+        System.out.println(hex);
+
+    }
+
+    @Test
+    public void createMint() throws Exception {
+
+        List<TxInputDto> inputs = new ArrayList<>();
+
+        //0.08785284
+        TxInputDto tx = new TxInputDto("9a05268549304748ef435b931e758e39887f02c315c24a7860918c36a14175dc", 0,"");
+        TxInputDto tx1 = new TxInputDto("9a05268549304748ef435b931e758e39887f02c315c24a7860918c36a14175dc", 1,"");
+        inputs.add(tx);
+        inputs.add(tx1);
+
+        List<CommonTxOputDto> outputs = new ArrayList<>();
+        String[] a = {"15hjZZ1PBy6Buos2cfeAyh8z1fNWBQVsZN","1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
+        String[] my = {"1P1KYzTrhVyjPe8HXzbavVwWSQ2rEgD4oi","1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};   // 找零
+        CommonTxOputDto c1 = new CommonTxOputDto(a, new BigDecimal("0.0001"), "06534c502b2b000202010453454e44201a47f6d520fa0048d9de19bae99fa61e1d91f35f49dd6d1fc472926b70f51cb30800b1a2bc2ec4ffff", 1);
+        outputs.add(c1);
+        CommonTxOputDto c11 = new CommonTxOputDto(my, new BigDecimal("0.0001"), "06534c502b2b000202010453454e44201a47f6d520fa0048d9de19bae99fa61e1d91f35f49dd6d1fc472926b70f51cb30800b1a2bc2ec4ffff", 1);
+        outputs.add(c11);         //找零
+        String[] sysad = {"1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
+        CommonTxOputDto c2 = new CommonTxOputDto(sysad, new BigDecimal("0.08755284"), 2);
+        outputs.add(c2);
 
         String createHex = Api.CreateDrivetx(inputs, outputs);
         String signHex = Api.SignDrivetx(createHex, "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
@@ -176,20 +205,20 @@ public class ApiTest extends ApplicationTest {
         List<TxInputDto> inputs = new ArrayList<>();
 
         //0.0973044
-        TxInputDto tx = new TxInputDto("86bb47d0f330d62f468311a53375ecc8738fd4d62b6a3d20964b412115dce6b8", 0,"");
-        TxInputDto tx1 = new TxInputDto("f216d04a33626f22eb12105ca3dd9b3f5719444b6be4b1df0d06cd750eaafe63", 1,"");
+        TxInputDto tx = new TxInputDto("0da948f150b3e8b637d04de58538b03a2fee0fbb5d8bf027b57d740bcaf3773f", 0,"");
+        TxInputDto tx1 = new TxInputDto("0da948f150b3e8b637d04de58538b03a2fee0fbb5d8bf027b57d740bcaf3773f", 1,"");
         inputs.add(tx);
         inputs.add(tx1);
 
         List<CommonTxOputDto> outputs = new ArrayList<>();
         String[] a = {"15hjZZ1PBy6Buos2cfeAyh8z1fNWBQVsZN","1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
         String[] my = {"1P1KYzTrhVyjPe8HXzbavVwWSQ2rEgD4oi","1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};   // 找零
-        CommonTxOputDto c1 = new CommonTxOputDto(a, new BigDecimal("0.0001"), "06534c502b2b000202010453454e44205ccd3d59da869896140c3175b2a541eec48d3ad2f43eeb273d299c19e7d67e430800000002540be400", 1);
+        CommonTxOputDto c1 = new CommonTxOputDto(a, new BigDecimal("0.0001"), "06534c502b2b000202010453454e44201a47f6d520fa0048d9de19bae99fa61e1d91f35f49dd6d1fc472926b70f51cb3080011c37937e08000", 1);
         outputs.add(c1);
-        CommonTxOputDto c11 = new CommonTxOputDto(my, new BigDecimal("0.0001"), "06534c502b2b000202010453454e44205ccd3d59da869896140c3175b2a541eec48d3ad2f43eeb273d299c19e7d67e43080163456115131800", 1);
+        CommonTxOputDto c11 = new CommonTxOputDto(my, new BigDecimal("0.0001"), "06534c502b2b000202010453454e44201a47f6d520fa0048d9de19bae99fa61e1d91f35f49dd6d1fc472926b70f51cb3080011c37937e08000", 1);
         outputs.add(c11);         //找零
         String[] sysad = {"1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
-        CommonTxOputDto c2 = new CommonTxOputDto(sysad, new BigDecimal("0.081145"), 2);
+        CommonTxOputDto c2 = new CommonTxOputDto(sysad, new BigDecimal("0.0883504"), 2);
         outputs.add(c2);
 
         String createHex = Api.CreateDrivetx(inputs, outputs);

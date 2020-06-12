@@ -65,6 +65,7 @@
 		<foreach collection="script" item="address" index="index" open="(" close=")" separator=",">
 			#{address}
 		</foreach>
+		and address = #{addressHash}
 	</select>
 
 </mapper>

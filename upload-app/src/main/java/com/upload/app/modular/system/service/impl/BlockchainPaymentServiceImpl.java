@@ -20,11 +20,11 @@ import java.util.List;
 @Service
 public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
 
-    final String tokenId = "5ccd3d59da869896140c3175b2a541eec48d3ad2f43eeb273d299c19e7d67e43";
+    final String tokenId = "1a47f6d520fa0048d9de19bae99fa61e1d91f35f49dd6d1fc472926b70f51cb3";
 
     final String systemAddress = "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx";
 
-    final String agreement = "06534c502b2b000202010453454e44205ccd3d59da869896140c3175b2a541eec48d3ad2f43eeb273d299c19e7d67e4308";
+    final String agreement = "06534c502b2b000202010453454e44201a47f6d520fa0048d9de19bae99fa61e1d91f35f49dd6d1fc472926b70f51cb308";
     @Resource
     private FchXsvLinkService fchXsvLinkService;
 
@@ -52,7 +52,7 @@ public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
 
         BigInteger balance = toAssets.subtract(fromAssets);
 
-        List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList);
+        List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fchXsvLink.getAddressHash());
 
         BigInteger sumAmount = new BigInteger("0");
 
@@ -73,7 +73,7 @@ public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
         BigInteger newAmount = sumAmount.divide(new BigInteger("100000000"));
 
         List<CommonTxOputDto> outputs = new ArrayList<>();
-        String[] sysAddress = {systemAddress};
+        String[] sysAddress = {systemAddress,"16C3CfUHFqxnSKL3DBcGXQxoWe9L6Rf2iN"};
         BigInteger subAmount = new BigInteger("0");
         if (type == 1) {
 
@@ -106,14 +106,14 @@ public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
             String mintQuantityHex = new BigInteger(subAmount.toString(),10).toString(16);
 
             while (true) {
-                if (mintQuantityHex.length() > 16) {
+                if (mintQuantityHex.length() >= 16) {
                     break;
                 } else {
                     mintQuantityHex = "0"+mintQuantityHex;
                 }
             }
 
-            String[] givechangeAddress = {fchAddress,systemAddress};
+            String[] givechangeAddress = {fchXsvLink.getXsvAddress(), systemAddress};
             CommonTxOputDto c2 = new CommonTxOputDto(givechangeAddress, new BigDecimal("0.0001"), agreement+mintQuantityHex, 1);                              // 多余找零
             outputs.add(c2);
 
@@ -123,11 +123,12 @@ public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
         BigDecimal sysFee = new BigDecimal("0");
         for (SystemUtxo sysUtxo : sysUtxoList) {
 
-            if (sysFee.compareTo(new BigDecimal("0.001")) > 0) {
+            if (sysFee.compareTo(new BigDecimal("0.001")) < 0) {
                 sysFee = sysFee.add(new BigDecimal(sysUtxo.getValue()));
                 TxInputDto tx = new TxInputDto(sysUtxo.getTxid(), sysUtxo.getN(),"");
                 inputs.add(tx);
-            }
+            } else
+                break;
         }
         sysFee = sysFee.subtract(new BigDecimal("0.0002"));
         CommonTxOputDto c3 = new CommonTxOputDto(sysAddress, sysFee, 2);

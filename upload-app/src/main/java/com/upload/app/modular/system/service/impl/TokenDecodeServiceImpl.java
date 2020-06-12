@@ -51,14 +51,6 @@ public class TokenDecodeServiceImpl implements TokenDecodeService {
         if (scriptTokenLinkList != null && scriptTokenLinkList.size() > 0)
             return null;
 
-        List<ScriptTokenLink> scriptTokenLink = null;
-
-        try {
-            scriptTokenLink = scriptTokenLinkService.tokenVin(vins);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         Map<Integer, String> map = vouts(vouts);
         Boolean sendFlag = false;
         boolean flag = false;           // 销毁立flag, 如果最后是false并且当前的vin包含token，则销毁
@@ -188,7 +180,7 @@ public class TokenDecodeServiceImpl implements TokenDecodeService {
             String vouthex = scriptPubKey.getString("hex");
             String value = vout.getBigDecimal("value").toString();
 
-            Map<String, Object> f = decodeSnedToken(OP_RETURN, hexStr, n, vins, txid, hashmap, vouthex, value, addressList);
+            Map<String, Object> f = decodeSnedToken(OP_RETURN, hexStr, n, vins, txid, vouthex, value, addressList);
 
             return f;
 
@@ -475,7 +467,7 @@ public class TokenDecodeServiceImpl implements TokenDecodeService {
     }
 
     //解析发送
-    public Map<String, Object> decodeSnedToken(String content, String toAddressHash, Integer n, JSONArray vins, String tx, Map<Integer, BigInteger> hashmap,
+    public Map<String, Object> decodeSnedToken(String content, String toAddressHash, Integer n, JSONArray vins, String tx,
                                     String vouthex, String value,  List<String> addressList) {
 
         Map<String, Object> result = new HashedMap();
@@ -538,9 +530,7 @@ public class TokenDecodeServiceImpl implements TokenDecodeService {
             result.put("flag", false);
             return result;
         }
-        hashmap.put(0, newBig);          //vin的所有钱
-        BigInteger voutBig = hashmap.get(1);
-        hashmap.put(1, voutBig.add(quantity_int));
+
 
         if (newBig.compareTo(quantity_int) < 0) {
             result.put("flag", false);
@@ -608,6 +598,9 @@ public class TokenDecodeServiceImpl implements TokenDecodeService {
         result.put("UtxoTokenList", UtxoTokenList);
         result.put("addressScriptLink", addressScriptLink);
         result.put("sendFlag", true);
+        result.put("flag", true);
+        result.put("toAmount", quantity_int);
+        result.put("fromAmount", newBig);
 
         return result;
 

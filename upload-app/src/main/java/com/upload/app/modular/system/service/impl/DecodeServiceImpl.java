@@ -8,6 +8,7 @@ import com.upload.app.modular.system.model.*;
 import com.upload.app.modular.system.service.*;
 import com.upload.app.core.rpc.Api;
 import com.upload.app.core.util.Sha256;
+import org.apache.commons.collections.map.HashedMap;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -409,6 +410,14 @@ public class DecodeServiceImpl implements DecodeService {
 
                 List<String> driveList = authorityVinsList(vins);
 
+                List<ScriptTokenLink> scriptTokenLink = null;
+
+                try {
+                    scriptTokenLink = scriptTokenLinkService.tokenVin(vins);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 JSONArray vouts = txTransaction.getJSONArray("vout");
 
                 StringBuilder data = new StringBuilder();
@@ -423,6 +432,9 @@ public class DecodeServiceImpl implements DecodeService {
                 List<ScriptUtxoTokenLink> UtxoTokenList = new ArrayList<>();
                 List<AddressScriptLink> addressScriptLink = new ArrayList<>();
                 Boolean sendFlag = false;
+                BigInteger fromAmount = new BigInteger("0");
+                BigInteger toAmount = new BigInteger("0");
+                Boolean flag = true;           // 销毁立flag, 如果最后是false并且当前的vin包含token，则销毁
 
                 for (Object v : vouts) {
 
@@ -526,6 +538,9 @@ public class DecodeServiceImpl implements DecodeService {
 
                         content = content.replaceFirst(a68, "");
 
+                        if ("".equals(content))
+                            continue;
+
                         String a6 = content.substring(0, 2);
 
                         if (!a6.equals("6a"))
@@ -583,111 +598,53 @@ public class DecodeServiceImpl implements DecodeService {
 
                         Map<String, Object> map = tokenDecodeService.decodeToken(tx, vins, vouts, vout, content, scriptPubKey, voutn, script, addressList);
 
-//                        if (map != null) {
-//
-//                            Object fob = map.get("flag");
-//
-//                            if (falg != null) {
-//                                Boolean flag = (Boolean)fob;
-//                            }
-//
-//                            Object slpOb = map.get("SlpSendList");
-//                            if (slpOb != null) {
-//                                SlpSendList.add((ScriptSlpSend) slpOb);
-//                            }
-//
-//                            Object tokenOb = map.get("TokenAssetsList");
-//                            if (tokenOb != null) {
-//                                TokenAssetsList.add((ScriptTokenLink)tokenOb);
-//                            }
-//
-//                            Object utOb = map.get("UtxoTokenList");
-//                            if (utOb != null) {
-//                                UtxoTokenList.add((ScriptUtxoTokenLink)utOb);
-//                            }
-//
-//                            Object asOb = map.get("addressScriptLink");
-//                            if (asOb != null) {
-//                                addressScriptLink.add((AddressScriptLink)asOb);
-//                            }
-//
-//                            Object sfOb = map.get("sendFlag");
-//                            if (sfOb != null) {
-//
-//                                if ((Boolean) sfOb || sendFlag)
-//                                    sendFlag = true;
-//
-//                            }
+                        if (map != null) {
 
-//                            if (sendFlag && hashmap.get(0).compareTo(hashmap.get(1)) >= 0) {
-//
-//                                if (SlpSendList != null) {
-//                                    for (ScriptSlpSend slpSend : SlpSendList) {
-//                                        scriptSlpSendService.insertSlpSend(slpSend);
-//                                    }
-//                                }
-//
-//                                if (TokenAssetsList != null) {
-//                                    for (ScriptTokenLink st : TokenAssetsList) {
-//                                        scriptTokenLinkService.insert(st);
-//                                    }
-//                                }
-//
-//                                if (utxoTokenList != null) {
-//                                    for (ScriptUtxoTokenLink sut : utxoTokenList) {
-//                                        scriptUtxoTokenLinkService.insert(sut);
-//                                    }
-//                                }
-//
-//                                if (addressScriptLink != null) {
-//                                    for (AddressScriptLink asl: addressScriptLink) {
-//                                        addressScriptLinkService.insert(asl);
-//                                    }
-//                                }
-//
-//
-//                                if (hashmap.get(0).compareTo(hashmap.get(1)) > 0) {
-//                                    BigInteger amt = hashmap.get(0).subtract(hashmap.get(1));
-//
-//                                    ScriptTokenDestruction tokenDestruction = new ScriptTokenDestruction();
-//                                    tokenDestruction.setScript(scriptTokenLink.get(0).getScript());
-//                                    tokenDestruction.setTxid(txid);
-//                                    tokenDestruction.setN(scriptTokenLink.get(0).getVout());
-//                                    scriptTokenDestructionService.insert(tokenDestruction);
-//                                    ScriptTokenLink update = new ScriptTokenLink();
-//                                    update.setTokenId(scriptTokenLink.get(0).getTokenId());
-//                                    update.setStatus(3);
-//                                    update.setTxid(txid);
-//                                    update.setToken(amt);
-//                                    update.setScript(scriptTokenLink.get(0).getScript());
-//                                    scriptTokenLinkService.insert(update);
-//
-//                                }
-//                            }
-//
-//                            if (!flag && scriptTokenLink != null) {            //销毁
-//
-//                                if (scriptTokenLink != null) {
-//
-//                                    for (ScriptTokenLink scriptToken : scriptTokenLink) {
-//
-//                                        ScriptTokenDestruction tokenDestruction = new ScriptTokenDestruction();
-//                                        tokenDestruction.setScript(scriptToken.getScript());
-//                                        tokenDestruction.setTxid(txid);
-//                                        tokenDestruction.setN(scriptToken.getVout());
-//                                        scriptTokenDestructionService.insert(tokenDestruction);
-//                                        ScriptTokenLink update = new ScriptTokenLink();
-//                                        update.setTokenId(scriptToken.getTokenId());
-//                                        update.setStatus(3);
-//                                        update.setTxid(txid);
-//                                        update.setToken(scriptToken.getToken());
-//                                        update.setScript(scriptToken.getScript());
-//                                        scriptTokenLinkService.insert(update);
-//
-//                                    }
-//                                }
-//                            }
-//                        }
+                            Object fob = map.get("flag");
+
+                            if (fob != null) {
+                                if (!(Boolean) fob && flag)
+                                    flag = false;
+                            }
+
+                            Object slpOb = map.get("SlpSendList");
+                            if (slpOb != null) {
+                                SlpSendList.addAll((List<ScriptSlpSend>) slpOb);
+                            }
+
+                            Object tokenOb = map.get("TokenAssetsList");
+                            if (tokenOb != null) {
+                                TokenAssetsList.addAll((List<ScriptTokenLink>)tokenOb);
+                            }
+
+                            Object utOb = map.get("UtxoTokenList");
+                            if (utOb != null) {
+                                UtxoTokenList.addAll((List<ScriptUtxoTokenLink>)utOb);
+                            }
+
+                            Object asOb = map.get("addressScriptLink");
+                            if (asOb != null) {
+                                addressScriptLink.addAll((List<AddressScriptLink>)asOb);
+                            }
+
+                            Object sfOb = map.get("sendFlag");
+                            if (sfOb != null) {
+
+                                if ((Boolean) sfOb || sendFlag)
+                                    sendFlag = true;
+
+                            }
+
+                            Object ta = map.get("toAmount");
+                            if (ta != null) {
+                                toAmount = toAmount.add((BigInteger)ta);
+                            }
+
+                            Object fa = map.get("fromAmount");
+                            if (ta != null) {
+                                fromAmount = (BigInteger)fa;
+                            }
+                        }
 
                         jb.put("driveId", driveId);
                         jb.put("metadata", metadata);
@@ -752,11 +709,80 @@ public class DecodeServiceImpl implements DecodeService {
 
                         }
 
-
-
                     }
 
                 }
+
+                if (flag && sendFlag && fromAmount.compareTo(toAmount) >= 0) {
+
+                    if (SlpSendList != null) {
+                        for (ScriptSlpSend slpSend : SlpSendList) {
+                            scriptSlpSendService.insertSlpSend(slpSend);
+                        }
+                    }
+
+                    if (TokenAssetsList != null) {
+                        for (ScriptTokenLink st : TokenAssetsList) {
+                            scriptTokenLinkService.insert(st);
+                        }
+                    }
+
+                    if (UtxoTokenList != null) {
+                        for (ScriptUtxoTokenLink sut : UtxoTokenList) {
+                            scriptUtxoTokenLinkService.insert(sut);
+                        }
+                    }
+
+                    if (addressScriptLink != null) {
+                        for (AddressScriptLink asl: addressScriptLink) {
+                            addressScriptLinkService.insert(asl);
+                        }
+                    }
+
+
+                    if (fromAmount.compareTo(toAmount) > 0) {
+                        BigInteger amt = fromAmount.subtract(toAmount);
+
+                        ScriptTokenDestruction tokenDestruction = new ScriptTokenDestruction();
+                        tokenDestruction.setScript(scriptTokenLink.get(0).getScript());
+                        tokenDestruction.setTxid(tx);
+                        tokenDestruction.setN(scriptTokenLink.get(0).getVout());
+                        scriptTokenDestructionService.insert(tokenDestruction);
+                        ScriptTokenLink update = new ScriptTokenLink();
+                        update.setTokenId(scriptTokenLink.get(0).getTokenId());
+                        update.setStatus(3);
+                        update.setTxid(tx);
+                        update.setToken(amt);
+                        update.setScript(scriptTokenLink.get(0).getScript());
+                        scriptTokenLinkService.insert(update);
+
+                    }
+                }
+
+                if (!flag && scriptTokenLink != null) {            //销毁
+
+                    if (scriptTokenLink != null) {
+
+                        for (ScriptTokenLink scriptToken : scriptTokenLink) {
+
+                            ScriptTokenDestruction tokenDestruction = new ScriptTokenDestruction();
+                            tokenDestruction.setScript(scriptToken.getScript());
+                            tokenDestruction.setTxid(tx);
+                            tokenDestruction.setN(scriptToken.getVout());
+                            scriptTokenDestructionService.insert(tokenDestruction);
+                            ScriptTokenLink update = new ScriptTokenLink();
+                            update.setTokenId(scriptToken.getTokenId());
+                            update.setStatus(3);
+                            update.setTxid(tx);
+                            update.setToken(scriptToken.getToken());
+                            update.setScript(scriptToken.getScript());
+                            scriptTokenLinkService.insert(update);
+
+                        }
+                    }
+                }
+
+
 
                 for (AddressDriveLink addressDrive : addressDriveList) {
 
