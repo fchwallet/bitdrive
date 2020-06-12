@@ -5,6 +5,8 @@ java implementation freedrive, see [architecture](./Freedrive-architecture.pdf)
 [2. update](#update)  
 [3. get](#get)  
 [4. get_drive_id](#get-drive-id)  
+[5. get_balance](#get-balance)  
+[6. fronze_drive_id](#froze-drive_id)  
 
 ### 通用  
 >URL: http://freedrive.fchwallet.com:8442       
@@ -151,3 +153,33 @@ curl example
 curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK ' 
 ```
 
+### get balance
+>获取FCH地址的积分余额     
+>接口名称: /api/get_balance
+```
+参数类型: ["application/x-www-form-urlencoded"]    
+'fch_addr=f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce'
+
+返回结果:
+{
+   "code": 200,
+   "balance": 12345	
+}
+```
+
+
+
+### frozen drive_id
+>冻结drive_id, 冻结后不再被修改。     
+>接口名称: /api/frozen_drive_id
+```
+参数类型: ["application/json"]    
+{
+  'drive_id=f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce'
+}
+
+返回结果:
+{
+   "code": 200,
+}
+```
