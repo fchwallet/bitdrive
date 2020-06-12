@@ -6,7 +6,7 @@ java implementation freedrive, see [architecture](./Freedrive-architecture.pdf)
 [3. get](#get)  
 [4. get_drive_id](#get-drive-id)  
 [5. get_balance](#get-balance)  
-[6. fronze_drive_id](#froze-drive-id)  
+[6. frozen_drive_id](#frozen-drive_id)  
 
 ### 通用  
 >URL: http://freedrive.fchwallet.com:8442       
@@ -169,7 +169,7 @@ curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d 'fch_addr=
 
 
 
-### frozen drive id
+### frozen drive_id
 >冻结drive_id, 冻结后不再被修改。     
 >接口名称: /api/frozen_drive_id
 ```
