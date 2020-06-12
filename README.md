@@ -175,7 +175,8 @@ curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d 'fch_addr=
 ```
 参数类型: ["application/json"]    
 {
-  'drive_id=f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce'
+  "fch_addr':"dsfsdfffffffffffffffffffff",	
+  "drive_id":"f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
 }
 
 返回结果:
