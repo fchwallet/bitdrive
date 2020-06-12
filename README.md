@@ -13,8 +13,10 @@ java implementation freedrive, see [architecture](./Freedrive-architecture.pdf)
 错误码：  
 {"code":"100101","验证时间超时"}  
 {"code":"100102","验证错误"}  
+{"code":"100457","付费失败"}
 {"code":"200212","上传失败，请联系客服解决"}
 {"code":"200211","data大于5M"}
+{"code":"200212","用户积分不足"}
 {"code":"1001","sign验证失败"}
 {"code":"400","参数错误"}
 {"code":"400","参数错误"}
