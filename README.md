@@ -6,7 +6,8 @@ java implementation freedrive, see [architecture](./Freedrive-architecture.pdf)
 [3. get](#get)  
 [4. get_drive_id](#get-drive_id)  
 [5. get_balance](#get-balance)  
-[6. frozen_drive_id](#frozen-drive_id)  
+[6. get_tx_history](#get-tx-history)  
+[7. frozen_drive_id](#frozen-drive_id)  
 
 ### 通用  
 >URL: http://freedrive.fchwallet.com:8442       
@@ -167,6 +168,28 @@ curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d 'fch_addr=
 }
 ```
 
+
+### get tx history
+>获取余额变更记录     
+>接口名称: /api/get_tx_history
+```
+参数类型: ["application/x-www-form-urlencoded"]    
+{
+  "fch_addr':"dsfsdfffffffffffffffffffff"	
+}
+
+返回结果:
+{
+   "code": 200,
+   "data":[{"type":"put", "change": -10, "timestamp":1592011897},
+	   {"type":"update", "change":-10,"timestamp":1592011897},
+	   {"type":"frozen_drive_id", "change":-10,"timestamp":1592011897},
+	   {"type":"get", "change":-2,"timestamp":1592011897},
+	   {"type":"get_drive_id", "change":-2,"timestamp":1592011897},
+	   {"type":"get_balance", "change":-2,"timestamp":1592011897},
+	   {"type":"self", "change":-2,"timestamp":1592011897}]
+}
+```
 
 
 ### frozen drive_id
