@@ -5,9 +5,9 @@ java implementation freedrive, see [architecture](./Freedrive-architecture.pdf)
 [2. update](#update)  
 [3. get](#get)  
 [4. get_drive_id](#get-drive_id)  
-[5. get_balance(todo)](#get-balance)  
-[6. get_tx_history(todo)](#get-tx-history)  
-[7. frozen_drive_id(todo)](#frozen-drive_id)  
+[5. get_balance (todo)](#get-balance)  
+[6. get_tx_history (todo)](#get-tx-history)  
+[7. frozen_drive_id (todo)](#frozen-drive_id)  
 
 ### 通用  
 >URL: http://freedrive.fchwallet.com:8442       
