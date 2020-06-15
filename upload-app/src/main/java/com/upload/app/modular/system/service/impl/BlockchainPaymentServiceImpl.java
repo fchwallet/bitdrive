@@ -25,6 +25,7 @@ public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
     final String systemAddress = "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx";
 
     final String agreement = "06534c502b2b000202010453454e44201a47f6d520fa0048d9de19bae99fa61e1d91f35f49dd6d1fc472926b70f51cb308";
+
     @Resource
     private FchXsvLinkService fchXsvLinkService;
 
@@ -73,7 +74,7 @@ public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
         BigInteger newAmount = sumAmount.divide(new BigInteger("100000000"));
 
         List<CommonTxOputDto> outputs = new ArrayList<>();
-        String[] sysAddress = {systemAddress,"16C3CfUHFqxnSKL3DBcGXQxoWe9L6Rf2iN"};
+        String[] sysAddress = {systemAddress, "16C3CfUHFqxnSKL3DBcGXQxoWe9L6Rf2iN"};
         BigInteger subAmount = new BigInteger("0");
         if (type == 1) {
 

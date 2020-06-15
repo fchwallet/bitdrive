@@ -97,7 +97,7 @@
 
 	<select id="findToTokenByScript" resultType="java.math.BigInteger">
 		SELECT
-			sum(token)
+			if(isnull(sum(token)), 0, sum(token))
 		FROM
 		`script_token_link` where script in
 		<foreach collection="script" item="address" index="index" open="(" close=")" separator=",">
@@ -108,7 +108,7 @@
 
 	<select id="findFromTokenByScript" resultType="java.math.BigInteger">
 		SELECT
-			sum(token)
+			if(isnull(sum(token)), 0, sum(token))
 		FROM
 		`script_token_link` where from_script in
 		<foreach collection="script" item="address" index="index" open="(" close=")" separator=",">

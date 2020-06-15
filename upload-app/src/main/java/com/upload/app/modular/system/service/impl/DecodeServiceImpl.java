@@ -9,6 +9,7 @@ import com.upload.app.modular.system.service.*;
 import com.upload.app.core.rpc.Api;
 import com.upload.app.core.util.Sha256;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -343,40 +344,48 @@ public class DecodeServiceImpl implements DecodeService {
 
                 if (drive != null) {
 
-                    DriveUtxo driveUtxo = new DriveUtxo();
-                    driveUtxo.setN(jb.getInteger("n"));
-                    driveUtxo.setTxid(jb.getString("txid"));
-                    driveUtxo.setValue(consValue);
-                    driveUtxo.setDriveId(drive);
-                    driveUtxoMapper.insert(driveUtxo);
+                    Integer n = jb.getInteger("n");
+                    String txid = jb.getString("txid");
+                    if (txid != null && n != null && "".equals(txid) && "".equals(n)) {
+                        DriveUtxo driveUtxo = new DriveUtxo();
+                        driveUtxo.setN(jb.getInteger("n"));
+                        driveUtxo.setTxid(jb.getString("txid"));
+                        driveUtxo.setValue(consValue);
+                        driveUtxo.setDriveId(drive);
+                        driveUtxoMapper.insert(driveUtxo);
 
-                    Update update = new Update();
-                    update.setMetadata(jb.getString("metadata"));
-                    update.setData(jb.getString("data"));
-                    update.setDriveId(drive);
-                    update.setUpdateId(jb.getString("driveId"));
-                    update.setFee(sumFee);
+                        Update update = new Update();
+                        update.setMetadata(jb.getString("metadata"));
+                        update.setData(jb.getString("data"));
+                        update.setDriveId(drive);
+                        update.setUpdateId(jb.getString("driveId"));
+                        update.setFee(sumFee);
 
-                    updateMapper.insert(update);
-                    return update.getUpdateId();
+                        updateMapper.insert(update);
+                        return update.getUpdateId();
+                    }
 
                 } else {
 
-                    DriveUtxo driveUtxo = new DriveUtxo();
-                    driveUtxo.setN(jb.getInteger("n"));
-                    driveUtxo.setTxid(jb.getString("txid"));
-                    driveUtxo.setValue(consValue);
-                    driveUtxo.setDriveId(jb.getString("driveId"));
-                    driveUtxoMapper.insert(driveUtxo);
+                    Integer n = jb.getInteger("n");
+                    String txid = jb.getString("txid");
+                    if (txid != null && n != null && "".equals(txid) && "".equals(n)) {
+                        DriveUtxo driveUtxo = new DriveUtxo();
+                        driveUtxo.setN(jb.getInteger("n"));
+                        driveUtxo.setTxid(jb.getString("txid"));
+                        driveUtxo.setValue(consValue);
+                        driveUtxo.setDriveId(jb.getString("driveId"));
+                        driveUtxoMapper.insert(driveUtxo);
 
-                    Create create = new Create();
-                    create.setData(jb.getString("data"));
-                    create.setMetadata(jb.getString("metadata"));
-                    create.setDriveId(jb.getString("driveId"));
-                    create.setTxid(jb.getString("txid"));
-                    create.setFee(sumFee);
-                    createMapper.insert(create);
-                    return create.getDriveId();
+                        Create create = new Create();
+                        create.setData(jb.getString("data"));
+                        create.setMetadata(jb.getString("metadata"));
+                        create.setDriveId(jb.getString("driveId"));
+                        create.setTxid(jb.getString("txid"));
+                        create.setFee(sumFee);
+                        createMapper.insert(create);
+                        return create.getDriveId();
+                    }
 
                 }
 
@@ -438,11 +447,18 @@ public class DecodeServiceImpl implements DecodeService {
 
                 for (Object v : vouts) {
 
+
+
+
                     JSONObject vout = (JSONObject)v;
 
                     BigDecimal value = vout.getBigDecimal("value");
 
                     Integer voutn = vout.getInteger("n");
+
+                    DriveUtxo du = driveUtxoMapper.findByTxidAndN(tx, voutn);
+                    if (du != null)
+                        continue;
 
                     String n = UnicodeUtil.intToHex(voutn);
 
@@ -808,40 +824,47 @@ public class DecodeServiceImpl implements DecodeService {
 
 
                 if (driveList != null && driveList.size() > 0) {
-
-                    DriveUtxo driveUtxo = new DriveUtxo();
-                    driveUtxo.setN(jb.getInteger("n"));
-                    driveUtxo.setTxid(jb.getString("txid"));
-                    driveUtxo.setValue(consValue);
-                    driveUtxo.setDriveId(driveList.get(0));
-                    driveUtxoMapper.insert(driveUtxo);
-
-                    Update update = new Update();
-                    update.setMetadata(jb.getString("metadata"));
-                    update.setData(jb.getString("data"));
-                    update.setDriveId(driveList.get(0));
-                    update.setUpdateId(jb.getString("driveId"));
-                    update.setCreateDate(new Date());
-                    updateMapper.insert(update);
-
-
-                } else {
-
-                    if (jb.size() > 0) {
+                    Integer n = jb.getInteger("n");
+                    String txid = jb.getString("txid");
+                    if (txid != null && n != null && "".equals(txid) && "".equals(n)) {
                         DriveUtxo driveUtxo = new DriveUtxo();
                         driveUtxo.setN(jb.getInteger("n"));
                         driveUtxo.setTxid(jb.getString("txid"));
                         driveUtxo.setValue(consValue);
-                        driveUtxo.setDriveId(jb.getString("driveId"));
+                        driveUtxo.setDriveId(driveList.get(0));
                         driveUtxoMapper.insert(driveUtxo);
 
-                        Create create = new Create();
-                        create.setData(jb.getString("data"));
-                        create.setMetadata(jb.getString("metadata"));
-                        create.setDriveId(jb.getString("driveId"));
-                        create.setTxid(jb.getString("txid"));
-                        create.setCreateDate(new Date());
-                        createMapper.insert(create);
+                        Update update = new Update();
+                        update.setMetadata(jb.getString("metadata"));
+                        update.setData(jb.getString("data"));
+                        update.setDriveId(driveList.get(0));
+                        update.setUpdateId(jb.getString("driveId"));
+                        update.setCreateDate(new Date());
+                        updateMapper.insert(update);
+                    }
+
+                } else {
+
+                    if (jb.size() > 0) {
+
+                        Integer n = jb.getInteger("n");
+                        String txid = jb.getString("txid");
+                        if (txid != null && n != null && "".equals(txid) && "".equals(n)) {
+                            DriveUtxo driveUtxo = new DriveUtxo();
+                            driveUtxo.setN(jb.getInteger("n"));
+                            driveUtxo.setTxid(jb.getString("txid"));
+                            driveUtxo.setValue(consValue);
+                            driveUtxo.setDriveId(jb.getString("driveId"));
+                            driveUtxoMapper.insert(driveUtxo);
+
+                            Create create = new Create();
+                            create.setData(jb.getString("data"));
+                            create.setMetadata(jb.getString("metadata"));
+                            create.setDriveId(jb.getString("driveId"));
+                            create.setTxid(jb.getString("txid"));
+                            create.setCreateDate(new Date());
+                            createMapper.insert(create);
+                        }
 
                     }
 
