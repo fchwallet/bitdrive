@@ -4,7 +4,10 @@ java implementation freedrive, see [architecture](./Freedrive-architecture.pdf)
 [1. put](#put)  
 [2. update](#update)  
 [3. get](#get)  
-[4. get_drive_id](#get-drive-id)  
+[4. get_drive_id](#get-drive_id)  
+[5. get_balance (todo)](#get-balance)  
+[6. get_tx_history (todo)](#get-tx-history)  
+[7. frozen_drive_id (todo)](#frozen-drive_id)  
 
 ### 通用  
 >URL: http://freedrive.fchwallet.com:8442       
@@ -113,7 +116,6 @@ curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  -
 或者参数传update_id, 查询某次更新记录    
 ```
 参数类型: ["application/x-www-form-urlencoded"]  
-
 'fch_addr=F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT&update_id=1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce'
     
 返回结果
@@ -131,12 +133,11 @@ curl example
 curl http://freedrive.fchwallet.com:8442/api/get -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK&drive_id=8d6cc0f1f6aa1f4535262f65466871a5865b0c94bb49ea5c5695917545aead93'      
 ```
     
-### get drive id
+### get drive_id
 >获取FCH地址的存储列表     
 >接口名称: /api/get_drive_id
 ```
 参数类型: ["application/x-www-form-urlencoded"]    
-
 'fch_addr=f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce'
    
 	    
@@ -151,3 +152,55 @@ curl example
 curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK ' 
 ```
 
+### get balance
+>获取FCH地址的积分余额     
+>接口名称: /api/get_balance
+```
+参数类型: ["application/x-www-form-urlencoded"]    
+'fch_addr=f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce'
+
+返回结果:
+{
+   "code": 200,
+   "balance": 12345	
+}
+```
+
+
+### get tx history
+>获取余额变更记录     
+>接口名称: /api/get_tx_history
+```
+参数类型: ["application/x-www-form-urlencoded"]    
+'fch_addr=1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM'	
+
+
+返回结果:
+{
+   "code": 200,
+   "data":[{"type":"put", "change": -10, "timestamp":1592011897},
+	   {"type":"update", "change":-10,"timestamp":1592011897},
+	   {"type":"frozen_drive_id", "change":-10,"timestamp":1592011897},
+	   {"type":"get", "change":-2,"timestamp":1592011897},
+	   {"type":"get_drive_id", "change":-2,"timestamp":1592011897},
+	   {"type":"get_balance", "change":-2,"timestamp":1592011897},
+	   {"type":"self", "change":-2,"timestamp":1592011897}]
+}
+```
+
+
+### frozen drive_id
+>冻结drive_id, 冻结后不再被修改。     
+>接口名称: /api/frozen_drive_id
+```
+参数类型: ["application/json"]    
+{
+  "fch_addr':"1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM",	
+  "drive_id":"f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
+}
+
+返回结果:
+{
+   "code": 200,
+}
+```
