@@ -23,4 +23,9 @@ public class CreateServiceImpl implements CreateService {
         return createMapper.findByDriveId(driveId);
     }
 
+    @Override
+    public int update(Create create) {
+        return createMapper.update(create);
+    }
+
 }

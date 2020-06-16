@@ -90,9 +90,12 @@ public class ApiController extends BaseController {
     @Autowired
     private ScriptUtxoTokenLinkService scriptUtxoTokenLinkService;
 
+    @Autowired
+    private BalanceHistoryService balanceHistoryService;
+
     final Base64.Decoder decoder = Base64.getDecoder();
 
-    final String tokenId = "1a47f6d520fa0048d9de19bae99fa61e1d91f35f49dd6d1fc472926b70f51cb3";
+    final String tokenId = "c7f7c99fb2f9ad865ba17f702dc21e2643ac1562941888952a27aa399e261101";
 
     @ResponseBody
     @RequestMapping(value="/test", method = RequestMethod.POST)
@@ -164,11 +167,11 @@ public class ApiController extends BaseController {
 
         List<String> scriptList = addressScriptLinkService.findListByAddress(fchXsvLink.getAddressHash());
 
-        if (scriptList == null || scriptList.size() < 1) {
-            result.put("code", 200212);
-            result.put("msg", "用户积分不足");
-            return result;
-        }
+//        if (scriptList == null || scriptList.size() < 1) {
+//            result.put("code", 200212);
+//            result.put("msg", "用户积分不足");
+//            return result;
+//        }
 
         List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fchXsvLink.getAddressHash());
         BigInteger balance = new BigInteger("0");
@@ -178,11 +181,11 @@ public class ApiController extends BaseController {
             balance = balance.add(amount);
         }
 
-        if (balance.compareTo(new BigInteger("1000000000")) < 0) {
-            result.put("code", 200212);
-            result.put("msg", "用户积分不足");
-            return result;
-        }
+//        if (balance.compareTo(new BigInteger("1000000000")) < 0) {
+//            result.put("code", 200212);
+//            result.put("msg", "用户积分不足");
+//            return result;
+//        }
 
         List<String> fchAddress = new ArrayList<>();
         for (Object o : fch_addr) {
@@ -231,12 +234,12 @@ public class ApiController extends BaseController {
             String drive_id = decodeService.decodeCreate(put, sumFee, null);
             result.put("code", 200);
             result.put("drive_id",drive_id);
-            Boolean f = blockchainPaymentService.payment(ad,1);         // 查询钱,付费
-            if (f != null && !f) {
-                result.put("code", 100457);
-                result.put("msg", "付费失败");
-                return result;
-            }
+//            Boolean f = blockchainPaymentService.payment(ad,1, "put");         // 查询钱,付费
+//            if (f != null && !f) {
+//                result.put("code", 100457);
+//                result.put("msg", "付费失败");
+//                return result;
+//            }
 
 
         } else {
@@ -402,7 +405,7 @@ public class ApiController extends BaseController {
             result.put("code", 200);
             result.put("update_id",update_id);
 
-            Boolean f = blockchainPaymentService.payment(fchadd,1);         // 查询钱,付费
+            Boolean f = blockchainPaymentService.payment(fchadd,1, "update");         // 查询钱,付费
             if (f != null && !f) {
                 result.put("code", 100457);
                 result.put("msg", "付费失败");
@@ -464,7 +467,7 @@ public class ApiController extends BaseController {
             return json;
         }
 
-        Boolean f = blockchainPaymentService.payment(fch_addr,2);         // 查询钱,付费
+        Boolean f = blockchainPaymentService.payment(fch_addr,2, "get");         // 查询钱,付费
         if (f != null && !f) {
             json.put("code", 100457);
             json.put("msg", "付费失败");
@@ -568,7 +571,7 @@ public class ApiController extends BaseController {
             return json;
         }
 
-        Boolean f = blockchainPaymentService.payment(fch_addr,2);         // 查询钱,付费
+        Boolean f = blockchainPaymentService.payment(fch_addr,2, "get_drive_id");         // 查询钱,付费
         if (f != null && !f) {
             json.put("code", 100457);
             json.put("msg", "付费失败");
@@ -594,6 +597,177 @@ public class ApiController extends BaseController {
         }
 
         return json;
+
+    }
+
+    @ResponseBody
+    @RequestMapping(value="/get_balance", method = RequestMethod.POST)
+    public JSONObject query(String fch_addr) throws Exception {
+
+        JSONObject ob = new JSONObject();
+
+        if ("F".equals(fch_addr) || "f".equals(fch_addr)) {
+            fch_addr = Api.fchtoxsv(fch_addr).getString("address");
+        } else if ("1".equals(fch_addr)) {
+            fch_addr = fch_addr;
+        }
+
+        FchXsvLink fchXsvLink = fchXsvLinkService.findByFch(fch_addr);
+
+        List<String> scriptList = addressScriptLinkService.findListByAddress(fchXsvLink.getAddressHash());
+
+
+        if (scriptList == null || scriptList.size() < 1) {
+            ob.put("balance", 0);
+            ob.put("code", 200);
+            return ob;
+        }
+
+        List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fchXsvLink.getAddressHash());
+        BigInteger balance = new BigInteger("0");
+
+        for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
+            BigInteger amount = scriptTokenLinkService.selectFAToken(tokenId, sut.getTxid(), sut.getN());
+            balance = balance.add(amount);
+        }
+
+
+        ob.put("balance", balance.divide(new BigInteger("100000000")));
+        ob.put("code", 200);
+
+        return ob;
+
+    }
+
+
+    @ResponseBody
+    @RequestMapping(value="/get_tx_history", method = RequestMethod.POST)
+    public JSONObject getTxHistory(String fch_addr) {
+
+        JSONObject ob = new JSONObject();
+        List<BalanceHistory> balanceHistoryList = balanceHistoryService.findByAddress(fch_addr);
+        ob.put("data", balanceHistoryList);
+        ob.put("code", 200);
+        return ob;
+
+    }
+
+    @ResponseBody
+    @RequestMapping(value="/terminate_drive_id", method = RequestMethod.POST)
+    public JSONObject terminateDriveId(@RequestBody String json) throws Exception {
+
+        JSONObject result = new JSONObject();
+
+        JSONObject param = null;
+        try {
+            param = (JSONObject) JSONObject.parse(json);
+        } catch (Exception e) {
+            result.put("code",1009);
+            result.put("msg","请传正确的json数据");
+            return result;
+        }
+
+        String fch_addr = param.getString("fch_addr");
+        String drive_id = param.getString("drive_id");
+
+        FchXsvLink fchXsvLink = fchXsvLinkService.findByFch(fch_addr);
+
+        List<String> scriptList = addressScriptLinkService.findListByAddress(fchXsvLink.getAddressHash());
+
+        if (scriptList == null || scriptList.size() < 1) {
+            result.put("code", 200212);
+            result.put("msg", "用户积分不足");
+            return result;
+        }
+
+        List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fchXsvLink.getAddressHash());
+        BigInteger balance = new BigInteger("0");
+
+        for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
+            BigInteger amount = scriptTokenLinkService.selectFAToken(tokenId, sut.getTxid(), sut.getN());
+            balance = balance.add(amount);
+        }
+
+        if (balance.compareTo(new BigInteger("1000000000")) < 0) {
+            result.put("code", 200212);
+            result.put("msg", "用户积分不足");
+            return result;
+        }
+
+        List<AddressDriveLink> ad = addressDriveLinkService.findDriveByAddress(fchXsvLink.getAddressHash());
+        if (ad.size() <= 0) {
+            result.put("code", 1000);
+            result.put("msg", "当前操作没有权限");
+            return result;
+        }
+
+        AddressDriveLink addressDriveLink = addressDriveLinkService.findByAddressAndDriveId(fchXsvLink.getAddressHash(), drive_id);
+        boolean flag = false;
+        if (addressDriveLink != null)
+            flag = true;
+
+        if (!flag) {
+            result.put("code", 1000);
+            result.put("msg", "当前操作没有权限");
+            return result;
+        }
+
+        List<String> fchAddress = new ArrayList<>();
+
+        if (fchXsvLink != null)
+            fchXsvLink.getXsvAddress();
+        else {
+            String xsvaddress = null;
+            FchXsvLink insert = new FchXsvLink();
+            if ("F".equals(fch_addr) || "f".equals(fch_addr)) {
+                xsvaddress = Api.fchtoxsv(fch_addr).getString("address");
+                insert.setType(0);
+            } else if ("1".equals(fch_addr)) {
+                xsvaddress = fch_addr;
+                insert.setType(1);
+            }
+            insert.setFchAddress(fch_addr);
+            insert.setXsvAddress(xsvaddress);
+            String addressHash = Api.ValidateAddress(xsvaddress).getString("scriptPubKey").replaceFirst("76a914", "").replaceFirst("88ac", "");
+            insert.setAddressHash(addressHash);
+            fchXsvLinkService.insert(insert);
+            fchXsvLink = fchXsvLinkService.findByFch(fch_addr);
+        }
+        fchAddress.add(fchXsvLink.getXsvAddress());
+
+        DriveUtxo du = driveUtxoService.findByDriveId(drive_id);
+        if (du == null) {
+            result.put("1002", "该drive_id不存在");
+            return result;
+        }
+
+        Boolean b = systemUtxoService.terminateDrive(fch_addr, drive_id);   //1表示create
+
+        if (b) {
+
+            Create create = new Create();
+            create.setStatus(1);
+            create.setDriveId(drive_id);
+            createService.update(create);
+
+            result.put("code", 200);
+            result.put("msg", "");
+
+            Boolean a = blockchainPaymentService.payment(fch_addr,1, "terminate_drive_id");         // 查询钱,付费
+            if (fchAddress != null && !a) {
+                result.put("code", 100457);
+                result.put("msg", "付费失败");
+                return result;
+            }
+
+        } else {
+
+            result.put("code", 500);
+            result.put("msg", "处理异常,联系客服");
+
+        }
+
+        return result;
 
     }
 

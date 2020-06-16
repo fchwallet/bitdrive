@@ -8,4 +8,6 @@ public interface CreateService {
 
     Create findByDriveId(String driveId);
 
+    int update(Create create);
+
 }

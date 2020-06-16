@@ -3,7 +3,7 @@ package com.upload.app.modular.system.service.impl;
 import com.upload.app.core.rpc.Api;
 import com.upload.app.core.rpc.CommonTxOputDto;
 import com.upload.app.core.rpc.TxInputDto;
-import com.upload.app.modular.system.model.AddressScriptLink;
+import com.upload.app.modular.system.model.BalanceHistory;
 import com.upload.app.modular.system.model.FchXsvLink;
 import com.upload.app.modular.system.model.ScriptUtxoTokenLink;
 import com.upload.app.modular.system.model.SystemUtxo;
@@ -15,16 +15,17 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
 public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
 
-    final String tokenId = "1a47f6d520fa0048d9de19bae99fa61e1d91f35f49dd6d1fc472926b70f51cb3";
+    final String tokenId = "c7f7c99fb2f9ad865ba17f702dc21e2643ac1562941888952a27aa399e261101";
 
     final String systemAddress = "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx";
 
-    final String agreement = "06534c502b2b000202010453454e44201a47f6d520fa0048d9de19bae99fa61e1d91f35f49dd6d1fc472926b70f51cb308";
+    final String agreement = "06534c502b2b000202010453454e4420c7f7c99fb2f9ad865ba17f702dc21e2643ac1562941888952a27aa399e26110108";
 
     @Resource
     private FchXsvLinkService fchXsvLinkService;
@@ -41,8 +42,11 @@ public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
     @Resource
     private SystemUtxoService systemUtxoService;
 
+    @Resource
+    private BalanceHistoryService balanceHistoryService;
+
     @Override
-    public Boolean payment(String fchAddress, Integer type) throws Exception {
+    public Boolean payment(String fchAddress, Integer type, String methodName) throws Exception {
 
         FchXsvLink fchXsvLink = fchXsvLinkService.findByFch(fchAddress);
 
@@ -76,6 +80,8 @@ public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
         List<CommonTxOputDto> outputs = new ArrayList<>();
         String[] sysAddress = {systemAddress, "16C3CfUHFqxnSKL3DBcGXQxoWe9L6Rf2iN"};
         BigInteger subAmount = new BigInteger("0");
+        BalanceHistory balanceHistory = new BalanceHistory();
+
         if (type == 1) {
 
             if (newAmount.compareTo(new BigInteger("10")) < 0) {
@@ -86,6 +92,7 @@ public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
             CommonTxOputDto c1 = new CommonTxOputDto(sysAddress, new BigDecimal("0.0001"), agreement + "000000003b9aca00", 1);           //扣钱 10块
             outputs.add(c1);
             subAmount = newAmount.subtract(new BigInteger("10"));
+            balanceHistory.setChange(-10);
 
         } else if (type == 2) {
 
@@ -97,6 +104,7 @@ public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
             CommonTxOputDto c1 = new CommonTxOputDto(sysAddress, new BigDecimal("0.0001"), agreement + "0000000077359400", 1);           //扣钱 2块
             outputs.add(c1);
             subAmount = newAmount.subtract(new BigInteger("2"));
+            balanceHistory.setChange(-2);
         }
 
 
@@ -128,6 +136,7 @@ public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
                 sysFee = sysFee.add(new BigDecimal(sysUtxo.getValue()));
                 TxInputDto tx = new TxInputDto(sysUtxo.getTxid(), sysUtxo.getN(),"");
                 inputs.add(tx);
+                systemUtxoService.delete(sysUtxo.getTxid(), sysUtxo.getN());
             } else
                 break;
         }
@@ -140,9 +149,13 @@ public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
         String signHex = Api.SignDrivetx(createHex, "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
         String hex = Api.SendRawTransaction(signHex);
 
-        if (!StringUtils.isEmpty(hex))
+        if (!StringUtils.isEmpty(hex)) {
+            balanceHistory.setAddress(fchAddress);
+            balanceHistory.setType(methodName);
+            balanceHistory.setTimestamp(new Date());
+            balanceHistoryService.insert(balanceHistory);
             return true;
-        else
+        } else
             return false;
 
     }

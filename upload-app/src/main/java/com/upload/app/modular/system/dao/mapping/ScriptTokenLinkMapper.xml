@@ -103,7 +103,7 @@
 		<foreach collection="script" item="address" index="index" open="(" close=")" separator=",">
 			#{address}
 		</foreach>
-  		 and status != 3
+  		 and status != 3 and status != 5
 	</select>
 
 	<select id="findFromTokenByScript" resultType="java.math.BigInteger">
@@ -114,6 +114,7 @@
 		<foreach collection="script" item="address" index="index" open="(" close=")" separator=",">
 			#{address}
 		</foreach>
+		and status != 5
 	</select>
 
 </mapper>

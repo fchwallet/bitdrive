@@ -21,16 +21,10 @@ public class TokenDecodeServiceImpl implements TokenDecodeService {
     private ScriptTokenLinkService scriptTokenLinkService;
 
     @Resource
-    private ScriptSlpSendService scriptSlpSendService;
-
-    @Resource
     private ScriptUtxoTokenLinkService scriptUtxoTokenLinkService;
 
     @Resource
     private AddressScriptLinkService addressScriptLinkService;
-
-    @Resource
-    private ScriptTokenDestructionService scriptTokenDestructionService;
 
     @Resource
     private GenesisAddressService genesisAddressService;
@@ -40,8 +34,6 @@ public class TokenDecodeServiceImpl implements TokenDecodeService {
 
     @Resource
     private ScriptSlpService scriptSlpService;
-
-    Boolean sendFlag = false;
 
     @Override
     public Map<String, Object> decodeToken(String txid, JSONArray vins, JSONArray vouts, JSONObject vout, String content, JSONObject scriptPubKey, Integer n, StringBuffer scrpit, List<String> addressList) {
@@ -55,10 +47,7 @@ public class TokenDecodeServiceImpl implements TokenDecodeService {
         Boolean sendFlag = false;
         boolean flag = false;           // 销毁立flag, 如果最后是false并且当前的vin包含token，则销毁
 
-        Map<Integer, BigInteger> hashmap = new HashedMap();
-        hashmap.put(1, new BigInteger("0"));
-
-        Map<String, Object> result = decode(scriptPubKey, vout, n, txid, map, vins, hashmap,
+        Map<String, Object> result = decode(scriptPubKey, vout, n, txid, map, vins,
                flag, content, scrpit.toString(), addressList);
 
         return result;
@@ -99,7 +88,7 @@ public class TokenDecodeServiceImpl implements TokenDecodeService {
 
 
 
-    public Map<String, Object> decode(JSONObject scriptPubKey, JSONObject vout, Integer n, String txid, Map map, JSONArray vins, Map hashmap, Boolean flag,
+    public Map<String, Object> decode(JSONObject scriptPubKey, JSONObject vout, Integer n, String txid, Map map, JSONArray vins, Boolean flag,
                                       String OP_RETURN, String hexStr, List<String> addressList) {
 
         Map<String, Object> result = new HashedMap();

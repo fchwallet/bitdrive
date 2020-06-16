@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.upload.app.modular.system.dao.BalanceHistoryMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.upload.app.modular.system.model.BalanceHistory">
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="type" property="type" jdbcType="VARCHAR" />
+		<result column="change" property="change" jdbcType="INTEGER" />
+		<result column="timestamp" property="timestamp" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		address, `type`, `change`, `timestamp`
+	</sql>
+
+	<select id="findByAddress" resultType="com.upload.app.modular.system.model.BalanceHistory">
+		select
+		<include refid="Base_Column_List" />
+		from balance_history where address = #{address}
+	</select>
+
+	<insert id="insert" parameterType="com.upload.app.modular.system.model.BalanceHistory">
+		insert into `balance_history`
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="address != null" >
+				address,
+			</if>
+			<if test="type != null" >
+				`type`,
+			</if>
+			<if test="change != null" >
+				`change`,
+			</if>
+			<if test="timestamp != null" >
+				`timestamp`,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="address != null" >
+				#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null" >
+				#{type,jdbcType=VARCHAR},
+			</if>
+			<if test="change != null" >
+				#{change,jdbcType=INTEGER},
+			</if>
+			<if test="timestamp != null" >
+				#{timestamp,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+
+</mapper>

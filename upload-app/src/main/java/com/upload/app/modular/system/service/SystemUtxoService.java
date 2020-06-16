@@ -16,4 +16,8 @@ public interface SystemUtxoService {
 
     Map<String, Object> spendUtxo(String metadata, List<String> fchAddress, Integer size, String data, DriveUtxo du, Integer type);
 
+    Boolean terminateDrive(String address, String driveId) throws Exception;
+
+    int delete(String txid, Integer n);
+
 }

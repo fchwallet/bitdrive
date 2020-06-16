@@ -4,11 +4,13 @@ import com.alibaba.fastjson.JSONArray;
 import com.upload.app.core.rpc.Api;
 import com.upload.app.core.rpc.CommonTxOputDto;
 import com.upload.app.core.rpc.TxInputDto;
+import com.upload.app.modular.system.dao.DriveUtxoMapper;
 import com.upload.app.modular.system.dao.SystemUtxoMapper;
 import com.upload.app.modular.system.model.DriveUtxo;
 import com.upload.app.modular.system.model.SystemUtxo;
 import com.upload.app.modular.system.service.SystemUtxoService;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,13 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
     @Resource
     private SystemUtxoMapper systemUtxoMapper;
 
+    @Resource
+    private DriveUtxoMapper driveUtxoMapper;
+
+    @Resource
+    private SystemUtxoService systemUtxoService;
+
+    final String systemAddress = "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx";
 
     @Override
     public List<SystemUtxo> findByAddress(String address) {
@@ -62,7 +71,7 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
 
         BigDecimal sumFee = fee.add(metadatafee);
 
-        List<SystemUtxo> systemUtxoList = systemUtxoMapper.findByAddress("1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
+        List<SystemUtxo> systemUtxoList = systemUtxoMapper.findByAddress(systemAddress);
         List<TxInputDto> inputs = new ArrayList<>();
         BigDecimal v = new BigDecimal("0");                 //总的utxo钱
         BigDecimal f = sumFee.add(new BigDecimal("0.00001"));
@@ -101,7 +110,7 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
         try {
 
             String createHex = Api.CreateDrivetx(inputs, outputs);
-            String signHex = Api.SignDrivetx(createHex, "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
+            String signHex = Api.SignDrivetx(createHex, systemAddress);
             String hex = Api.SendRawTransaction(signHex);
             map.put("hex", hex);
             map.put("sumFee", sumFee);
@@ -112,6 +121,53 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
 
         return map;
 
+    }
+
+    @Override
+    public Boolean terminateDrive(String address, String driveId) throws Exception {
+
+        List<CommonTxOputDto> outputs = new ArrayList<>();
+
+        List<SystemUtxo> systemUtxoList = systemUtxoMapper.findByAddress(systemAddress);
+        List<TxInputDto> inputs = new ArrayList<>();
+        BigDecimal sysFee = new BigDecimal("0");
+        for (SystemUtxo sysUtxo : systemUtxoList) {
+            if (sysFee.compareTo(new BigDecimal("0.001")) < 0) {
+                sysFee = sysFee.add(new BigDecimal(sysUtxo.getValue()));
+                TxInputDto tx = new TxInputDto(sysUtxo.getTxid(), sysUtxo.getN(),"");
+                inputs.add(tx);
+                systemUtxoService.delete(sysUtxo.getTxid(), sysUtxo.getN());
+            } else
+                break;
+        }
+
+
+        DriveUtxo driveUtxo = driveUtxoMapper.findByDriveId(driveId);
+        TxInputDto tx = new TxInputDto(driveUtxo.getTxid(), driveUtxo.getN(),"");
+        inputs.add(tx);
+
+
+        String[] ads = {"1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqm0"};
+        CommonTxOputDto c1 = new CommonTxOputDto(ads, new BigDecimal("0.00001"), "", 1);
+        outputs.add(c1);
+        String[] sysad = {systemAddress};
+        sysFee = sysFee.subtract(new BigDecimal("0.00001"));
+        CommonTxOputDto c2 = new CommonTxOputDto(sysad, sysFee, 2);
+        outputs.add(c2);                                //找零
+
+        String createHex = Api.CreateDrivetx(inputs, outputs);
+        String signHex = Api.SignDrivetx(createHex, systemAddress);
+        String hex = Api.SendRawTransaction(signHex);
+        if (!StringUtils.isEmpty(hex))
+            return true;
+        else
+            return false;
+
+    }
+
+    @Override
+    public int delete(String txid, Integer n) {
+        return systemUtxoMapper.delete(txid, n);
     }
 
 }

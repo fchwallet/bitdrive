@@ -8,4 +8,6 @@ public interface CreateMapper {
 
     Create findByDriveId(String driveId);
 
+    int update(Create create);
+
 }
