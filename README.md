@@ -5,9 +5,9 @@ java implementation freedrive, see [architecture](./Freedrive-architecture.pdf)
 [2. update](#update)  
 [3. get](#get)  
 [4. get_drive_id](#get-drive_id)  
-[5. get_balance (todo)](#get-balance)  
-[6. get_tx_history (todo)](#get-tx-history)  
-[7. terminate_drive_id (todo)](#terminate-drive_id)  
+[5. get_balance](#get-balance)  
+[6. get_tx_history](#get-tx-history)  
+[7. terminate_drive_id](#terminate-drive_id)  
 
 ### 通用  
 >URL: http://freedrive.fchwallet.com:8442       
@@ -166,7 +166,6 @@ curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d 'fch_addr=
 }
 ```
 
-
 ### get tx history
 >获取余额变更记录     
 >接口名称: /api/get_tx_history
@@ -183,14 +182,13 @@ curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d 'fch_addr=
 	   {"type":"terminate_drive_id", "change":-10,"timestamp":1592011897},
 	   {"type":"get", "change":-2,"timestamp":1592011897},
 	   {"type":"get_drive_id", "change":-2,"timestamp":1592011897},
-	   {"type":"get_balance", "change":-2,"timestamp":1592011897},
-	   {"type":"self", "change":-2,"timestamp":1592011897}]
+	  ]
 }
 ```
 
 
 ### terminate drive_id
->冻结drive_id, 冻结后不再被修改。     
+>终止drive_id, 终止后无法再被修改。     
 >接口名称: /api/terminate_drive_id
 ```
 参数类型: ["application/json"]    
