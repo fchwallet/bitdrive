@@ -166,7 +166,6 @@ curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d 'fch_addr=
 }
 ```
 
-
 ### get tx history
 >获取余额变更记录     
 >接口名称: /api/get_tx_history
@@ -183,8 +182,7 @@ curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d 'fch_addr=
 	   {"type":"terminate_drive_id", "change":-10,"timestamp":1592011897},
 	   {"type":"get", "change":-2,"timestamp":1592011897},
 	   {"type":"get_drive_id", "change":-2,"timestamp":1592011897},
-	   {"type":"get_balance", "change":-2,"timestamp":1592011897},
-	   {"type":"self", "change":-2,"timestamp":1592011897}]
+	  ]
 }
 ```
 
