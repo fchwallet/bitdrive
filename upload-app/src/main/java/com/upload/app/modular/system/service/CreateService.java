@@ -10,4 +10,6 @@ public interface CreateService {
 
     int update(Create create);
 
+    Create findByData(String data);
+
 }

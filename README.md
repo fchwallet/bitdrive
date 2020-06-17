@@ -19,7 +19,7 @@ java implementation freedrive, see [architecture](./Freedrive-architecture.pdf)
 {"code":"100457","付费失败"}
 {"code":"200212","上传失败，请联系客服解决"}
 {"code":"200211","data大于5M"}
-{"code":"200212","用户积分不足"}
+{"code":"200214","用户积分不足"}
 {"code":"1001","sign验证失败"}
 {"code":"400","参数错误"}
 {"code":"400","参数错误"}
@@ -28,6 +28,9 @@ java implementation freedrive, see [architecture](./Freedrive-architecture.pdf)
 {"code":"1005","当前地址找不到相应记录"}
 {"code":"1006","找不到更新记录"}
 {"code":"1009","请传正确的json数据"}
+{"code":"200213","token余额和链上不对应请稍后重试"}
+{"code":"100456","该driveid已经结束"}
+
 
 ```	  
 
@@ -85,7 +88,7 @@ curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  -
 >从freedrive获取存储内容   
 >接口名称: /api/get
 
-查询单个drive_id的所有变更记录
+查询单个drive_id的所有变更记录(type = 1 为链接 type = 0 为 正常数据)
 ```
 参数类型: ["application/x-www-form-urlencoded"]  
 'fch_addr=F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT&drive_id=1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce'
@@ -103,12 +106,14 @@ curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  -
       { 
         "update_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
         "metadata": {},
-        "data": {}
+        "data": {},
+        "type": 1
       },
       {
         "update_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce" 
         "metadata": {},
-        "data": {}
+        "data": {},
+        "type": 0
       }
     ]
 }
@@ -177,11 +182,12 @@ curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d 'fch_addr=
 返回结果:
 {
    "code": 200,
-   "data":[{"type":"put", "change": -10, "timestamp":1592011897},
-	   {"type":"update", "change":-10,"timestamp":1592011897},
-	   {"type":"terminate_drive_id", "change":-10,"timestamp":1592011897},
-	   {"type":"get", "change":-2,"timestamp":1592011897},
-	   {"type":"get_drive_id", "change":-2,"timestamp":1592011897},
+   "data":[{"type":"put", "change": -10, "timestamp":2020-06-17 19:09:02},
+	   {"type":"update", "change":-10,"timestamp":2020-06-17 19:09:02},
+	   {"type":"terminate_drive_id", "change":-10,"timestamp":2020-06-17 19:09:02},
+	   {"type":"get", "change":-2,"timestamp":2020-06-17 19:09:02},
+	   {"type":"get_drive_id", "change":-2,"timestamp":2020-06-17 19:09:02},
+	   {"type":"recharge", "change":100,"timestamp":2020-06-17 19:09:02},
 	  ]
 }
 ```

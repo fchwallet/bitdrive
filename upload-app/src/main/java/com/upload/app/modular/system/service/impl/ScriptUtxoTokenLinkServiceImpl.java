@@ -15,7 +15,6 @@ public class ScriptUtxoTokenLinkServiceImpl implements ScriptUtxoTokenLinkServic
     @Resource
     private ScriptUtxoTokenLinkMapper scriptUtxoTokenLinkMapper;
 
-
     @Override
     public int insert(ScriptUtxoTokenLink scriptUtxoTokenLink) {
         return scriptUtxoTokenLinkMapper.insert(scriptUtxoTokenLink);

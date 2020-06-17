@@ -28,4 +28,9 @@ public class CreateServiceImpl implements CreateService {
         return createMapper.update(create);
     }
 
+    @Override
+    public Create findByData(String data) {
+        return createMapper.findByData(data);
+    }
+
 }

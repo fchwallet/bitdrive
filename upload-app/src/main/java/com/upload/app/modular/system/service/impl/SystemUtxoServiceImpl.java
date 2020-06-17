@@ -7,8 +7,10 @@ import com.upload.app.modular.system.dao.DriveUtxoMapper;
 import com.upload.app.modular.system.dao.SystemUtxoMapper;
 import com.upload.app.modular.system.model.Create;
 import com.upload.app.modular.system.model.DriveUtxo;
+import com.upload.app.modular.system.model.ScriptUtxoTokenLink;
 import com.upload.app.modular.system.model.SystemUtxo;
 import com.upload.app.modular.system.service.CreateService;
+import com.upload.app.modular.system.service.ScriptUtxoTokenLinkService;
 import com.upload.app.modular.system.service.SystemUtxoService;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +37,9 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
 
     @Resource
     private CreateService createService;
+
+    @Resource
+    private ScriptUtxoTokenLinkService scriptUtxoTokenLinkService;
 
     final String systemAddress = "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx";
 
@@ -176,6 +181,12 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
             delete.setTxid(driveUtxo.getTxid());
             delete.setN(driveUtxo.getN());
             driveUtxoMapper.delete(delete);
+            ScriptUtxoTokenLink sutl = new ScriptUtxoTokenLink();
+            sutl.setAddress(address);
+            sutl.setTxid(hex);
+            sutl.setAddress("00000000000000000000");
+            sutl.setScript("00000000000000000000");
+            scriptUtxoTokenLinkService.insert(sutl);
             return true;
         } else
             return false;

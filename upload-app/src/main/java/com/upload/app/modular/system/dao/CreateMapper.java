@@ -10,4 +10,6 @@ public interface CreateMapper {
 
     int update(Create create);
 
+    Create findByData(String data);
+
 }

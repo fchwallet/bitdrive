@@ -8,8 +8,6 @@ import com.upload.app.modular.system.model.*;
 import com.upload.app.modular.system.service.*;
 import com.upload.app.core.rpc.Api;
 import com.upload.app.core.util.Sha256;
-import org.apache.commons.collections.map.HashedMap;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,7 +67,7 @@ public class DecodeServiceImpl implements DecodeService {
 
     @Override
     @Transactional(rollbackFor=Exception.class)
-    public String decodeCreate(JSONArray jsonArray, BigDecimal sumFee, String drive) throws Exception {
+    public String decodeCreate(JSONArray jsonArray, BigDecimal sumFee, String drive, Integer size) throws Exception {
 
         for (Object ob : jsonArray) {
 
@@ -252,8 +250,6 @@ public class DecodeServiceImpl implements DecodeService {
 
                         String metadata = content;
 
-//                        tokenDecodeService.decodeToken(tx, vins, vouts, vout, content, scriptPubKey, voutn, script, addressList);
-
                         jb.put("driveId", driveId);
                         jb.put("metadata", metadata);
                         jb.put("n", voutn);
@@ -351,10 +347,19 @@ public class DecodeServiceImpl implements DecodeService {
 
                     Update update = new Update();
                     update.setMetadata(jb.getString("metadata"));
-                    update.setData(jb.getString("data"));
+//                    update.setData(jb.getString("data"));
                     update.setDriveId(drive);
                     update.setUpdateId(jb.getString("driveId"));
                     update.setFee(sumFee);
+
+                    if (size > 51200) {
+                        String fileName = Sha256.getSHA256(jb.getString("txid") + jb.getInteger("n"));
+                        String url = ouputFile(jb.getString("data"), fileName);
+                        update.setData(url);
+                        update.setType(1);
+                    } else {
+                        update.setData(jb.getString("data"));
+                    }
 
                     updateMapper.insert(update);
                     return update.getUpdateId();
@@ -369,11 +374,21 @@ public class DecodeServiceImpl implements DecodeService {
                     driveUtxoMapper.insert(driveUtxo);
 
                     Create create = new Create();
-                    create.setData(jb.getString("data"));
+//                    create.setData(jb.getString("data"));
                     create.setMetadata(jb.getString("metadata"));
                     create.setDriveId(jb.getString("driveId"));
                     create.setTxid(jb.getString("txid"));
                     create.setFee(sumFee);
+
+                    if (size > 51200) {
+                        String fileName = Sha256.getSHA256(jb.getString("txid") + jb.getInteger("n"));
+                        String url = ouputFile(jb.getString("data"), fileName);
+                        create.setData(url);
+                        create.setType(1);
+                    } else {
+                        create.setData(jb.getString("data"));
+                    }
+
                     createMapper.insert(create);
                     return create.getDriveId();
 
@@ -437,9 +452,6 @@ public class DecodeServiceImpl implements DecodeService {
                 Boolean flag = true;           // 销毁立flag, 如果最后是false并且当前的vin包含token，则销毁
 
                 for (Object v : vouts) {
-
-
-
 
                     JSONObject vout = (JSONObject)v;
 
@@ -825,10 +837,19 @@ public class DecodeServiceImpl implements DecodeService {
 
                     Update update = new Update();
                     update.setMetadata(jb.getString("metadata"));
-                    update.setData(jb.getString("data"));
                     update.setDriveId(driveList.get(0));
                     update.setUpdateId(jb.getString("driveId"));
                     update.setCreateDate(new Date());
+                    Integer size = jb.getString("data").getBytes().length;
+                    if (size > 51200) {
+                        String fileName = Sha256.getSHA256(jb.getString("txid") + jb.getInteger("n"));
+                        String url = ouputFile(jb.getString("data"), fileName);
+                        update.setData(url);
+                        update.setType(1);
+                    } else {
+                        update.setData(jb.getString("data"));
+                    }
+
                     updateMapper.insert(update);
 
 
@@ -844,11 +865,21 @@ public class DecodeServiceImpl implements DecodeService {
                         driveUtxoMapper.insert(driveUtxo);
 
                         Create create = new Create();
-                        create.setData(jb.getString("data"));
                         create.setMetadata(jb.getString("metadata"));
                         create.setDriveId(jb.getString("driveId"));
                         create.setTxid(jb.getString("txid"));
                         create.setCreateDate(new Date());
+
+                        Integer size = jb.getString("data").getBytes().length;
+                        if (size > 51200) {
+                            String fileName = Sha256.getSHA256(jb.getString("txid") + jb.getInteger("n"));
+                            String url = ouputFile(jb.getString("data"), fileName);
+                            create.setData(url);
+                            create.setType(1);
+                        } else {
+                            create.setData(jb.getString("data"));
+                        }
+
                         createMapper.insert(create);
 
 
@@ -965,9 +996,9 @@ public class DecodeServiceImpl implements DecodeService {
     }
 
 
-    public boolean ouputFile(String data, String fileName) throws Exception {
+    public String ouputFile(String data, String fileName) throws Exception {
 
-        File dest = new File(deposeFilesDir + fileName);
+        File dest = new File(deposeFilesDir + fileName+".txt");
 
         if (!dest.getParentFile().exists()) {
             dest.getParentFile().mkdirs();
@@ -990,8 +1021,8 @@ public class DecodeServiceImpl implements DecodeService {
                 bos.close();
             }
         }
-
-        return true;
+        String url = "http://localhost:8442/api/download?data=";
+        return url + fileName;
 
     }
 

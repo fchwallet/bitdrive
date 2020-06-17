@@ -1,13 +1,11 @@
 package com.upload.app.modular.api;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.upload.app.modular.system.model.AddressDriveLink;
 import com.upload.app.modular.system.model.FchXsvLink;
 import com.upload.app.modular.system.service.AddressDriveLinkService;
 import com.upload.app.modular.system.service.FchXsvLinkService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -38,14 +36,6 @@ public class StatisticsController {
     public JSONObject get() {
 
         JSONObject ob = new JSONObject();
-
-//        if (StringUtils.isEmpty(name)) {
-//            ob.put("code", 400);
-//            ob.put("msg", "参数错误");
-//            return ob;
-//        }
-
-//        if ("fch".equals(name.toLowerCase())) {
 
         List<FchXsvLink> fchXsvList = fchXsvLinkService.findByType(0);
 

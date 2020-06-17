@@ -12,10 +12,11 @@
 		<result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
 		<result column="fee" property="fee" jdbcType="DECIMAL"/>
 		<result column="status" property="status" jdbcType="INTEGER"/>
+		<result column="type" property="type" jdbcType="INTEGER"/>
 	</resultMap>
 
 	<sql id="Base_Column_List">
-		id, txid, drive_id, `data`, metadata, create_date, fee, status
+		id, txid, drive_id, `data`, metadata, create_date, fee, status, `type`
 	</sql>
 
 	<select id="findByDriveId" resultType="com.upload.app.modular.system.model.Create">
@@ -48,6 +49,9 @@
 			<if test="status != null" >
 				`status`,
 			</if>
+			<if test="type != null" >
+				`type`,
+			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides="," >
 			<if test="txid != null" >
@@ -71,6 +75,9 @@
 			<if test="status != null" >
 				#{status,jdbcType=INTEGER},
 			</if>
+			<if test="type != null" >
+				#{type,jdbcType=INTEGER},
+			</if>
 		</trim>
 	</insert>
 
@@ -83,5 +90,11 @@
 		</trim>
 		WHERE drive_id = #{driveId}
 	</update>
+
+	<select id="findByData" resultType="com.upload.app.modular.system.model.Create">
+		select
+		<include refid="Base_Column_List" />
+		from `create` where `data` = #{data}
+	</select>
 
 </mapper>

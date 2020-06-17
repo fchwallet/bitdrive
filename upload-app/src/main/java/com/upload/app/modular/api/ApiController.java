@@ -28,11 +28,16 @@ import com.upload.app.core.rpc.TxInputDto;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -47,9 +52,6 @@ import java.util.*;
 @RequestMapping("/api")
 @Slf4j
 public class ApiController extends BaseController {
-
-    @Autowired
-    private AccessService accessService;
 
     @Autowired
     private AddressDriveLinkService addressDriveLinkService;
@@ -181,7 +183,7 @@ public class ApiController extends BaseController {
 
 
         if (balance.compareTo(new BigInteger("1000000000")) < 0) {
-            result.put("code", 200212);
+            result.put("code", 200214);
             result.put("msg", "用户积分不足");
             return result;
         }
@@ -236,7 +238,7 @@ public class ApiController extends BaseController {
 
             put.add(hex);
             BigDecimal sumFee = (BigDecimal) sf;
-            String drive_id = decodeService.decodeCreate(put, sumFee, null);
+            String drive_id = decodeService.decodeCreate(put, sumFee, null, size);
             result.put("code", 200);
             result.put("drive_id",drive_id);
             Boolean f = blockchainPaymentService.payment(ad,1, "put");         // 查询钱,付费
@@ -327,8 +329,8 @@ public class ApiController extends BaseController {
         List<String> scriptList = addressScriptLinkService.findListByAddress(fxl.getAddressHash());
 
         if (scriptList == null || scriptList.size() < 1) {
-            result.put("code", 200212);
-            result.put("msg", "用户积分不足");
+            result.put("code", 200214);
+                result.put("msg", "用户积分不足");
             return result;
         }
 
@@ -346,7 +348,7 @@ public class ApiController extends BaseController {
 
 
         if (balance.compareTo(new BigInteger("1000000000")) < 0) {
-            result.put("code", 200212);
+            result.put("code", 200214);
             result.put("msg", "用户积分不足");
             return result;
         }
@@ -431,7 +433,7 @@ public class ApiController extends BaseController {
         if (!StringUtils.isEmpty(hex) && sf != null) {
             put.add(hex);
             BigDecimal sumFee = (BigDecimal) sf;
-            String update_id = decodeService.decodeCreate(put, sumFee, drive_id);
+            String update_id = decodeService.decodeCreate(put, sumFee, drive_id, size);
             result.put("code", 200);
             result.put("update_id",update_id);
 
@@ -478,7 +480,7 @@ public class ApiController extends BaseController {
         List<String> scriptList = addressScriptLinkService.findListByAddress(fchXsvLink.getAddressHash());
 
         if (scriptList == null || scriptList.size() < 1) {
-            json.put("code", 200212);
+            json.put("code", 200214);
             json.put("msg", "用户积分不足");
             return json;
         }
@@ -498,7 +500,7 @@ public class ApiController extends BaseController {
 
 
         if (balance.compareTo(new BigInteger("200000000")) < 0) {
-            json.put("code", 200212);
+            json.put("code", 200214);
             json.put("msg", "用户积分不足");
             return json;
         }
@@ -595,7 +597,7 @@ public class ApiController extends BaseController {
         List<String> scriptList = addressScriptLinkService.findListByAddress(fchXsvLink.getAddressHash());
 
         if (scriptList == null || scriptList.size() < 1) {
-            json.put("code", 200212);
+            json.put("code", 200214);
             json.put("msg", "用户积分不足");
             return json;
         }
@@ -613,7 +615,7 @@ public class ApiController extends BaseController {
         }
 
         if (balance.compareTo(new BigInteger("200000000")) < 0) {
-            json.put("code", 200212);
+            json.put("code", 200214);
             json.put("msg", "用户积分不足");
             return json;
         }
@@ -743,7 +745,7 @@ public class ApiController extends BaseController {
         List<String> scriptList = addressScriptLinkService.findListByAddress(fchXsvLink.getAddressHash());
 
         if (scriptList == null || scriptList.size() < 1) {
-            result.put("code", 200212);
+            result.put("code", 200214);
             result.put("msg", "用户积分不足");
             return result;
         }
@@ -760,7 +762,7 @@ public class ApiController extends BaseController {
         }
 
         if (balance.compareTo(new BigInteger("1000000000")) < 0) {
-            result.put("code", 200212);
+            result.put("code", 200214);
             result.put("msg", "用户积分不足");
             return result;
         }
@@ -825,7 +827,7 @@ public class ApiController extends BaseController {
             return result;
         }
 
-        Boolean b = systemUtxoService.terminateDrive(fch_addr, drive_id);   //1表示create
+        Boolean b = systemUtxoService.terminateDrive(fchXsvLink.getAddressHash(), drive_id);   //1表示create
 
         if (b) {
 
@@ -849,6 +851,29 @@ public class ApiController extends BaseController {
         return result;
 
     }
+
+    @ResponseBody
+    @RequestMapping(value="/download", method = RequestMethod.GET)
+    public ResponseEntity<byte[]> download(HttpServletRequest request, String data) throws Exception {
+
+//        String path = request.getServletContext().getRealPath("C:\\Users\\caiyile\\Desktop\\test\\");
+        String path = "C:\\Users\\caiyile\\Desktop\\test\\";
+
+        File file = new File(path + File.separator + data + ".txt");
+
+        ResponseEntity.BodyBuilder builder = ResponseEntity.ok();
+
+        builder.contentLength(file.length());
+
+        builder.contentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        builder.header("Content-Disposition", "attachment; filename=" + data + ".txt");
+
+        return builder.body(FileUtils.readFileToByteArray(file));
+
+    }
+
+
 
 }
 

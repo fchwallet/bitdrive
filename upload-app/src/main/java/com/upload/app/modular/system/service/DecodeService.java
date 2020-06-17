@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 
 public interface DecodeService {
 
-     String decodeCreate(JSONArray jsonArray, BigDecimal sumFee, String driveId) throws Exception;
+     String decodeCreate(JSONArray jsonArray, BigDecimal sumFee, String driveId, Integer size) throws Exception;
 
      void blockDecode(JSONArray jsonArray) throws Exception;
 
