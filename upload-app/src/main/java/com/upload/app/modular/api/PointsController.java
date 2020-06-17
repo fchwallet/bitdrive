@@ -2,26 +2,31 @@ package com.upload.app.modular.api;
 
 import com.alibaba.fastjson.JSONObject;
 import com.upload.app.core.rpc.Api;
+import com.upload.app.modular.system.model.BalanceHistory;
 import com.upload.app.modular.system.service.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
+import java.util.Date;
 
 @RestController
 @RequestMapping("/points")
 @Slf4j
 public class PointsController {
 
-    @Resource
+    @Autowired
     private SendService sendService;
 
+    @Autowired
+    private BalanceHistoryService balanceHistoryService;
+
     @ResponseBody
-    @RequestMapping(value="/recharge", method = RequestMethod.POST)
-    public JSONObject recharge(String address, String value) throws Exception {
+    @RequestMapping(value="/charge", method = RequestMethod.POST)
+    public JSONObject charge(String address, String value) throws Exception {
 
         JSONObject ob = new JSONObject();
 
@@ -34,6 +39,12 @@ public class PointsController {
         Boolean flag = sendService.Create(address, value);
 
         if (flag) {
+            BalanceHistory balanceHistory = new BalanceHistory();
+            balanceHistory.setTimestamp(new Date());
+            balanceHistory.setType("recharge");
+            balanceHistory.setAddress(address);
+            balanceHistory.setChange(Integer.valueOf(value));
+            balanceHistoryService.insert(balanceHistory);
             ob.put("code", 200);
             ob.put("msg", "充值成功");
         } else {

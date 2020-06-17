@@ -1,13 +1,14 @@
 package com.upload.app.modular.system.service.impl;
 
-import com.alibaba.fastjson.JSONArray;
 import com.upload.app.core.rpc.Api;
 import com.upload.app.core.rpc.CommonTxOputDto;
 import com.upload.app.core.rpc.TxInputDto;
 import com.upload.app.modular.system.dao.DriveUtxoMapper;
 import com.upload.app.modular.system.dao.SystemUtxoMapper;
+import com.upload.app.modular.system.model.Create;
 import com.upload.app.modular.system.model.DriveUtxo;
 import com.upload.app.modular.system.model.SystemUtxo;
+import com.upload.app.modular.system.service.CreateService;
 import com.upload.app.modular.system.service.SystemUtxoService;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +32,9 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
 
     @Resource
     private SystemUtxoService systemUtxoService;
+
+    @Resource
+    private CreateService createService;
 
     final String systemAddress = "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx";
 
@@ -124,6 +128,7 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
     }
 
     @Override
+    @Transactional(rollbackFor=Exception.class)
     public Boolean terminateDrive(String address, String driveId) throws Exception {
 
         List<CommonTxOputDto> outputs = new ArrayList<>();
@@ -143,12 +148,15 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
 
 
         DriveUtxo driveUtxo = driveUtxoMapper.findByDriveId(driveId);
+        if (driveUtxo == null)
+            return false;
+
         TxInputDto tx = new TxInputDto(driveUtxo.getTxid(), driveUtxo.getN(),"");
         inputs.add(tx);
 
 
-        String[] ads = {"1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqm0"};
-        CommonTxOputDto c1 = new CommonTxOputDto(ads, new BigDecimal("0.00001"), "", 1);
+        String[] ads = {"1111111111111111111114oLvT2"};
+        CommonTxOputDto c1 = new CommonTxOputDto(ads, new BigDecimal("0.00001"),2);
         outputs.add(c1);
         String[] sysad = {systemAddress};
         sysFee = sysFee.subtract(new BigDecimal("0.00001"));
@@ -158,9 +166,18 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
         String createHex = Api.CreateDrivetx(inputs, outputs);
         String signHex = Api.SignDrivetx(createHex, systemAddress);
         String hex = Api.SendRawTransaction(signHex);
-        if (!StringUtils.isEmpty(hex))
+        if (!StringUtils.isEmpty(hex)) {
+            Create create = new Create();
+            create.setStatus(1);
+            create.setDriveId(driveId);
+            createService.update(create);
+            DriveUtxo delete = new DriveUtxo();
+            delete.setDriveId(driveId);
+            delete.setTxid(driveUtxo.getTxid());
+            delete.setN(driveUtxo.getN());
+            driveUtxoMapper.delete(delete);
             return true;
-        else
+        } else
             return false;
 
     }

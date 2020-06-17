@@ -75,7 +75,7 @@
 	</insert>
 
 	<update id="update"  parameterType="com.upload.app.modular.system.model.Create">
-		UPDATE create
+		UPDATE `create`
 		<trim prefix= "set" suffixOverrides= ",">
 			<if test="status != null">
 				status = #{status},
