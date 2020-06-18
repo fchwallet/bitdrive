@@ -189,7 +189,7 @@ curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d 'fch_addr=
 	   {"type":"terminate_drive_id", "change":-10,"timestamp":2020-06-17 19:09:02},
 	   {"type":"get", "change":-2,"timestamp":2020-06-17 19:09:02},
 	   {"type":"get_drive_id", "change":-2,"timestamp":2020-06-17 19:09:02},
-	   {"type":"recharge", "change":100,"timestamp":2020-06-17 19:09:02},
+	   {"type":"charge", "change":100,"timestamp":2020-06-17 19:09:02},
 	  ]
 }
 ```
