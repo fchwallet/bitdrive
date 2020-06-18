@@ -99,20 +99,21 @@ curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  -
     "put":
     {
       "metadata": {},
-      "data": {}
+      "data": {},
+      "type": 0
     }
     "update":
     [
       { 
         "update_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
-        "metadata": {},
-        "data": {},
+        "metadata1": {},
+        "data": {http://xxx.xxx.xxx},
         "type": 1
       },
       {
         "update_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce" 
         "metadata": {},
-        "data": {},
+        "data": {0101},
         "type": 0
       }
     ]
@@ -128,7 +129,8 @@ curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  -
     "code":200,
     { 
       "metadata": {},
-      "data": {}
+      "data": {},
+      "type": 0
     }
 }
 
