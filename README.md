@@ -31,6 +31,12 @@ java implementation freedrive, see [architecture](./Freedrive-architecture.pdf)
 {"code":"200213","token余额和链上不对应请稍后重试"}
 {"code":"100456","该driveid已经结束"}
 
+计费说明：（每次请求扣除一次）
+{put:                  10积分}
+{update:               10积分}
+{get:                  2积分}
+{get_drive_id:         2积分}
+{terminate_drive_id:   10积分}
 
 ```	  
 
@@ -173,6 +179,11 @@ curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d 'fch_addr=
 }
 ```
 
+curl example
+```
+curl http://freedrive.fchwallet.com:8442/api/get_balance -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK ' 
+```
+
 ### get tx history
 >获取余额变更记录     
 >接口名称: /api/get_tx_history
@@ -194,6 +205,10 @@ curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d 'fch_addr=
 }
 ```
 
+curl example
+```
+curl http://freedrive.fchwallet.com:8442/api/get_tx_history -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK'      
+```
 
 ### terminate drive_id
 >终止drive_id, 终止后无法再被修改。     
@@ -210,3 +225,9 @@ curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d 'fch_addr=
    "code": 200,
 }
 ```
+
+curl example
+```
+curl http://freedrive.fchwallet.com:8442/api/terminate_drive_id  -X POST  -d @terminate_drive_id.json  --header "Content-Type:application/json"
+```
+
