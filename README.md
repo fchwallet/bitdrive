@@ -106,7 +106,7 @@ curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  -
     [
       { 
         "update_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
-        "metadata1": {},
+        "metadata": {},
         "data": "http://xxx.xxx.xxx",
         "type": 1
       },
