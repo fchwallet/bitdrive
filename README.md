@@ -112,7 +112,7 @@ curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  -
     [
       { 
         "update_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
-        "metadata1": {},
+        "metadata": {},
         "data": "http://xxx.xxx.xxx",
         "type": 1
       },
@@ -200,7 +200,7 @@ curl http://freedrive.fchwallet.com:8442/api/get_balance -X POST  -d 'fch_addr=F
 	   {"type":"terminate_drive_id", "change":-10,"timestamp":2020-06-17 19:09:02},
 	   {"type":"get", "change":-2,"timestamp":2020-06-17 19:09:02},
 	   {"type":"get_drive_id", "change":-2,"timestamp":2020-06-17 19:09:02},
-	   {"type":"recharge", "change":100,"timestamp":2020-06-17 19:09:02},
+	   {"type":"charge", "change":100,"timestamp":2020-06-17 19:09:02},
 	  ]
 }
 ```
