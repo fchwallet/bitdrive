@@ -88,7 +88,7 @@ curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  -
 >从freedrive获取存储内容   
 >接口名称: /api/get
 
-查询单个drive_id的所有变更记录(type = 1 为链接 type = 0 为 正常数据)
+查询单个drive_id的所有变更记录(type = 1 data的数据为链接 type = 0  data数据为正常数据)
 ```
 参数类型: ["application/x-www-form-urlencoded"]  
 'fch_addr=F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT&drive_id=1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce'
@@ -99,7 +99,7 @@ curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  -
     "put":
     {
       "metadata": {},
-      "data": {},
+      "data": "0101",
       "type": 0
     }
     "update":
@@ -107,13 +107,13 @@ curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  -
       { 
         "update_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
         "metadata1": {},
-        "data": {http://xxx.xxx.xxx},
+        "data": "http://xxx.xxx.xxx",
         "type": 1
       },
       {
         "update_id": "1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce" 
         "metadata": {},
-        "data": {0101},
+        "data": "0101",
         "type": 0
       }
     ]
