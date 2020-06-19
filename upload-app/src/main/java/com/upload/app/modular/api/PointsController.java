@@ -41,7 +41,7 @@ public class PointsController {
         if (flag) {
             BalanceHistory balanceHistory = new BalanceHistory();
             balanceHistory.setTimestamp(new Date());
-            balanceHistory.setType("recharge");
+            balanceHistory.setType("charge");
             balanceHistory.setAddress(address);
             balanceHistory.setChange(Integer.valueOf(value));
             balanceHistoryService.insert(balanceHistory);

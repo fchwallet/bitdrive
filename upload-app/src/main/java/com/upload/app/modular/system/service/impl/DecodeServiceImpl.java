@@ -8,6 +8,7 @@ import com.upload.app.modular.system.model.*;
 import com.upload.app.modular.system.service.*;
 import com.upload.app.core.rpc.Api;
 import com.upload.app.core.util.Sha256;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,7 +64,7 @@ public class DecodeServiceImpl implements DecodeService {
     @Resource
     private ScriptTokenDestructionService scriptTokenDestructionService;
 
-    static String deposeFilesDir = "C:\\Users\\caiyile\\Desktop\\test\\";
+    static String deposeFilesDir = "/java/testUpload/data/";
 
     @Override
     @Transactional(rollbackFor=Exception.class)
@@ -406,6 +407,7 @@ public class DecodeServiceImpl implements DecodeService {
     }
 
     @Override
+    @Transactional(rollbackFor=Exception.class)
     public void blockDecode(JSONArray jsonArray) throws Exception {
 
         for (Object ob : jsonArray) {
@@ -840,18 +842,18 @@ public class DecodeServiceImpl implements DecodeService {
                     update.setDriveId(driveList.get(0));
                     update.setUpdateId(jb.getString("driveId"));
                     update.setCreateDate(new Date());
-                    Integer size = jb.getString("data").getBytes().length;
-                    if (size > 51200) {
-                        String fileName = Sha256.getSHA256(jb.getString("txid") + jb.getInteger("n"));
-                        String url = ouputFile(jb.getString("data"), fileName);
-                        update.setData(url);
-                        update.setType(1);
-                    } else {
-                        update.setData(jb.getString("data"));
+                    if (!StringUtils.isEmpty(jb.getString("data"))) {
+                        Integer size = jb.getString("data").getBytes().length;
+                        if (size > 51200) {
+                            String fileName = Sha256.getSHA256(jb.getString("txid") + jb.getInteger("n"));
+                            String url = ouputFile(jb.getString("data"), fileName);
+                            update.setData(url);
+                            update.setType(1);
+                        } else {
+                            update.setData(jb.getString("data"));
+                        }
+                        updateMapper.insert(update);
                     }
-
-                    updateMapper.insert(update);
-
 
                 } else {
 
@@ -869,15 +871,16 @@ public class DecodeServiceImpl implements DecodeService {
                         create.setDriveId(jb.getString("driveId"));
                         create.setTxid(jb.getString("txid"));
                         create.setCreateDate(new Date());
-
-                        Integer size = jb.getString("data").getBytes().length;
-                        if (size > 51200) {
-                            String fileName = Sha256.getSHA256(jb.getString("txid") + jb.getInteger("n"));
-                            String url = ouputFile(jb.getString("data"), fileName);
-                            create.setData(url);
-                            create.setType(1);
-                        } else {
-                            create.setData(jb.getString("data"));
+                        if (!StringUtils.isEmpty(jb.getString("data"))) {
+                            Integer size = jb.getString("data").getBytes().length;
+                            if (size > 51200) {
+                                String fileName = Sha256.getSHA256(jb.getString("txid") + jb.getInteger("n"));
+                                String url = ouputFile(jb.getString("data"), fileName);
+                                create.setData(url);
+                                create.setType(1);
+                            } else {
+                                create.setData(jb.getString("data"));
+                            }
                         }
 
                         createMapper.insert(create);

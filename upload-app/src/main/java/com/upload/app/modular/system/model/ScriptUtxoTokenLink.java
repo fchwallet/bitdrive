@@ -12,6 +12,16 @@ public class ScriptUtxoTokenLink {
 
     private String address;
 
+    private String tokenId;
+
+    public String getTokenId() {
+        return tokenId;
+    }
+
+    public void setTokenId(String tokenId) {
+        this.tokenId = tokenId;
+    }
+
     public String getAddress() {
         return address;
     }

@@ -76,7 +76,7 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
         String[] address = fchAddress.toArray(new String[0]);
 
         BigDecimal sizefree = new BigDecimal(size).divide(new BigDecimal("2")).setScale(8);    // 设置8位小数
-        BigDecimal fee = new BigDecimal("0.00000001").multiply(sizefree);
+        BigDecimal fee = (new BigDecimal("0.00000001").multiply(sizefree)).setScale(8, BigDecimal.ROUND_HALF_UP);
 
         BigDecimal sumFee = fee.add(metadatafee);
 
@@ -186,6 +186,7 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
             sutl.setTxid(hex);
             sutl.setAddress("00000000000000000000");
             sutl.setScript("00000000000000000000");
+            sutl.setTokenId("00000000000000000000");
             scriptUtxoTokenLinkService.insert(sutl);
             return true;
         } else

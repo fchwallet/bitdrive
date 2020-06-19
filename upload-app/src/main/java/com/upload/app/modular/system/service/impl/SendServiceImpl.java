@@ -74,7 +74,7 @@ public class SendServiceImpl implements SendService {
 
         BigInteger balance = toAssets.subtract(fromAssets);
 
-        List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fchXsvLink.getAddressHash());
+        List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fchXsvLink.getAddressHash(), tokenId);
         BigInteger sumAmount = new BigInteger("0");
 
         for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {

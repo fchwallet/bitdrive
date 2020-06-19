@@ -9,10 +9,11 @@
 		<result column="n" property="n" jdbcType="INTEGER"/>
 		<result column="value" property="value" jdbcType="VARCHAR"/>
 		<result column="address" property="address" jdbcType="VARCHAR"/>
+		<result column="token_id" property="tokenId" jdbcType="VARCHAR"/>
 	</resultMap>
 
 	<sql id="Base_Column_List">
-		script, txid, n, `value`, address
+		script, txid, n, `value`, address, token_id
 	</sql>
 
 	<insert id="insert" parameterType="com.upload.app.modular.system.model.ScriptUtxoTokenLink">
@@ -33,6 +34,9 @@
 			<if test="address != null" >
 				`address`,
 			</if>
+			<if test="tokenId != null" >
+				`token_id`,
+			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides="," >
 			<if test="script != null" >
@@ -50,6 +54,9 @@
 			<if test="address != null" >
 				#{address,jdbcType=VARCHAR},
 			</if>
+			<if test="tokenId != null" >
+				#{tokenId,jdbcType=VARCHAR},
+			</if>
 		</trim>
 	</insert>
 
@@ -65,7 +72,7 @@
 		<foreach collection="script" item="address" index="index" open="(" close=")" separator=",">
 			#{address}
 		</foreach>
-		and address = #{addressHash}
+		and address = #{addressHash} and token_id = #{tokenId}
 	</select>
 
 </mapper>

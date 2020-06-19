@@ -11,6 +11,6 @@ public interface ScriptUtxoTokenLinkService {
 
     int deleteUtxoToken(String txid, Integer n);
 
-    List<ScriptUtxoTokenLink> findListByScript(List<String> script, String addressHash);
+    List<ScriptUtxoTokenLink> findListByScript(List<String> script, String addressHash, String tokenId);
 
 }

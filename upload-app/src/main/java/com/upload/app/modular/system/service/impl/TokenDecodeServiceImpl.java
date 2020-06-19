@@ -93,7 +93,14 @@ public class TokenDecodeServiceImpl implements TokenDecodeService {
 
         Map<String, Object> result = new HashedMap();
 
-        String slpp = OP_RETURN.substring(0, 20);
+        String slpp;
+
+        try {
+            slpp = OP_RETURN.substring(0, 20);
+        } catch (Exception e) {
+            return null;
+        }
+
 
         if (!"06534c502b2b00020201".equals(slpp)) {
             return null;  // continue
@@ -316,6 +323,7 @@ public class TokenDecodeServiceImpl implements TokenDecodeService {
                 UtxoToken.setTxid(txid);
                 UtxoToken.setValue(value);
                 UtxoToken.setScript(hexStr);
+                UtxoToken.setTokenId(tokenId);
                 scriptUtxoTokenLinkService.insert(UtxoToken);
 
                 int count = addressScriptLinkService.findCount(address, hexStr);
@@ -435,6 +443,7 @@ public class TokenDecodeServiceImpl implements TokenDecodeService {
                 UtxoToken.setTxid(tx);
                 UtxoToken.setValue(value);
                 UtxoToken.setScript(hexStr);
+                UtxoToken.setTokenId(token_id_str);
                 scriptUtxoTokenLinkService.insert(UtxoToken);
 
                 int count = addressScriptLinkService.findCount(address, hexStr);
@@ -572,6 +581,7 @@ public class TokenDecodeServiceImpl implements TokenDecodeService {
             scriptUtxoTokenLink.setTxid(tx);
             scriptUtxoTokenLink.setValue(value);
             scriptUtxoTokenLink.setScript(toAddressHash);         // 脚本
+            scriptUtxoTokenLink.setTokenId(token_id_str);
             UtxoTokenList.add(scriptUtxoTokenLink);
             int count = addressScriptLinkService.findCount(address, toAddressHash);
             if (count < 1) {

@@ -26,8 +26,8 @@ public class ScriptUtxoTokenLinkServiceImpl implements ScriptUtxoTokenLinkServic
     }
 
     @Override
-    public List<ScriptUtxoTokenLink> findListByScript(List<String> script, String addressHash) {
-        return scriptUtxoTokenLinkMapper.findListByScript(script, addressHash);
+    public List<ScriptUtxoTokenLink> findListByScript(List<String> script, String addressHash, String tokenId) {
+        return scriptUtxoTokenLinkMapper.findListByScript(script, addressHash, tokenId);
     }
 
 }

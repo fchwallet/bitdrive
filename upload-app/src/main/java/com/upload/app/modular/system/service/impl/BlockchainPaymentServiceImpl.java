@@ -1,5 +1,7 @@
 package com.upload.app.modular.system.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.upload.app.core.rpc.Api;
 import com.upload.app.core.rpc.CommonTxOputDto;
 import com.upload.app.core.rpc.TxInputDto;
@@ -45,6 +47,7 @@ public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
     @Resource
     private BalanceHistoryService balanceHistoryService;
 
+
     @Override
     public Boolean payment(String fchAddress, Integer type, String methodName) throws Exception {
 
@@ -57,7 +60,7 @@ public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
 
         BigInteger balance = toAssets.subtract(fromAssets);
 
-        List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fchXsvLink.getAddressHash());
+        List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fchXsvLink.getAddressHash(), tokenId);
 
         BigInteger sumAmount = new BigInteger("0");
 
@@ -150,6 +153,17 @@ public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
         String hex = Api.SendRawTransaction(signHex);
 
         if (!StringUtils.isEmpty(hex)) {
+//            JSONObject json = Api.GetRawTransaction(hex);
+//            JSONArray vouts = json.getJSONArray("vout");
+//            for (Object o : vouts) {
+//                JSONObject v = (JSONObject)o;
+//                Integer n = v.getInteger("n");
+//                if (n == 0) {
+//
+//                } else if (n == 1) {
+//
+//                }
+//            }
             balanceHistory.setAddress(fchAddress);
             balanceHistory.setType(methodName);
             balanceHistory.setTimestamp(new Date());

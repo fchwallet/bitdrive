@@ -275,6 +275,7 @@
     </dependencies>
 
     <build>
+        <finalName>driveJ</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
