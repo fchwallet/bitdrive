@@ -2,6 +2,7 @@ package com.upload.app.modular.system.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.upload.app.core.redission.DistributedRedisLock;
 import com.upload.app.core.util.UnicodeUtil;
 import com.upload.app.modular.system.dao.*;
 import com.upload.app.modular.system.model.*;
@@ -63,6 +64,9 @@ public class DecodeServiceImpl implements DecodeService {
 
     @Resource
     private ScriptTokenDestructionService scriptTokenDestructionService;
+
+    @Resource
+    private BalanceHistoryService balanceHistoryService;
 
     static String deposeFilesDir = "/java/testUpload/data/";
 
@@ -425,6 +429,8 @@ public class DecodeServiceImpl implements DecodeService {
 
                 JSONArray vins = txTransaction.getJSONArray("vin");
 
+                Integer blockheight = txTransaction.getInteger("blockheight");
+
                 List<String> driveList = authorityVinsList(vins);
 
                 List<ScriptTokenLink> scriptTokenLink = null;
@@ -463,7 +469,12 @@ public class DecodeServiceImpl implements DecodeService {
 
                     DriveUtxo du = driveUtxoMapper.findByTxidAndN(tx, voutn);
                     if (du != null)
-                        continue;
+                        break;
+
+
+                    ScriptUtxoTokenLink scriptUtxoTokenLink = scriptUtxoTokenLinkService.findUtxoToken(tx, voutn);
+                    if (scriptUtxoTokenLink != null)
+                        break;
 
                     String n = UnicodeUtil.intToHex(voutn);
 
@@ -617,53 +628,55 @@ public class DecodeServiceImpl implements DecodeService {
 
                         String metadata = content;
 
-                        Map<String, Object> map = tokenDecodeService.decodeToken(tx, vins, vouts, vout, content, scriptPubKey, voutn, script, addressList);
+                        if (blockheight != null && blockheight > 0) {
+                            Map<String, Object> map = tokenDecodeService.decodeToken(tx, vins, vouts, vout, content, scriptPubKey, voutn, script, addressList);
 
-                        if (map != null) {
+                            if (map != null) {
 
-                            Object fob = map.get("flag");
+                                Object fob = map.get("flag");
 
-                            if (fob != null) {
-                                if (!(Boolean) fob && flag)
-                                    flag = false;
-                            }
+                                if (fob != null) {
+                                    if (!(Boolean) fob && flag)
+                                        flag = false;
+                                }
 
-                            Object slpOb = map.get("SlpSendList");
-                            if (slpOb != null) {
-                                SlpSendList.addAll((List<ScriptSlpSend>) slpOb);
-                            }
+                                Object slpOb = map.get("SlpSendList");
+                                if (slpOb != null) {
+                                    SlpSendList.addAll((List<ScriptSlpSend>) slpOb);
+                                }
 
-                            Object tokenOb = map.get("TokenAssetsList");
-                            if (tokenOb != null) {
-                                TokenAssetsList.addAll((List<ScriptTokenLink>)tokenOb);
-                            }
+                                Object tokenOb = map.get("TokenAssetsList");
+                                if (tokenOb != null) {
+                                    TokenAssetsList.addAll((List<ScriptTokenLink>) tokenOb);
+                                }
 
-                            Object utOb = map.get("UtxoTokenList");
-                            if (utOb != null) {
-                                UtxoTokenList.addAll((List<ScriptUtxoTokenLink>)utOb);
-                            }
+                                Object utOb = map.get("UtxoTokenList");
+                                if (utOb != null) {
+                                    UtxoTokenList.addAll((List<ScriptUtxoTokenLink>) utOb);
+                                }
 
-                            Object asOb = map.get("addressScriptLink");
-                            if (asOb != null) {
-                                addressScriptLink.addAll((List<AddressScriptLink>)asOb);
-                            }
+                                Object asOb = map.get("addressScriptLink");
+                                if (asOb != null) {
+                                    addressScriptLink.addAll((List<AddressScriptLink>) asOb);
+                                }
 
-                            Object sfOb = map.get("sendFlag");
-                            if (sfOb != null) {
+                                Object sfOb = map.get("sendFlag");
+                                if (sfOb != null) {
 
-                                if ((Boolean) sfOb || sendFlag)
-                                    sendFlag = true;
+                                    if ((Boolean) sfOb || sendFlag)
+                                        sendFlag = true;
 
-                            }
+                                }
 
-                            Object ta = map.get("toAmount");
-                            if (ta != null) {
-                                toAmount = toAmount.add((BigInteger)ta);
-                            }
+                                Object ta = map.get("toAmount");
+                                if (ta != null) {
+                                    toAmount = toAmount.add((BigInteger) ta);
+                                }
 
-                            Object fa = map.get("fromAmount");
-                            if (ta != null) {
-                                fromAmount = (BigInteger)fa;
+                                Object fa = map.get("fromAmount");
+                                if (ta != null) {
+                                    fromAmount = (BigInteger) fa;
+                                }
                             }
                         }
 
@@ -734,35 +747,53 @@ public class DecodeServiceImpl implements DecodeService {
 
                 }
 
-                if (flag && sendFlag && fromAmount.compareTo(toAmount) >= 0) {
+                if (blockheight != null && blockheight > 0) {
 
-                    if (SlpSendList != null) {
-                        for (ScriptSlpSend slpSend : SlpSendList) {
-                            scriptSlpSendService.insertSlpSend(slpSend);
+                    if (flag && sendFlag && fromAmount.compareTo(toAmount) >= 0) {
+
+                        if (SlpSendList != null) {
+                            for (ScriptSlpSend slpSend : SlpSendList) {
+                                scriptSlpSendService.insertSlpSend(slpSend);
+                            }
                         }
-                    }
 
-                    if (TokenAssetsList != null) {
-                        for (ScriptTokenLink st : TokenAssetsList) {
-                            scriptTokenLinkService.insert(st);
+                        if (TokenAssetsList != null) {
+                            for (ScriptTokenLink st : TokenAssetsList) {
+                                scriptTokenLinkService.insert(st);
+                            }
                         }
-                    }
 
-                    if (UtxoTokenList != null) {
-                        for (ScriptUtxoTokenLink sut : UtxoTokenList) {
-                            scriptUtxoTokenLinkService.insert(sut);
+                        if (UtxoTokenList != null) {
+                            for (ScriptUtxoTokenLink sut : UtxoTokenList) {
+                                scriptUtxoTokenLinkService.insert(sut);
+                            }
                         }
-                    }
 
-                    if (addressScriptLink != null) {
-                        for (AddressScriptLink asl: addressScriptLink) {
-                            addressScriptLinkService.insert(asl);
+                        if (addressScriptLink != null) {
+                            for (AddressScriptLink asl : addressScriptLink) {
+                                addressScriptLinkService.insert(asl);
+                            }
                         }
-                    }
 
 
-                    if (fromAmount.compareTo(toAmount) > 0) {
-                        BigInteger amt = fromAmount.subtract(toAmount);
+                        if (fromAmount.compareTo(toAmount) > 0) {
+                            BigInteger amt = fromAmount.subtract(toAmount);
+
+                            ScriptTokenDestruction tokenDestruction = new ScriptTokenDestruction();
+                            tokenDestruction.setScript(scriptTokenLink.get(0).getScript());
+                            tokenDestruction.setTxid(tx);
+                            tokenDestruction.setN(scriptTokenLink.get(0).getVout());
+                            scriptTokenDestructionService.insert(tokenDestruction);
+                            ScriptTokenLink update = new ScriptTokenLink();
+                            update.setTokenId(scriptTokenLink.get(0).getTokenId());
+                            update.setStatus(3);
+                            update.setTxid(tx);
+                            update.setToken(amt);
+                            update.setScript(scriptTokenLink.get(0).getScript());
+                            scriptTokenLinkService.insert(update);
+
+                        }
+                    } else if (flag && sendFlag && fromAmount.compareTo(toAmount) < 0) {
 
                         ScriptTokenDestruction tokenDestruction = new ScriptTokenDestruction();
                         tokenDestruction.setScript(scriptTokenLink.get(0).getScript());
@@ -773,37 +804,51 @@ public class DecodeServiceImpl implements DecodeService {
                         update.setTokenId(scriptTokenLink.get(0).getTokenId());
                         update.setStatus(3);
                         update.setTxid(tx);
-                        update.setToken(amt);
+                        update.setToken(fromAmount);
                         update.setScript(scriptTokenLink.get(0).getScript());
                         scriptTokenLinkService.insert(update);
 
+                        BalanceHistory bh = new BalanceHistory();
+                        String a = fromAmount.divide(new BigInteger("100000000")).toString();
+                        bh.setChange(Integer.valueOf("-" + a));
+                        bh.setTimestamp(new Date());
+                        bh.setType("destruction");
+                        List<String> adHash = addressScriptLinkService.findByScript(scriptTokenLink.get(0).getScript());
+                        for (String ad : adHash) {
+                            FchXsvLink address = fchXsvLinkMapper.findByHash(ad);
+                            if (address != null && (!"1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx".equals(address.getFchAddress()) && !"18x7ZqhUHV3NgCGAw3NPEsGbEZ5i6beyD6".equals(address.getFchAddress()))) {
+                                bh.setAddress(address.getFchAddress());
+                                balanceHistoryService.insert(bh);
+                            }
+                        }
+
+
                     }
-                }
 
-                if (!flag && scriptTokenLink != null) {            //销毁
+                    if (!flag && scriptTokenLink != null) {            //销毁
 
-                    if (scriptTokenLink != null) {
+                        if (scriptTokenLink != null) {
 
-                        for (ScriptTokenLink scriptToken : scriptTokenLink) {
+                            for (ScriptTokenLink scriptToken : scriptTokenLink) {
 
-                            ScriptTokenDestruction tokenDestruction = new ScriptTokenDestruction();
-                            tokenDestruction.setScript(scriptToken.getScript());
-                            tokenDestruction.setTxid(tx);
-                            tokenDestruction.setN(scriptToken.getVout());
-                            scriptTokenDestructionService.insert(tokenDestruction);
-                            ScriptTokenLink update = new ScriptTokenLink();
-                            update.setTokenId(scriptToken.getTokenId());
-                            update.setStatus(3);
-                            update.setTxid(tx);
-                            update.setToken(scriptToken.getToken());
-                            update.setScript(scriptToken.getScript());
-                            scriptTokenLinkService.insert(update);
+                                ScriptTokenDestruction tokenDestruction = new ScriptTokenDestruction();
+                                tokenDestruction.setScript(scriptToken.getScript());
+                                tokenDestruction.setTxid(tx);
+                                tokenDestruction.setN(scriptToken.getVout());
+                                scriptTokenDestructionService.insert(tokenDestruction);
+                                ScriptTokenLink update = new ScriptTokenLink();
+                                update.setTokenId(scriptToken.getTokenId());
+                                update.setStatus(3);
+                                update.setTxid(tx);
+                                update.setToken(scriptToken.getToken());
+                                update.setScript(scriptToken.getScript());
+                                scriptTokenLinkService.insert(update);
 
+                            }
                         }
                     }
+
                 }
-
-
 
                 for (AddressDriveLink addressDrive : addressDriveList) {
 

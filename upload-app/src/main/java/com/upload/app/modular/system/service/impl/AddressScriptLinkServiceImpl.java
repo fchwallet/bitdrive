@@ -29,4 +29,9 @@ public class AddressScriptLinkServiceImpl implements AddressScriptLinkService {
         return addressScriptLinkMapper.findListByAddress(address);
     }
 
+    @Override
+    public List<String> findByScript(String script) {
+        return addressScriptLinkMapper.findByScript(script);
+    }
+
 }

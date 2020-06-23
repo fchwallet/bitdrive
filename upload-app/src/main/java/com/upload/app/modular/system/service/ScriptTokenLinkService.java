@@ -17,7 +17,7 @@ public interface ScriptTokenLinkService {
 
     ScriptTokenLink findByTokenAssetsStatus(String txid, Integer vout, Integer status);
 
-    List<ScriptTokenLink> selectByTxid(String txid);
+    List<ScriptTokenLink> selectByTxid(String txid, Integer vout);
 
     List<ScriptTokenLink> tokenVin(JSONArray vins);
 

@@ -75,4 +75,11 @@
 		and address = #{addressHash} and token_id = #{tokenId}
 	</select>
 
+	<select id="findUtxoToken" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+		`script_utxo_token_link` where txid = #{txid} and n = #{n} limit 0,1
+	</select>
+
 </mapper>

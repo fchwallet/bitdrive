@@ -92,7 +92,7 @@
 		SELECT
 		<include refid="Base_Column_List" />
 		FROM
-		`script_token_link` where txid = #{txid}
+		`script_token_link` where txid = #{txid} and vout = #{vout}
 	</select>
 
 	<select id="findToTokenByScript" resultType="java.math.BigInteger">

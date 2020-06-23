@@ -330,7 +330,7 @@ public class Api {
 	 */
 	public static String SendToAddress(String address, BigDecimal amount) throws Exception {
 
-		URL url = new URL("http://" + user + ':' + password + "@" + "192.168.0.12" + ":" + port + "/");
+		URL url = new URL("http://" + user + ':' + password + "@" + "192.168.0.34" + ":" + port + "/");
 		BitClient bitClient = new BitClient(url);
 		String relust = bitClient.sendToAddress(address, amount);
 		return relust;

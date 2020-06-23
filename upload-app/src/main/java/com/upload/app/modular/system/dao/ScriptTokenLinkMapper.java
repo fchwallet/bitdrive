@@ -16,7 +16,7 @@ public interface ScriptTokenLinkMapper {
 
     ScriptTokenLink findByTokenAssetsStatus(@Param("txid") String txid, @Param("vout") Integer vout, @Param("status") Integer status);
 
-    List<ScriptTokenLink> selectByTxid(String txid);
+    List<ScriptTokenLink> selectByTxid(@Param("txid")String txid, @Param("vout") Integer vout);
 
     BigInteger findToTokenByScript(@Param("script") List<String> script);
 

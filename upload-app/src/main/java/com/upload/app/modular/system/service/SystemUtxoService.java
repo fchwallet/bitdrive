@@ -14,7 +14,7 @@ public interface SystemUtxoService {
 
     int insert(SystemUtxo systemUtxo);
 
-    Map<String, Object> spendUtxo(String metadata, List<String> fchAddress, Integer size, String data, DriveUtxo du, Integer type);
+    Map<String, Object> spendUtxo(String metadata, List<String> fchAddress, Integer size, String data, DriveUtxo du, Integer type) throws InterruptedException;
 
     Boolean terminateDrive(String address, String driveId) throws Exception;
 

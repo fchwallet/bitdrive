@@ -3,9 +3,7 @@ package com.upload.app.modular.system.service.impl;
 import com.upload.app.core.rpc.Api;
 import com.upload.app.core.rpc.CommonTxOputDto;
 import com.upload.app.core.rpc.TxInputDto;
-import com.upload.app.modular.system.model.FchXsvLink;
-import com.upload.app.modular.system.model.ScriptUtxoTokenLink;
-import com.upload.app.modular.system.model.SystemUtxo;
+import com.upload.app.modular.system.model.*;
 import com.upload.app.modular.system.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -80,6 +78,7 @@ public class SendServiceImpl implements SendService {
         for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
             TxInputDto tx = new TxInputDto(sut.getTxid(), sut.getN(),"");
             inputs.add(tx);
+            scriptUtxoTokenLinkService.deleteUtxoToken(sut.getTxid(), sut.getN());
             BigInteger amount = scriptTokenLinkService.selectFAToken(tokenId, sut.getTxid(), sut.getN());
             sumAmount = sumAmount.add(amount);
         }
@@ -143,9 +142,97 @@ public class SendServiceImpl implements SendService {
 
         if (StringUtils.isEmpty(hex))
             return false;
-        else
-            return true;
+        else {
 
+            StringBuilder script = new StringBuilder();
+            script.append("6376a91484be1e524ff4324816f25e558dd89be1a29841b388ac6776a914");
+            script.append(toFchXsvLink.getAddressHash()+"88ac");
+
+            StringBuilder fromscript = new StringBuilder();
+            fromscript.append("6376a91484be1e524ff4324816f25e558dd89be1a29841b388ac6776a91457353d54a4fc0c2d24ef12f27c4351f35885541688ac");
+
+            List<String> Lcount = addressScriptLinkService.findByScript(script.toString());
+
+            if (Lcount == null || Lcount.size() < 1) {
+
+                AddressScriptLink asl3 = new AddressScriptLink();
+                asl3.setAddress("84be1e524ff4324816f25e558dd89be1a29841b3");
+                asl3.setScript(script.toString());
+                addressScriptLinkService.insert(asl3);
+                AddressScriptLink asl4 = new AddressScriptLink();
+                asl4.setAddress(toFchXsvLink.getAddressHash());
+                asl4.setScript(script.toString());
+                addressScriptLinkService.insert(asl4);
+
+            }
+
+            ScriptUtxoTokenLink sutl1 = new ScriptUtxoTokenLink();                             // 找零
+            sutl1.setTokenId(tokenId);
+            sutl1.setScript(fromscript.toString());
+            sutl1.setAddress("57353d54a4fc0c2d24ef12f27c4351f358855416");
+            sutl1.setTxid(hex);
+            sutl1.setN(0);
+            sutl1.setValue("0.0001");
+            scriptUtxoTokenLinkService.insert(sutl1);
+
+            ScriptUtxoTokenLink sutl2 = new ScriptUtxoTokenLink();                              // 找零
+            sutl2.setTokenId(tokenId);
+            sutl2.setScript(fromscript.toString());
+            sutl2.setAddress("84be1e524ff4324816f25e558dd89be1a29841b3");
+            sutl2.setTxid(hex);
+            sutl2.setN(0);
+            sutl2.setValue("0.0001");
+            scriptUtxoTokenLinkService.insert(sutl2);
+
+            ScriptUtxoTokenLink sutl3 = new ScriptUtxoTokenLink();                              // 打钱
+            sutl3.setTokenId(tokenId);
+            sutl3.setScript(script.toString());
+            sutl3.setAddress("84be1e524ff4324816f25e558dd89be1a29841b3");
+            sutl3.setTxid(hex);
+            sutl3.setN(1);
+            sutl3.setValue("0.0001");
+            scriptUtxoTokenLinkService.insert(sutl3);
+
+            ScriptUtxoTokenLink sutl4 = new ScriptUtxoTokenLink();                              // 打钱
+            sutl4.setTokenId(tokenId);
+            sutl4.setScript(script.toString());
+            sutl4.setAddress(toFchXsvLink.getAddressHash());
+            sutl4.setTxid(hex);
+            sutl4.setN(1);
+            sutl4.setValue("0.0001");
+            scriptUtxoTokenLinkService.insert(sutl4);
+
+            ScriptTokenLink stl1 = new ScriptTokenLink();                                       //打给他
+            stl1.setScript(script.toString());
+            stl1.setToken(newValue.multiply(new BigInteger("100000000")));
+            stl1.setFromScript(fromscript.toString());
+            stl1.setStatus(2);
+            stl1.setTokenId(tokenId);
+            stl1.setTxid(hex);
+            stl1.setVout(1);
+            scriptTokenLinkService.insert(stl1);
+
+
+            ScriptTokenLink stl2 = new ScriptTokenLink();
+            stl2.setScript(fromscript.toString());
+            stl2.setToken(surplus.multiply(new BigInteger("100000000")));
+            stl2.setFromScript(fromscript.toString());
+            stl2.setStatus(4);
+            stl2.setTokenId(tokenId);
+            stl2.setTxid(hex);
+            stl2.setVout(0);
+            scriptTokenLinkService.insert(stl2);
+
+            SystemUtxo systemUtxo = new SystemUtxo();
+            systemUtxo.setAddress("1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
+            systemUtxo.setValue(sysFee.toString());
+            systemUtxo.setN(2);
+            systemUtxo.setTxid(hex);
+            systemUtxoService.insert(systemUtxo);
+
+
+            return true;
+        }
     }
 
 }

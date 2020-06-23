@@ -45,8 +45,8 @@ public class ScriptTokenLinkServiceImpl implements ScriptTokenLinkService {
     }
 
     @Override
-    public List<ScriptTokenLink> selectByTxid(String txid) {
-        return scriptTokenLinkMapper.selectByTxid(txid);
+    public List<ScriptTokenLink> selectByTxid(String txid, Integer vout) {
+        return scriptTokenLinkMapper.selectByTxid(txid, vout);
     }
 
     @Override
