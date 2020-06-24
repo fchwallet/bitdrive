@@ -45,9 +45,9 @@ java implementation freedrive, see [architecture](./Freedrive-architecture.pdf)
 接口重构调整为
 put, update, get, get_drive_id 
 2020/6/18
-1) get 接口增加”type“字段
-2) 增加计费相关接口，get_balance, get_tx_history
-3) 增加终止修改drive_id： terminate_drive_id
+1) get 接口增加"type"字段
+2) 增加计费相关接口, get_balance, get_tx_history
+3) 增加终止修改drive_id: terminate_drive_id
 
 ```	  
 
