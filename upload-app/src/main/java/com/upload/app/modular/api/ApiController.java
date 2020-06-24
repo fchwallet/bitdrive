@@ -186,7 +186,8 @@ public class ApiController extends BaseController {
 
         BigInteger toAssets = scriptTokenLinkService.findToTokenByScript(scriptList);
         BigInteger fromAssets = scriptTokenLinkService.findFromTokenByScript(scriptList);
-        BigInteger balance = toAssets.subtract(fromAssets);
+        BigInteger destructionAssets = scriptTokenLinkService.findDestructionByScript(scriptList);
+        BigInteger balance = toAssets.subtract(fromAssets).subtract(destructionAssets);
 
         BigInteger sumAmount = new BigInteger("0");
         for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
@@ -366,7 +367,8 @@ public class ApiController extends BaseController {
 
         BigInteger toAssets = scriptTokenLinkService.findToTokenByScript(scriptList);
         BigInteger fromAssets = scriptTokenLinkService.findFromTokenByScript(scriptList);
-        BigInteger balance = toAssets.subtract(fromAssets);
+        BigInteger destructionAssets = scriptTokenLinkService.findDestructionByScript(scriptList);
+        BigInteger balance = toAssets.subtract(fromAssets).subtract(destructionAssets);
 
         BigInteger sumAmount = new BigInteger("0");
         for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
@@ -522,7 +524,8 @@ public class ApiController extends BaseController {
 
         BigInteger toAssets = scriptTokenLinkService.findToTokenByScript(scriptList);
         BigInteger fromAssets = scriptTokenLinkService.findFromTokenByScript(scriptList);
-        BigInteger balance = toAssets.subtract(fromAssets);
+        BigInteger destructionAssets = scriptTokenLinkService.findDestructionByScript(scriptList);
+        BigInteger balance = toAssets.subtract(fromAssets).subtract(destructionAssets);
 
         BigInteger sumAmount = new BigInteger("0");
         for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
@@ -642,7 +645,8 @@ public class ApiController extends BaseController {
 
         BigInteger toAssets = scriptTokenLinkService.findToTokenByScript(scriptList);
         BigInteger fromAssets = scriptTokenLinkService.findFromTokenByScript(scriptList);
-        BigInteger balance = toAssets.subtract(fromAssets);
+        BigInteger destructionAssets = scriptTokenLinkService.findDestructionByScript(scriptList);
+        BigInteger balance = toAssets.subtract(fromAssets).subtract(destructionAssets);
 
         BigInteger sumAmount = new BigInteger("0");
         for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
@@ -656,6 +660,12 @@ public class ApiController extends BaseController {
             return json;
         }
 
+        if (balance.compareTo(sumAmount) != 0) {
+            json.put("code", 200213);
+            json.put("msg", "token余额和链上不对应请稍后重试");
+            return json;
+        }
+
         Boolean lock = iSyncCacheService.getLock(fchXsvLink.getAddressHash(),5);
 
         if (lock) {
@@ -664,12 +674,6 @@ public class ApiController extends BaseController {
             if (f != null && !f) {
                 json.put("code", 100457);
                 json.put("msg", "付费失败");
-                return json;
-            }
-
-            if (balance.compareTo(sumAmount) != 0) {
-                json.put("code", 200213);
-                json.put("msg", "token余额和链上不对应请稍后重试");
                 return json;
             }
 
@@ -831,7 +835,8 @@ public class ApiController extends BaseController {
         List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fchXsvLink.getAddressHash(), tokenId);
         BigInteger toAssets = scriptTokenLinkService.findToTokenByScript(scriptList);
         BigInteger fromAssets = scriptTokenLinkService.findFromTokenByScript(scriptList);
-        BigInteger balance = toAssets.subtract(fromAssets);
+        BigInteger destructionAssets = scriptTokenLinkService.findDestructionByScript(scriptList);
+        BigInteger balance = toAssets.subtract(fromAssets.subtract(destructionAssets));
 
         BigInteger sumAmount = new BigInteger("0");
         for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
@@ -845,6 +850,12 @@ public class ApiController extends BaseController {
             return result;
         }
 
+        if (balance.compareTo(sumAmount) != 0) {
+            result.put("code", 200213);
+            result.put("msg", "token余额和链上不对应请稍后重试");
+            return result;
+        }
+
         Boolean lock = iSyncCacheService.getLock(fchXsvLink.getAddressHash(),5);
 
         if (lock) {
@@ -853,12 +864,6 @@ public class ApiController extends BaseController {
             if (f != null && !f) {
                 result.put("code", 100457);
                 result.put("msg", "付费失败");
-                return result;
-            }
-
-            if (balance.compareTo(sumAmount) != 0) {
-                result.put("code", 200213);
-                result.put("msg", "token余额和链上不对应请稍后重试");
                 return result;
             }
 

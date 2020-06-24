@@ -89,5 +89,10 @@ public class ScriptTokenLinkServiceImpl implements ScriptTokenLinkService {
         return scriptTokenLinkMapper.findFromTokenByScript(script);
     }
 
+    @Override
+    public BigInteger findDestructionByScript(List<String> script) {
+        return scriptTokenLinkMapper.findDestructionByScript(script);
+    }
+
 
 }

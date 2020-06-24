@@ -65,8 +65,9 @@ public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
 
         BigInteger toAssets = scriptTokenLinkService.findToTokenByScript(scriptList);
         BigInteger fromAssets = scriptTokenLinkService.findFromTokenByScript(scriptList);
+        BigInteger destructionAssets = scriptTokenLinkService.findDestructionByScript(scriptList);
 
-        BigInteger balance = toAssets.subtract(fromAssets);
+        BigInteger balance = toAssets.subtract(fromAssets).subtract(destructionAssets);
 
         List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fchXsvLink.getAddressHash(), tokenId);
 

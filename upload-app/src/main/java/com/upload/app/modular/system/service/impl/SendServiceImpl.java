@@ -33,6 +33,9 @@ public class SendServiceImpl implements SendService {
     @Resource
     private ScriptUtxoTokenLinkService scriptUtxoTokenLinkService;
 
+    @Resource
+    private BlockingQueueService blockingQueueService;
+
     final String payAddress = "18x7ZqhUHV3NgCGAw3NPEsGbEZ5i6beyD6";
 
     final String systemAddress = "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx";
@@ -47,16 +50,29 @@ public class SendServiceImpl implements SendService {
 
         List<TxInputDto> inputs = new ArrayList<>();
 
-        List<SystemUtxo> sysUtxoList = systemUtxoService.findByAddress(systemAddress);
+//        List<SystemUtxo> sysUtxoList = systemUtxoService.findByAddress(systemAddress);
+//        BigDecimal sysFee = new BigDecimal("0");
+//        for (SystemUtxo sysUtxo : sysUtxoList) {
+//            if (sysFee.compareTo(new BigDecimal("0.0001")) < 0) {
+//                sysFee = sysFee.add(new BigDecimal(sysUtxo.getValue()));
+//                TxInputDto tx = new TxInputDto(sysUtxo.getTxid(), sysUtxo.getN(),"");
+//                inputs.add(tx);
+//                systemUtxoService.delete(sysUtxo.getTxid(), sysUtxo.getN());
+//            } else
+//                break;
+//        }
+
         BigDecimal sysFee = new BigDecimal("0");
-        for (SystemUtxo sysUtxo : sysUtxoList) {
-            if (sysFee.compareTo(new BigDecimal("0.0001")) < 0) {
-                sysFee = sysFee.add(new BigDecimal(sysUtxo.getValue()));
-                TxInputDto tx = new TxInputDto(sysUtxo.getTxid(), sysUtxo.getN(),"");
-                inputs.add(tx);
-                systemUtxoService.delete(sysUtxo.getTxid(), sysUtxo.getN());
-            } else
+        while (true) {
+            if (sysFee.compareTo(new BigDecimal("0.001")) < 0) {
+                SystemUtxo systemUtxo = blockingQueueService.take();
+                TxInputDto input = new TxInputDto(systemUtxo.getTxid(), systemUtxo.getN(), "");
+                sysFee = sysFee.add(new BigDecimal(systemUtxo.getValue()));
+                systemUtxoService.delete(systemUtxo.getTxid(), systemUtxo.getN());
+                inputs.add(input);
+            } else {
                 break;
+            }
         }
 
         FchXsvLink fchXsvLink = fchXsvLinkService.findByFch(payAddress);
@@ -69,8 +85,8 @@ public class SendServiceImpl implements SendService {
 
         BigInteger toAssets = scriptTokenLinkService.findToTokenByScript(scriptList);
         BigInteger fromAssets = scriptTokenLinkService.findFromTokenByScript(scriptList);
-
-        BigInteger balance = toAssets.subtract(fromAssets);
+        BigInteger destructionAssets = scriptTokenLinkService.findDestructionByScript(scriptList);
+        BigInteger balance = toAssets.subtract(fromAssets).subtract(destructionAssets);
 
         List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fchXsvLink.getAddressHash(), tokenId);
         BigInteger sumAmount = new BigInteger("0");
