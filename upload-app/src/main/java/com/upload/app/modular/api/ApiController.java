@@ -18,24 +18,23 @@ package com.upload.app.modular.api;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import cn.stylefeng.roses.core.base.controller.BaseController;
-import com.upload.app.core.util.HttpUtil;
 import com.upload.app.core.util.JsonResult;
 import com.upload.app.modular.system.model.*;
 import com.upload.app.modular.system.service.*;
 import com.upload.app.core.rpc.Api;
-import com.upload.app.core.rpc.CommonTxOputDto;
-import com.upload.app.core.rpc.TxInputDto;
+
 import lombok.extern.slf4j.Slf4j;
 
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.math.BigDecimal;
@@ -95,6 +94,11 @@ public class ApiController extends BaseController {
     @Autowired
     private BalanceHistoryService balanceHistoryService;
 
+    @Resource
+    private ISyncCacheService iSyncCacheService;
+
+    private static final Object LOCKER = new Object();
+
     final String path = "/java/testUpload/data/";
     final Base64.Decoder decoder = Base64.getDecoder();
 
@@ -116,156 +120,168 @@ public class ApiController extends BaseController {
     @RequestMapping(value="/put", method = RequestMethod.POST)
     public JSONObject put(@RequestBody String json) throws Exception {
 
-        synchronized (this) {
-            JSONObject result = new JSONObject();
-            JSONObject param = null;
-            try {
-                param = (JSONObject) JSONObject.parse(json);
-            } catch (Exception e) {
-                result.put("code", 1009);
-                result.put("msg", "请传正确的json数据");
-                return result;
-            }
+        JSONObject result = new JSONObject();
 
-            JSONArray fch_addr = param.getJSONArray("addr");
+        JSONObject param = null;
 
-            String metadata = param.getString("metadata");
+        try {
+            param = (JSONObject) JSONObject.parse(json);
+        } catch (Exception e) {
+            result.put("code", 1009);
+            result.put("msg", "请传正确的json数据");
+            return result;
+        }
 
-            String data = param.getString("data");
-            String signautre = param.getString("signature");
+        JSONArray fch_addr = param.getJSONArray("addr");
 
-            if (fch_addr == null || fch_addr.size() < 0 || StringUtils.isEmpty(metadata) || StringUtils.isEmpty(data) || StringUtils.isEmpty(signautre)) {
-                result.put("code", 400);
-                result.put("msg", "参数错误");
-                return result;
-            }
+        String metadata = param.getString("metadata");
 
-            String ad = fch_addr.getString(0);
-            String adfrist = ad.substring(0, 1);
-            String fchXSVaddress = null;
-            if ("F".equals(adfrist) || "f".equals(adfrist)) {
-                fchXSVaddress = Api.fchtoxsv(fch_addr.getString(0)).getString("address");
-            } else if ("1".equals(adfrist)) {
-                fchXSVaddress = ad;
-            }
+        String data = param.getString("data");
+        String signautre = param.getString("signature");
 
+        if (fch_addr == null || fch_addr.size() < 0 || StringUtils.isEmpty(metadata) || StringUtils.isEmpty(data) || StringUtils.isEmpty(signautre)) {
+            result.put("code", 400);
+            result.put("msg", "参数错误");
+            return result;
+        }
 
-            Boolean b = Api.VerifyMessage(fchXSVaddress, signautre, data);
-
-            if (!b) {
-                result.put("code", 1001);
-                result.put("msg", "sign验证失败");
-                return result;
-            }
+        String ad = fch_addr.getString(0);
+        String adfrist = ad.substring(0, 1);
+        String fchXSVaddress = null;
+        if ("F".equals(adfrist) || "f".equals(adfrist)) {
+            fchXSVaddress = Api.fchtoxsv(fch_addr.getString(0)).getString("address");
+        } else if ("1".equals(adfrist)) {
+            fchXSVaddress = ad;
+        }
 
 
-            Integer size = data.getBytes().length;
+        Boolean b = Api.VerifyMessage(fchXSVaddress, signautre, data);
 
-            if (size > 1024 * 1024 * 5) {
-                result.put("code", 200211);
-                result.put("msg", "data不能超过5M");
-                return result;
-            }
-
-            FchXsvLink fchXsvLink = fchXsvLinkService.findByFch(ad);
-
-            List<String> scriptList = addressScriptLinkService.findListByAddress(fchXsvLink.getAddressHash());
-
-            if (scriptList == null || scriptList.size() < 1) {
-                result.put("code", 200214);
-                result.put("msg", "用户积分不足");
-                return result;
-            }
-
-            List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fchXsvLink.getAddressHash(), tokenId);
-
-            BigInteger toAssets = scriptTokenLinkService.findToTokenByScript(scriptList);
-            BigInteger fromAssets = scriptTokenLinkService.findFromTokenByScript(scriptList);
-            BigInteger balance = toAssets.subtract(fromAssets);
-
-            BigInteger sumAmount = new BigInteger("0");
-            for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
-                BigInteger amount = scriptTokenLinkService.selectFAToken(tokenId, sut.getTxid(), sut.getN());
-                sumAmount = sumAmount.add(amount);
-            }
+        if (!b) {
+            result.put("code", 1001);
+            result.put("msg", "sign验证失败");
+            return result;
+        }
 
 
-            if (balance.compareTo(new BigInteger("1000000000")) < 0) {
-                result.put("code", 200214);
-                result.put("msg", "用户积分不足");
-                return result;
-            }
+        Integer size = data.getBytes().length;
 
-            if (balance.compareTo(sumAmount) != 0) {
-                result.put("code", 200213);
-                result.put("msg", "token余额和链上不对应请稍后重试");
-                return result;
-            }
+        if (size > 1024 * 1024 * 5) {
+            result.put("code", 200211);
+            result.put("msg", "data不能超过5M");
+            return result;
+        }
 
-            List<String> fchAddress = new ArrayList<>();
-            for (Object o : fch_addr) {
+        FchXsvLink fchXsvLink = fchXsvLinkService.findByFch(ad);
 
-                String addr = (String) o;
-                FchXsvLink f = fchXsvLinkService.findByFch(addr);
+        List<String> scriptList = addressScriptLinkService.findListByAddress(fchXsvLink.getAddressHash());
 
-                if (f != null)
-                    f.getXsvAddress();
-                else {
-                    String xsvaddress = null;
-                    FchXsvLink insert = new FchXsvLink();
-                    if ("F".equals(adfrist) || "f".equals(adfrist)) {
-                        xsvaddress = Api.fchtoxsv(fch_addr.getString(0)).getString("address");
-                        insert.setType(0);
-                    } else if ("1".equals(adfrist)) {
-                        xsvaddress = ad;
-                        insert.setType(1);
-                    }
+        if (scriptList == null || scriptList.size() < 1) {
+            result.put("code", 200214);
+            result.put("msg", "用户积分不足");
+            return result;
+        }
 
-                    insert.setFchAddress(addr);
-                    insert.setXsvAddress(xsvaddress);
+        List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fchXsvLink.getAddressHash(), tokenId);
 
+        BigInteger toAssets = scriptTokenLinkService.findToTokenByScript(scriptList);
+        BigInteger fromAssets = scriptTokenLinkService.findFromTokenByScript(scriptList);
+        BigInteger destructionAssets = scriptTokenLinkService.findDestructionByScript(scriptList);
+        BigInteger balance = toAssets.subtract(fromAssets).subtract(destructionAssets);
 
-                    String addressHash = Api.ValidateAddress(xsvaddress).getString("scriptPubKey").replaceFirst("76a914", "").replaceFirst("88ac", "");
-                    insert.setAddressHash(addressHash);
-                    fchXsvLinkService.insert(insert);
-                    f = fchXsvLinkService.findByFch(addr);
+        BigInteger sumAmount = new BigInteger("0");
+        for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
+            BigInteger amount = scriptTokenLinkService.selectFAToken(tokenId, sut.getTxid(), sut.getN());
+            sumAmount = sumAmount.add(amount);
+        }
+
+        if (balance.compareTo(new BigInteger("1000000000")) < 0) {
+            result.put("code", 200214);
+            result.put("msg", "用户积分不足");
+            return result;
+        }
+
+        if (balance.compareTo(sumAmount) != 0) {
+            result.put("code", 200213);
+            result.put("msg", "token余额和链上不对应请稍后重试");
+            return result;
+        }
+
+        List<String> fchAddress = new ArrayList<>();
+
+        for (Object o : fch_addr) {
+
+            String addr = (String) o;
+            FchXsvLink f = fchXsvLinkService.findByFch(addr);
+
+            if (f != null)
+                f.getXsvAddress();
+            else {
+                String xsvaddress = null;
+                FchXsvLink insert = new FchXsvLink();
+                if ("F".equals(adfrist) || "f".equals(adfrist)) {
+                    xsvaddress = Api.fchtoxsv(fch_addr.getString(0)).getString("address");
+                    insert.setType(0);
+                } else if ("1".equals(adfrist)) {
+                    xsvaddress = ad;
+                    insert.setType(1);
                 }
 
-                fchAddress.add(f.getXsvAddress());
+                insert.setFchAddress(addr);
+                insert.setXsvAddress(xsvaddress);
 
+                String addressHash = Api.ValidateAddress(xsvaddress).getString("scriptPubKey").replaceFirst("76a914", "").replaceFirst("88ac", "");
+                insert.setAddressHash(addressHash);
+                fchXsvLinkService.insert(insert);
+                f = fchXsvLinkService.findByFch(addr);
             }
 
+            fchAddress.add(f.getXsvAddress());
+
+        }
+
+        Boolean lock = iSyncCacheService.getLock(fchXSVaddress,5);
+
+        if (lock) {
 
             Map<String, Object> map = systemUtxoService.spendUtxo(metadata, fchAddress, size, data, null, 1);   //1表示create
 
             String hex = (String) map.get("hex");
+
             Object sf = map.get("sumFee");
 
             JSONArray put = new JSONArray();
+
             if (!StringUtils.isEmpty(hex) && sf != null) {
 
                 put.add(hex);
                 BigDecimal sumFee = (BigDecimal) sf;
                 String drive_id = decodeService.decodeCreate(put, sumFee, null, size);
-                result.put("code", 200);
-                result.put("drive_id", drive_id);
+
                 Boolean f = blockchainPaymentService.payment(ad, 1, "put");         // 查询钱,付费
                 if (f != null && !f) {
                     result.put("code", 100457);
                     result.put("msg", "付费失败");
                     return result;
+                } else {
+                    result.put("code", 200);
+                    result.put("drive_id", drive_id);
                 }
-
 
             } else {
 
                 result.put("code", 500);
                 result.put("msg", "处理异常,联系客服");
-
             }
 
-            return result;
+            iSyncCacheService.releaseLock(fchXSVaddress);
+
+        } else {
+            result.put("code", 200);
+            result.put("msg", "请求太快！");
         }
+
+        return result;
 
     }
 
@@ -274,165 +290,168 @@ public class ApiController extends BaseController {
     @RequestMapping(value="/update", method = RequestMethod.POST)
     public JSONObject update(@RequestBody String json) throws Exception {
 
-        synchronized (this) {
-            JSONObject result = new JSONObject();
 
-            JSONObject param = null;
-            try {
-                param = (JSONObject) JSONObject.parse(json);
-            } catch (Exception e) {
-                result.put("code", 1009);
-                result.put("msg", "请传正确的json数据");
+        JSONObject result = new JSONObject();
+
+        JSONObject param = null;
+
+        try {
+            param = (JSONObject) JSONObject.parse(json);
+        } catch (Exception e) {
+            result.put("code", 1009);
+            result.put("msg", "请传正确的json数据");
+            return result;
+        }
+
+        JSONArray fch_addr = param.getJSONArray("addr");
+
+        String metadata = param.getString("metadata");
+
+        String data = param.getString("data");
+
+        String signautre = param.getString("signature");
+
+        String drive_id = param.getString("drive_id");
+
+
+        if (fch_addr == null || fch_addr.size() < 0 || StringUtils.isEmpty(metadata) || StringUtils.isEmpty(data) || StringUtils.isEmpty(signautre) || StringUtils.isEmpty(drive_id)) {
+            result.put("code", 400);
+            result.put("msg", "参数错误");
+            return result;
+        }
+
+        Create create = createService.findByDriveId(drive_id);
+
+        if (create != null) {
+            if (create.getStatus() == 1) {
+                result.put("code", 100456);
+                result.put("msg", "该driveid已经结束");
                 return result;
             }
+        } else {
+            result.put("code", 1002);
+            result.put("msg", "该drive_id不存在");
+            return result;
+        }
 
-            JSONArray fch_addr = param.getJSONArray("addr");
+        String fchadd = fch_addr.getString(0);
+        String adfrist = fchadd.substring(0, 1);
+        String fchXSVaddress = null;
+        if ("F".equals(adfrist) || "f".equals(adfrist)) {
+            fchXSVaddress = Api.fchtoxsv(fch_addr.getString(0)).getString("address");
+        } else if ("1".equals(adfrist)) {
+            fchXSVaddress = fchadd;
+        }
 
-            String metadata = param.getString("metadata");
+        Boolean b = Api.VerifyMessage(fchXSVaddress, signautre, data);
 
-            String data = param.getString("data");
+        if (!b) {
+            result.put("code", 1001);
+            result.put("msg", "sign验证失败");
+            return result;
+        }
 
-            String signautre = param.getString("signature");
-
-            String drive_id = param.getString("drive_id");
+        FchXsvLink fxl = fchXsvLinkService.findByFch(fchadd);
 
 
-            if (fch_addr == null || fch_addr.size() < 0 || StringUtils.isEmpty(metadata) || StringUtils.isEmpty(data) || StringUtils.isEmpty(signautre) || StringUtils.isEmpty(drive_id)) {
-                result.put("code", 400);
-                result.put("msg", "参数错误");
-                return result;
+
+        List<String> scriptList = addressScriptLinkService.findListByAddress(fxl.getAddressHash());
+
+        if (scriptList == null || scriptList.size() < 1) {
+            result.put("code", 200214);
+            result.put("msg", "用户积分不足");
+            return result;
+        }
+
+        List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fxl.getAddressHash(), tokenId);
+
+        BigInteger toAssets = scriptTokenLinkService.findToTokenByScript(scriptList);
+        BigInteger fromAssets = scriptTokenLinkService.findFromTokenByScript(scriptList);
+        BigInteger destructionAssets = scriptTokenLinkService.findDestructionByScript(scriptList);
+        BigInteger balance = toAssets.subtract(fromAssets).subtract(destructionAssets);
+
+        BigInteger sumAmount = new BigInteger("0");
+        for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
+            BigInteger amount = scriptTokenLinkService.selectFAToken(tokenId, sut.getTxid(), sut.getN());
+            sumAmount = sumAmount.add(amount);
+        }
+
+        if (balance.compareTo(new BigInteger("1000000000")) < 0) {
+            result.put("code", 200214);
+            result.put("msg", "用户积分不足");
+            return result;
+        }
+
+        if (balance.compareTo(sumAmount) != 0) {
+            result.put("code", 200213);
+            result.put("msg", "token余额和链上不对应请稍后重试");
+            return result;
+        }
+
+        List<AddressDriveLink> ad = addressDriveLinkService.findDriveByAddress(fxl.getAddressHash());
+        if (ad.size() <= 0) {
+            result.put("code", 1000);
+            result.put("msg", "当前操作没有权限");
+            return result;
+        }
+
+        boolean flag = false;
+        for (AddressDriveLink adl : ad) {
+            if (adl.getDriveId().equals(drive_id)) {
+                flag = true;
+                break;
             }
+        }
 
-            Create create = createService.findByDriveId(drive_id);
+        if (!flag) {
+            result.put("code", 1000);
+            result.put("msg", "当前操作没有权限");
+            return result;
+        }
 
-            if (create != null) {
-                if (create.getStatus() == 1) {
-                    result.put("code", 100456);
-                    result.put("msg", "该driveid已经结束");
-                    return result;
+        Integer size = data.getBytes().length;
+
+        if (size > 1024 * 1024 * 15) {
+            result.put("code", 200211);
+            result.put("msg", "data不能超过5M");
+            return result;
+        }
+
+        List<String> fchAddress = new ArrayList<>();
+        for (Object o : fch_addr) {
+            String addr = (String) o;
+            FchXsvLink f = fchXsvLinkService.findByFch(addr);
+            if (f != null)
+                f.getXsvAddress();
+            else {
+                String xsvaddress = null;
+                FchXsvLink insert = new FchXsvLink();
+                if ("F".equals(adfrist) || "f".equals(adfrist)) {
+                    xsvaddress = Api.fchtoxsv(addr).getString("address");
+                    insert.setType(0);
+                } else if ("1".equals(adfrist)) {
+                    xsvaddress = fchadd;
+                    insert.setType(1);
                 }
-            } else {
-                result.put("code", 1002);
-                result.put("msg", "该drive_id不存在");
-                return result;
+                insert.setFchAddress(addr);
+                insert.setXsvAddress(xsvaddress);
+                String addressHash = Api.ValidateAddress(xsvaddress).getString("scriptPubKey").replaceFirst("76a914", "").replaceFirst("88ac", "");
+                insert.setAddressHash(addressHash);
+                fchXsvLinkService.insert(insert);
+                f = fchXsvLinkService.findByFch(addr);
             }
+            fchAddress.add(f.getXsvAddress());
+        }
 
-            String fchadd = fch_addr.getString(0);
-            String adfrist = fchadd.substring(0, 1);
-            String fchXSVaddress = null;
-            if ("F".equals(adfrist) || "f".equals(adfrist)) {
-                fchXSVaddress = Api.fchtoxsv(fch_addr.getString(0)).getString("address");
-            } else if ("1".equals(adfrist)) {
-                fchXSVaddress = fchadd;
-            }
+        DriveUtxo du = driveUtxoService.findByDriveId(drive_id);
+        if (du == null) {
+            result.put("1002", "该drive_id不存在");
+            return result;
+        }
 
-            Boolean b = Api.VerifyMessage(fchXSVaddress, signautre, data);
+        Boolean lock = iSyncCacheService.getLock(fchXSVaddress+"update",5);
 
-            if (!b) {
-                result.put("code", 1001);
-                result.put("msg", "sign验证失败");
-                return result;
-            }
-
-            FchXsvLink fxl = fchXsvLinkService.findByFch(fchadd);
-
-            List<String> scriptList = addressScriptLinkService.findListByAddress(fxl.getAddressHash());
-
-            if (scriptList == null || scriptList.size() < 1) {
-                result.put("code", 200214);
-                result.put("msg", "用户积分不足");
-                return result;
-            }
-
-            List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fxl.getAddressHash(), tokenId);
-
-            BigInteger toAssets = scriptTokenLinkService.findToTokenByScript(scriptList);
-            BigInteger fromAssets = scriptTokenLinkService.findFromTokenByScript(scriptList);
-            BigInteger balance = toAssets.subtract(fromAssets);
-
-            BigInteger sumAmount = new BigInteger("0");
-            for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
-                BigInteger amount = scriptTokenLinkService.selectFAToken(tokenId, sut.getTxid(), sut.getN());
-                sumAmount = sumAmount.add(amount);
-            }
-
-
-            if (balance.compareTo(new BigInteger("1000000000")) < 0) {
-                result.put("code", 200214);
-                result.put("msg", "用户积分不足");
-                return result;
-            }
-
-            if (balance.compareTo(sumAmount) != 0) {
-                result.put("code", 200213);
-                result.put("msg", "token余额和链上不对应请稍后重试");
-                return result;
-            }
-
-            List<AddressDriveLink> ad = addressDriveLinkService.findDriveByAddress(fxl.getAddressHash());
-            if (ad.size() <= 0) {
-                result.put("code", 1000);
-                result.put("msg", "当前操作没有权限");
-                return result;
-            }
-
-            boolean flag = false;
-            for (AddressDriveLink adl : ad) {
-
-                if (adl.getDriveId().equals(drive_id)) {
-                    flag = true;
-                    break;
-                }
-
-            }
-
-            if (!flag) {
-                result.put("code", 1000);
-                result.put("msg", "当前操作没有权限");
-                return result;
-            }
-
-
-            Integer size = data.getBytes().length;
-
-            if (size > 1024 * 1024 * 15) {
-                result.put("code", 200211);
-                result.put("msg", "data不能超过5M");
-                return result;
-            }
-
-
-            List<String> fchAddress = new ArrayList<>();
-            for (Object o : fch_addr) {
-                String addr = (String) o;
-                FchXsvLink f = fchXsvLinkService.findByFch(addr);
-                if (f != null)
-                    f.getXsvAddress();
-                else {
-                    String xsvaddress = null;
-                    FchXsvLink insert = new FchXsvLink();
-                    if ("F".equals(adfrist) || "f".equals(adfrist)) {
-                        xsvaddress = Api.fchtoxsv(addr).getString("address");
-                        insert.setType(0);
-                    } else if ("1".equals(adfrist)) {
-                        xsvaddress = fchadd;
-                        insert.setType(1);
-                    }
-                    insert.setFchAddress(addr);
-                    insert.setXsvAddress(xsvaddress);
-                    String addressHash = Api.ValidateAddress(xsvaddress).getString("scriptPubKey").replaceFirst("76a914", "").replaceFirst("88ac", "");
-                    insert.setAddressHash(addressHash);
-                    fchXsvLinkService.insert(insert);
-                    f = fchXsvLinkService.findByFch(addr);
-                }
-                fchAddress.add(f.getXsvAddress());
-            }
-
-            DriveUtxo du = driveUtxoService.findByDriveId(drive_id);
-            if (du == null) {
-                result.put("1002", "该drive_id不存在");
-                return result;
-            }
+        if (lock) {
 
             Map<String, Object> map = systemUtxoService.spendUtxo(metadata, fchAddress, size, data, du, 2);   //1表示create
 
@@ -455,14 +474,18 @@ public class ApiController extends BaseController {
                 }
 
             } else {
-
                 result.put("code", 500);
                 result.put("msg", "处理异常,联系客服");
-
             }
 
-            return result;
+            iSyncCacheService.releaseLock(fchXSVaddress);
+
+        } else {
+            result.put("code", 200);
+            result.put("msg", "请求太快，请稍后重试！");
         }
+
+        return result;
 
     }
 
@@ -501,7 +524,8 @@ public class ApiController extends BaseController {
 
         BigInteger toAssets = scriptTokenLinkService.findToTokenByScript(scriptList);
         BigInteger fromAssets = scriptTokenLinkService.findFromTokenByScript(scriptList);
-        BigInteger balance = toAssets.subtract(fromAssets);
+        BigInteger destructionAssets = scriptTokenLinkService.findDestructionByScript(scriptList);
+        BigInteger balance = toAssets.subtract(fromAssets).subtract(destructionAssets);
 
         BigInteger sumAmount = new BigInteger("0");
         for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
@@ -523,69 +547,73 @@ public class ApiController extends BaseController {
         }
 
 
-        Boolean f = blockchainPaymentService.payment(addr,2, "get");         // 查询钱,付费
-        if (f != null && !f) {
-            json.put("code", 100457);
-            json.put("msg", "付费失败");
-            return json;
-        }
-
-
-        if (drive_id != null && !drive_id.equals("")) {
-
-            DriveTxAddress driveTxad = driveTxAddressService.findByDrive(fchXsvLink.getAddressHash(), drive_id);
-
-            if (driveTxad != null) {
-
-                Create create = createService.findByDriveId(driveTxad.getDriveId());
-                JSONObject ob = new JSONObject();
-                ob.put("metadata", create.getMetadata());
-                ob.put("data", create.getData());
-                json.put("put", ob);
-
+        Boolean lock = iSyncCacheService.getLock(fchXsvLink.getAddressHash(),5);
+        if (lock) {
+            Boolean f = blockchainPaymentService.payment(addr, 2, "get");         // 查询钱,付费
+            if (f != null && !f) {
+                json.put("code", 100457);
+                json.put("msg", "付费失败");
+                return json;
             }
 
-            List<DriveTxAddress> updateTxaddList = driveTxAddressService.findUpdateByDriveList(fchXsvLink.getAddressHash(), drive_id);
 
-            JSONArray obs = new JSONArray();
-            for (DriveTxAddress driveTxAddress : updateTxaddList) {
+            if (drive_id != null && !drive_id.equals("")) {
+
+                DriveTxAddress driveTxad = driveTxAddressService.findByDrive(fchXsvLink.getAddressHash(), drive_id);
+
+                if (driveTxad != null) {
+
+                    Create create = createService.findByDriveId(driveTxad.getDriveId());
+                    JSONObject ob = new JSONObject();
+                    ob.put("metadata", create.getMetadata());
+                    ob.put("data", create.getData());
+                    json.put("put", ob);
+
+                }
+
+                List<DriveTxAddress> updateTxaddList = driveTxAddressService.findUpdateByDriveList(fchXsvLink.getAddressHash(), drive_id);
+
+                JSONArray obs = new JSONArray();
+                for (DriveTxAddress driveTxAddress : updateTxaddList) {
+                    Update up = updateService.findByDriveId(driveTxAddress.getDriveId(), driveTxAddress.getUpdateId());
+                    JSONObject ob = new JSONObject();
+                    ob.put("update_id", up.getUpdateId());
+                    ob.put("metadata", up.getMetadata());
+                    ob.put("data", up.getData());
+                    obs.add(ob);
+                }
+
+                json.put("update", obs);
+
+                json.put("code", 200);
+
+            } else if (update_id != null && !update_id.equals("")) {
+
+                DriveTxAddress driveTxAddress = driveTxAddressService.findUpdate(fchXsvLink.getAddressHash(), update_id);
+
+                if (driveTxAddress == null) {
+                    json.put("update", "找不到更新记录,请检查参数");
+                    json.put("code", 1006);
+                    return json;
+                }
 
                 Update up = updateService.findByDriveId(driveTxAddress.getDriveId(), driveTxAddress.getUpdateId());
 
                 JSONObject ob = new JSONObject();
-                ob.put("update_id", up.getUpdateId());
                 ob.put("metadata", up.getMetadata());
                 ob.put("data", up.getData());
-                obs.add(ob);
+
+                json.put("update", ob);
+                json.put("code", 200);
 
             }
 
-            json.put("update", obs);
+            iSyncCacheService.releaseLock(fchXsvLink.getAddressHash());
 
+        } else {
+            json.put("msg", "请求太快，请稍后重试！");
             json.put("code", 200);
-
-        } else if (update_id != null && !update_id.equals("")) {
-
-            DriveTxAddress driveTxAddress = driveTxAddressService.findUpdate(fchXsvLink.getAddressHash(), update_id);
-
-            if (driveTxAddress == null) {
-                json.put("update", "找不到更新记录,请检查参数");
-                json.put("code", 1006);
-                return json;
-            }
-
-            Update up = updateService.findByDriveId(driveTxAddress.getDriveId(), driveTxAddress.getUpdateId());
-
-            JSONObject ob = new JSONObject();
-            ob.put("metadata", up.getMetadata());
-            ob.put("data", up.getData());
-
-            json.put("update", ob);
-            json.put("code", 200);
-
         }
-
-
         return json;
 
     }
@@ -617,7 +645,8 @@ public class ApiController extends BaseController {
 
         BigInteger toAssets = scriptTokenLinkService.findToTokenByScript(scriptList);
         BigInteger fromAssets = scriptTokenLinkService.findFromTokenByScript(scriptList);
-        BigInteger balance = toAssets.subtract(fromAssets);
+        BigInteger destructionAssets = scriptTokenLinkService.findDestructionByScript(scriptList);
+        BigInteger balance = toAssets.subtract(fromAssets).subtract(destructionAssets);
 
         BigInteger sumAmount = new BigInteger("0");
         for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
@@ -631,35 +660,46 @@ public class ApiController extends BaseController {
             return json;
         }
 
-        Boolean f = blockchainPaymentService.payment(addr,2, "get_drive_id");         // 查询钱,付费
-        if (f != null && !f) {
-            json.put("code", 100457);
-            json.put("msg", "付费失败");
-            return json;
-        }
-
         if (balance.compareTo(sumAmount) != 0) {
             json.put("code", 200213);
             json.put("msg", "token余额和链上不对应请稍后重试");
             return json;
         }
 
-        if (fchXsvLink != null) {
+        Boolean lock = iSyncCacheService.getLock(fchXsvLink.getAddressHash(),5);
 
-            List<AddressDriveLink> addressDriveLink = addressDriveLinkService.findByAddress(fchXsvLink.getAddressHash(), 0);
-            List<String> list = new ArrayList<>();
-            for (AddressDriveLink ad : addressDriveLink) {
-                list.add(ad.getDriveId());
+        if (lock) {
+
+            Boolean f = blockchainPaymentService.payment(addr, 2, "get_drive_id");         // 查询钱,付费
+            if (f != null && !f) {
+                json.put("code", 100457);
+                json.put("msg", "付费失败");
+                return json;
             }
 
-            json.put("code", 200);
-            json.put("drive_id", list);
+            if (fchXsvLink != null) {
+
+                List<AddressDriveLink> addressDriveLink = addressDriveLinkService.findByAddress(fchXsvLink.getAddressHash(), 0);
+                List<String> list = new ArrayList<>();
+                for (AddressDriveLink ad : addressDriveLink) {
+                    list.add(ad.getDriveId());
+                }
+
+                json.put("code", 200);
+                json.put("drive_id", list);
+
+            } else {
+
+                json.put("code", 200);
+                json.put("drive_id", "");
+
+            }
+
+            iSyncCacheService.releaseLock(fchXsvLink.getAddressHash());
 
         } else {
-
             json.put("code", 200);
-            json.put("drive_id", "");
-
+            json.put("msg", "请求太快！请稍后重试");
         }
 
         return json;
@@ -668,21 +708,23 @@ public class ApiController extends BaseController {
 
     @ResponseBody
     @RequestMapping(value="/get_balance", method = RequestMethod.POST)
+    @Transactional(rollbackFor=Exception.class)
     public JSONObject query(String addr) throws Exception {
 
         JSONObject ob = new JSONObject();
 
-//        if ("F".equals(addr) || "f".equals(addr)) {
-//            addr = Api.fchtoxsv(addr).getString("address");
-//        } else if ("1".equals(addr)) {
-//            addr = addr;
-//        }
+        if (StringUtils.isEmpty(addr)) {
+            ob.put("code", 400);
+            ob.put("msg", "参数错误");
+            return ob;
+        }
 
         FchXsvLink fchXsvLink = fchXsvLinkService.findByFch(addr);
 
+
         if (fchXsvLink == null) {
 
-            String adfrist = addr.substring(0,1);
+            String adfrist = addr.substring(0, 1);
 
             String xsvaddress = null;
             FchXsvLink insert = new FchXsvLink();
@@ -712,7 +754,7 @@ public class ApiController extends BaseController {
             return ob;
         }
 
-        List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fchXsvLink.getAddressHash(),tokenId);
+        List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fchXsvLink.getAddressHash(), tokenId);
         BigInteger balance = new BigInteger("0");
 
         for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
@@ -760,6 +802,12 @@ public class ApiController extends BaseController {
         String drive_id = param.getString("drive_id");
 
 
+        if (StringUtils.isEmpty(fch_addr) || StringUtils.isEmpty(drive_id)) {
+            result.put("code", 400);
+            result.put("msg", "参数错误");
+            return result;
+        }
+
         Create create = createService.findByDriveId(drive_id);
 
         if (create != null) {
@@ -787,7 +835,8 @@ public class ApiController extends BaseController {
         List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fchXsvLink.getAddressHash(), tokenId);
         BigInteger toAssets = scriptTokenLinkService.findToTokenByScript(scriptList);
         BigInteger fromAssets = scriptTokenLinkService.findFromTokenByScript(scriptList);
-        BigInteger balance = toAssets.subtract(fromAssets);
+        BigInteger destructionAssets = scriptTokenLinkService.findDestructionByScript(scriptList);
+        BigInteger balance = toAssets.subtract(fromAssets.subtract(destructionAssets));
 
         BigInteger sumAmount = new BigInteger("0");
         for (ScriptUtxoTokenLink sut : scriptUtxoTokenList) {
@@ -801,85 +850,96 @@ public class ApiController extends BaseController {
             return result;
         }
 
-        Boolean f = blockchainPaymentService.payment(fch_addr,2, "get_drive_id");         // 查询钱,付费
-        if (f != null && !f) {
-            result.put("code", 100457);
-            result.put("msg", "付费失败");
-            return result;
-        }
-
         if (balance.compareTo(sumAmount) != 0) {
             result.put("code", 200213);
             result.put("msg", "token余额和链上不对应请稍后重试");
             return result;
         }
 
-        List<AddressDriveLink> ad = addressDriveLinkService.findDriveByAddress(fchXsvLink.getAddressHash());
-        if (ad.size() <= 0) {
-            result.put("code", 1000);
-            result.put("msg", "当前操作没有权限");
-            return result;
-        }
+        Boolean lock = iSyncCacheService.getLock(fchXsvLink.getAddressHash(),5);
 
-        AddressDriveLink addressDriveLink = addressDriveLinkService.findByAddressAndDriveId(fchXsvLink.getAddressHash(), drive_id);
-        boolean flag = false;
-        if (addressDriveLink != null)
-            flag = true;
+        if (lock) {
 
-        if (!flag) {
-            result.put("code", 1000);
-            result.put("msg", "当前操作没有权限");
-            return result;
-        }
-
-        List<String> fchAddress = new ArrayList<>();
-
-        if (fchXsvLink != null)
-            fchXsvLink.getXsvAddress();
-        else {
-            String xsvaddress = null;
-            FchXsvLink insert = new FchXsvLink();
-            if ("F".equals(fch_addr) || "f".equals(fch_addr)) {
-                xsvaddress = Api.fchtoxsv(fch_addr).getString("address");
-                insert.setType(0);
-            } else if ("1".equals(fch_addr)) {
-                xsvaddress = fch_addr;
-                insert.setType(1);
-            }
-            insert.setFchAddress(fch_addr);
-            insert.setXsvAddress(xsvaddress);
-            String addressHash = Api.ValidateAddress(xsvaddress).getString("scriptPubKey").replaceFirst("76a914", "").replaceFirst("88ac", "");
-            insert.setAddressHash(addressHash);
-            fchXsvLinkService.insert(insert);
-            fchXsvLink = fchXsvLinkService.findByFch(fch_addr);
-        }
-        fchAddress.add(fchXsvLink.getXsvAddress());
-
-        DriveUtxo du = driveUtxoService.findByDriveId(drive_id);
-        if (du == null) {
-            result.put("1002", "该drive_id不存在");
-            return result;
-        }
-
-        Boolean b = systemUtxoService.terminateDrive(fchXsvLink.getAddressHash(), drive_id);   //1表示create
-
-        if (b) {
-
-            result.put("code", 200);
-            result.put("msg", "");
-
-            Boolean a = blockchainPaymentService.payment(fch_addr,1, "terminate_drive_id");         // 查询钱,付费
-            if (fchAddress != null && !a) {
+            Boolean f = blockchainPaymentService.payment(fch_addr, 2, "get_drive_id");         // 查询钱,付费
+            if (f != null && !f) {
                 result.put("code", 100457);
                 result.put("msg", "付费失败");
                 return result;
             }
 
+            List<AddressDriveLink> ad = addressDriveLinkService.findDriveByAddress(fchXsvLink.getAddressHash());
+            if (ad.size() <= 0) {
+                result.put("code", 1000);
+                result.put("msg", "当前操作没有权限");
+                return result;
+            }
+
+            AddressDriveLink addressDriveLink = addressDriveLinkService.findByAddressAndDriveId(fchXsvLink.getAddressHash(), drive_id);
+            boolean flag = false;
+            if (addressDriveLink != null)
+                flag = true;
+
+            if (!flag) {
+                result.put("code", 1000);
+                result.put("msg", "当前操作没有权限");
+                return result;
+            }
+
+            List<String> fchAddress = new ArrayList<>();
+
+            if (fchXsvLink != null)
+                fchXsvLink.getXsvAddress();
+            else {
+                String xsvaddress = null;
+                FchXsvLink insert = new FchXsvLink();
+                if ("F".equals(fch_addr) || "f".equals(fch_addr)) {
+                    xsvaddress = Api.fchtoxsv(fch_addr).getString("address");
+                    insert.setType(0);
+                } else if ("1".equals(fch_addr)) {
+                    xsvaddress = fch_addr;
+                    insert.setType(1);
+                }
+                insert.setFchAddress(fch_addr);
+                insert.setXsvAddress(xsvaddress);
+                String addressHash = Api.ValidateAddress(xsvaddress).getString("scriptPubKey").replaceFirst("76a914", "").replaceFirst("88ac", "");
+                insert.setAddressHash(addressHash);
+                fchXsvLinkService.insert(insert);
+                fchXsvLink = fchXsvLinkService.findByFch(fch_addr);
+            }
+            fchAddress.add(fchXsvLink.getXsvAddress());
+
+            DriveUtxo du = driveUtxoService.findByDriveId(drive_id);
+            if (du == null) {
+                result.put("1002", "该drive_id不存在");
+                return result;
+            }
+
+            Boolean b = systemUtxoService.terminateDrive(fchXsvLink.getAddressHash(), drive_id);   //1表示create
+
+            if (b) {
+
+                result.put("code", 200);
+                result.put("msg", "");
+
+                Boolean a = blockchainPaymentService.payment(fch_addr, 1, "terminate_drive_id");         // 查询钱,付费
+                if (fchAddress != null && !a) {
+                    result.put("code", 100457);
+                    result.put("msg", "付费失败");
+                    return result;
+                }
+
+            } else {
+
+                result.put("code", 500);
+                result.put("msg", "处理异常,联系客服");
+
+            }
+
+            iSyncCacheService.releaseLock(fchXsvLink.getAddressHash());
+
         } else {
-
-            result.put("code", 500);
-            result.put("msg", "处理异常,联系客服");
-
+            result.put("code", 200);
+            result.put("msg", "请求太快，请稍后重试");
         }
 
         return result;

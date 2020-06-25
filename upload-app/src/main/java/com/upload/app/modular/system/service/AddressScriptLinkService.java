@@ -12,4 +12,6 @@ public interface AddressScriptLinkService {
 
     List<String> findListByAddress(String address);
 
+    List<String> findByScript(String script);
+
 }

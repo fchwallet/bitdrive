@@ -30,7 +30,7 @@ public class SignatureScheduler {
     @Autowired
     private BlockCountService blockCountService;
 
-    @Scheduled(cron = "0/1 * * * * ?")
+    @Scheduled(cron = "0/59 * * * * ?")
     public void work() {
         self.start();
     }
@@ -73,28 +73,29 @@ public class SignatureScheduler {
                 count ++;
                 blockCountService.updateBlock(count);
 
-            } else {
-
-                List<String> txList = new ArrayList<>();
-
-                try {
-                    txList = Api.GetRawMemPool();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                JSONArray jsonArray = new JSONArray();
-                for (String tx: txList) {
-                    jsonArray.add(tx);
-                }
-
-                try {
-                    decodeService.blockDecode(jsonArray);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
             }
+//            else {
+//
+//                List<String> txList = new ArrayList<>();
+//
+//                try {
+//                    txList = Api.GetRawMemPool();
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//
+//                JSONArray jsonArray = new JSONArray();
+//                for (String tx: txList) {
+//                    jsonArray.add(tx);
+//                }
+//
+//                try {
+//                    decodeService.blockDecode(jsonArray);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//
+//            }
 
         } catch (Exception e) {
             e.printStackTrace();

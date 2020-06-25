@@ -92,7 +92,7 @@
 		SELECT
 		<include refid="Base_Column_List" />
 		FROM
-		`script_token_link` where txid = #{txid}
+		`script_token_link` where txid = #{txid} and vout = #{vout}
 	</select>
 
 	<select id="findToTokenByScript" resultType="java.math.BigInteger">
@@ -115,6 +115,17 @@
 			#{address}
 		</foreach>
 		and status != 5
+	</select>
+
+	<select id="findDestructionByScript" resultType="java.math.BigInteger">
+		SELECT
+		if(isnull(sum(token)), 0, sum(token))
+		FROM
+		`script_token_link` where script in
+		<foreach collection="script" item="address" index="index" open="(" close=")" separator=",">
+			#{address}
+		</foreach>
+		and status = 3
 	</select>
 
 </mapper>

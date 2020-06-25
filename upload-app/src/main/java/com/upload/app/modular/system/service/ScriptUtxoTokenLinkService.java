@@ -13,4 +13,6 @@ public interface ScriptUtxoTokenLinkService {
 
     List<ScriptUtxoTokenLink> findListByScript(List<String> script, String addressHash, String tokenId);
 
+    ScriptUtxoTokenLink findUtxoToken(String txid, Integer n);
+
 }

@@ -9,6 +9,8 @@ import com.upload.app.modular.system.model.Create;
 import com.upload.app.modular.system.model.DriveUtxo;
 import com.upload.app.modular.system.model.ScriptUtxoTokenLink;
 import com.upload.app.modular.system.model.SystemUtxo;
+import com.upload.app.modular.system.scheduler.SystemUtxoScheduler;
+import com.upload.app.modular.system.service.BlockingQueueService;
 import com.upload.app.modular.system.service.CreateService;
 import com.upload.app.modular.system.service.ScriptUtxoTokenLinkService;
 import com.upload.app.modular.system.service.SystemUtxoService;
@@ -39,9 +41,14 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
     private CreateService createService;
 
     @Resource
+    private BlockingQueueService blockingQueueService;
+
+    @Resource
     private ScriptUtxoTokenLinkService scriptUtxoTokenLinkService;
 
     final String systemAddress = "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx";
+
+    private static final Object LOCKER = new Object();
 
     @Override
     public List<SystemUtxo> findByAddress(String address) {
@@ -60,7 +67,7 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
 
     @Override
     @Transactional(rollbackFor=Exception.class)
-    public Map<String, Object> spendUtxo(String metadata, List<String> fchAddress, Integer size, String data, DriveUtxo du, Integer type) {
+    public Map<String, Object> spendUtxo(String metadata, List<String> fchAddress, Integer size, String data, DriveUtxo du, Integer type) throws InterruptedException {
 
         List<CommonTxOputDto> outputs = new ArrayList<>();
 
@@ -79,14 +86,15 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
         BigDecimal fee = (new BigDecimal("0.00000001").multiply(sizefree)).setScale(8, BigDecimal.ROUND_HALF_UP);
 
         BigDecimal sumFee = fee.add(metadatafee);
-
-        List<SystemUtxo> systemUtxoList = systemUtxoMapper.findByAddress(systemAddress);
         List<TxInputDto> inputs = new ArrayList<>();
         BigDecimal v = new BigDecimal("0");                 //总的utxo钱
         BigDecimal f = sumFee.add(new BigDecimal("0.00001"));
-        for (SystemUtxo systemUtxo : systemUtxoList) {
-            TxInputDto input = new TxInputDto(systemUtxo.getTxid(),systemUtxo.getN(),"");
+
+
+        while (true) {
             if (v.compareTo(f) < 0 || inputs.size() == 0) {
+                SystemUtxo systemUtxo = blockingQueueService.take();
+                TxInputDto input = new TxInputDto(systemUtxo.getTxid(), systemUtxo.getN(), "");
                 v = v.add(new BigDecimal(systemUtxo.getValue()));
                 systemUtxoMapper.delete(systemUtxo.getTxid(), systemUtxo.getN());
                 inputs.add(input);
@@ -94,9 +102,22 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
                 break;
             }
         }
+//            List<SystemUtxo> systemUtxoList = systemUtxoMapper.findByAddress(systemAddress);
+//            for (SystemUtxo systemUtxo : systemUtxoList) {
+//                if (systemUtxoMapper.isExistence(systemUtxo.getTxid(), systemUtxo.getN())) {
+//                    TxInputDto input = new TxInputDto(systemUtxo.getTxid(), systemUtxo.getN(), "");
+//                    if (v.compareTo(f) < 0 || inputs.size() == 0) {
+//                        v = v.add(new BigDecimal(systemUtxo.getValue()));
+//                        systemUtxoMapper.delete(systemUtxo.getTxid(), systemUtxo.getN());
+//                        inputs.add(input);
+//                    } else {
+//                        break;
+//                    }
+//                }
+//            }
 
         if (type == 2) {
-            TxInputDto input = new TxInputDto(du.getTxid(), du.getN(),"");
+            TxInputDto input = new TxInputDto(du.getTxid(), du.getN(), "");
             inputs.add(input);
             v = v.add(new BigDecimal(du.getValue()));
         }
@@ -121,6 +142,16 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
             String createHex = Api.CreateDrivetx(inputs, outputs);
             String signHex = Api.SignDrivetx(createHex, systemAddress);
             String hex = Api.SendRawTransaction(signHex);
+
+            if (!StringUtils.isEmpty(hex)) {
+                SystemUtxo systemUtxo = new SystemUtxo();
+                systemUtxo.setAddress("1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
+                systemUtxo.setValue(fvalue.toString());
+                systemUtxo.setN(1);
+                systemUtxo.setTxid(hex);
+                systemUtxoMapper.insert(systemUtxo);
+            }
+
             map.put("hex", hex);
             map.put("sumFee", sumFee);
 
@@ -138,17 +169,29 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
 
         List<CommonTxOputDto> outputs = new ArrayList<>();
 
-        List<SystemUtxo> systemUtxoList = systemUtxoMapper.findByAddress(systemAddress);
+//        List<SystemUtxo> systemUtxoList = systemUtxoMapper.findByAddress(systemAddress);
         List<TxInputDto> inputs = new ArrayList<>();
         BigDecimal sysFee = new BigDecimal("0");
-        for (SystemUtxo sysUtxo : systemUtxoList) {
+//        for (SystemUtxo sysUtxo : systemUtxoList) {
+//            if (sysFee.compareTo(new BigDecimal("0.001")) < 0) {
+//                sysFee = sysFee.add(new BigDecimal(sysUtxo.getValue()));
+//                TxInputDto tx = new TxInputDto(sysUtxo.getTxid(), sysUtxo.getN(),"");
+//                inputs.add(tx);
+//                systemUtxoService.delete(sysUtxo.getTxid(), sysUtxo.getN());
+//            } else
+//                break;
+//        }
+
+        while (true) {
             if (sysFee.compareTo(new BigDecimal("0.001")) < 0) {
-                sysFee = sysFee.add(new BigDecimal(sysUtxo.getValue()));
-                TxInputDto tx = new TxInputDto(sysUtxo.getTxid(), sysUtxo.getN(),"");
-                inputs.add(tx);
-                systemUtxoService.delete(sysUtxo.getTxid(), sysUtxo.getN());
-            } else
+                SystemUtxo systemUtxo = blockingQueueService.take();
+                TxInputDto input = new TxInputDto(systemUtxo.getTxid(), systemUtxo.getN(), "");
+                sysFee = sysFee.add(new BigDecimal(systemUtxo.getValue()));
+                systemUtxoService.delete(systemUtxo.getTxid(), systemUtxo.getN());
+                inputs.add(input);
+            } else {
                 break;
+            }
         }
 
 

@@ -13,4 +13,6 @@ public interface ScriptUtxoTokenLinkMapper {
 
     List<ScriptUtxoTokenLink> findListByScript(@Param("script") List<String> script, @Param("addressHash") String addressHash, @Param("tokenId") String tokenId);
 
+    ScriptUtxoTokenLink findUtxoToken(@Param("txid") String txid, @Param("n") Integer n);
+
 }

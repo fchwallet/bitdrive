@@ -45,8 +45,8 @@ public class ScriptTokenLinkServiceImpl implements ScriptTokenLinkService {
     }
 
     @Override
-    public List<ScriptTokenLink> selectByTxid(String txid) {
-        return scriptTokenLinkMapper.selectByTxid(txid);
+    public List<ScriptTokenLink> selectByTxid(String txid, Integer vout) {
+        return scriptTokenLinkMapper.selectByTxid(txid, vout);
     }
 
     @Override
@@ -87,6 +87,11 @@ public class ScriptTokenLinkServiceImpl implements ScriptTokenLinkService {
     @Override
     public BigInteger findFromTokenByScript(List<String> script) {
         return scriptTokenLinkMapper.findFromTokenByScript(script);
+    }
+
+    @Override
+    public BigInteger findDestructionByScript(List<String> script) {
+        return scriptTokenLinkMapper.findDestructionByScript(script);
     }
 
 

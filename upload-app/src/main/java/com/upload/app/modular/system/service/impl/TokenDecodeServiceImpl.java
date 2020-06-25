@@ -38,7 +38,7 @@ public class TokenDecodeServiceImpl implements TokenDecodeService {
     @Override
     public Map<String, Object> decodeToken(String txid, JSONArray vins, JSONArray vouts, JSONObject vout, String content, JSONObject scriptPubKey, Integer n, StringBuffer scrpit, List<String> addressList) {
 
-        List<ScriptTokenLink> scriptTokenLinkList = scriptTokenLinkService.selectByTxid(txid);
+        List<ScriptTokenLink> scriptTokenLinkList = scriptTokenLinkService.selectByTxid(txid, n);
 
         if (scriptTokenLinkList != null && scriptTokenLinkList.size() > 0)
             return null;
@@ -51,20 +51,6 @@ public class TokenDecodeServiceImpl implements TokenDecodeService {
                flag, content, scrpit.toString(), addressList);
 
         return result;
-
-//        if (f == 1) {
-//            return null;
-//        } else if (f == 2) {
-//            return null;
-//        } else if (f == 3) {
-//            result.put("flag", false);
-//            return result;
-//        } else if (f == 4) {
-//            result.put("flag", true);
-//            return result;
-//        } else {
-//            return null;
-//        }
 
     }
 
@@ -179,14 +165,6 @@ public class TokenDecodeServiceImpl implements TokenDecodeService {
             Map<String, Object> f = decodeSnedToken(OP_RETURN, hexStr, n, vins, txid, vouthex, value, addressList);
 
             return f;
-
-//            if (f || sendFlag)
-//                sendFlag = true;
-//
-//            if (sendFlag)
-//                flag = false;
-//            else
-//                flag = true;
 
         }
 

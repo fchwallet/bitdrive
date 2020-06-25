@@ -46,4 +46,11 @@
 		`address_script_link` where address = #{address}
 	</select>
 
+	<select id="findByScript" resultType="java.lang.String">
+		SELECT
+			address
+		FROM
+		`address_script_link` where script = #{script}
+	</select>
+
 </mapper>
