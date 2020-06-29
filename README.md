@@ -62,6 +62,8 @@ put, update, get, get_drive_id
 "data": "010101010",(hex 字符串)
 "signature": sign(data) 用fch_addr 签名data字段内容的签名
 }   
+
+注：下一个版本signature = sign(sha256(data)). 这样对data比较大的时候处理更好.
    
 返回结果         
 {
@@ -87,7 +89,9 @@ curl http://freedrive.fchwallet.com:8442/api/put  -X POST  -d @put.json  --heade
 "signature": sign(data),用fch_addr 签名data字段内容的签名
 "drive_id":  需要更新的drive_id
 }   
-   
+
+注：下一个版本signature = sign(sha256(data)). 这样对data比较大的时候处理更好.   
+
 返回结果：         
 {
   "code": 200,
