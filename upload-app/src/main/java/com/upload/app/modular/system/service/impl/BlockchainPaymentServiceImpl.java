@@ -179,6 +179,20 @@ public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
         CommonTxOputDto c3 = new CommonTxOputDto(sys, sysFee, 2);
         outputs.add(c3);
 
+        CommonTxOputDto c4 = null;
+        if ("get".equals(methodName)) {
+            c4 = new CommonTxOputDto("64726976656765743031",3);
+        } else if ("put".equals(methodName)) {
+            c4 = new CommonTxOputDto("64726976657075743031",3);
+        } else if ("update".equals(methodName)) {
+            c4 = new CommonTxOputDto("64726976657570643031",3);
+        } else if ("get_drive_id".equals(methodName)) {
+            c4 = new CommonTxOputDto("64726976656469643031",3);
+        } else if ("terminate_drive_id".equals(methodName)) {
+            c4 = new CommonTxOputDto("64726976657464693031",3);
+        }
+        outputs.add(c4);
+
         String createHex = Api.CreateDrivetx(inputs, outputs);
         String signHex = Api.SignDrivetx(createHex, "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
         String hex = Api.SendRawTransaction(signHex);

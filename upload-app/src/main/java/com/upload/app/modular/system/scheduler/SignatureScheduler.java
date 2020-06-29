@@ -30,7 +30,7 @@ public class SignatureScheduler {
     @Autowired
     private BlockCountService blockCountService;
 
-    @Scheduled(cron = "0/59 * * * * ?")
+    @Scheduled(cron = "0/1 * * * * ?")
     public void work() {
         self.start();
     }

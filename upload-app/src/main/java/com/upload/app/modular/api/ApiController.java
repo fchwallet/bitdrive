@@ -19,6 +19,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import cn.stylefeng.roses.core.base.controller.BaseController;
 import com.upload.app.core.util.JsonResult;
+import com.upload.app.core.util.Sha256;
+import com.upload.app.core.util.UnicodeUtil;
 import com.upload.app.modular.system.model.*;
 import com.upload.app.modular.system.service.*;
 import com.upload.app.core.rpc.Api;
@@ -145,6 +147,8 @@ public class ApiController extends BaseController {
             return result;
         }
 
+        String sha256Data = Sha256.getSHA256(data);
+
         String ad = fch_addr.getString(0);
         String adfrist = ad.substring(0, 1);
         String fchXSVaddress = null;
@@ -155,7 +159,7 @@ public class ApiController extends BaseController {
         }
 
 
-        Boolean b = Api.VerifyMessage(fchXSVaddress, signautre, data);
+        Boolean b = Api.VerifyMessage(fchXSVaddress, signautre, sha256Data);
 
         if (!b) {
             result.put("code", 1001);
@@ -342,8 +346,9 @@ public class ApiController extends BaseController {
         } else if ("1".equals(adfrist)) {
             fchXSVaddress = fchadd;
         }
+        String sha256Data = Sha256.getSHA256(data);
 
-        Boolean b = Api.VerifyMessage(fchXSVaddress, signautre, data);
+        Boolean b = Api.VerifyMessage(fchXSVaddress, signautre, sha256Data);
 
         if (!b) {
             result.put("code", 1001);
