@@ -15,10 +15,10 @@ java implementation freedrive, see [architecture](./Freedrive-architecture.pdf)
 >URL: http://freedrive.fchwallet.com:8442       
 所有接口都是post请求.
 ```
-signature:
+接口签名signature 计算规则:
 1) params_concat =  p1 + p2 ... + timestamp
 2) hash = sha256(params_concat)
-3) signature = ecdsa(hash, addr_private)
+3) signature = ecdsa(hash, addr_private), 用私钥签名hash
 
 错误码：  
 {"code":"100101","验证时间超时"}  
