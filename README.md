@@ -8,11 +8,18 @@ java implementation freedrive, see [architecture](./Freedrive-architecture.pdf)
 [5. get_balance](#get-balance)  
 [6. get_tx_history](#get-tx-history)  
 [7. terminate_drive_id](#terminate-drive_id)  
+[8. get_auth](#get-auth)  
+[9. auth](#auth)  
 
 ### 通用  
 >URL: http://freedrive.fchwallet.com:8442       
 所有接口都是post请求.
 ```
+接口签名参数(signature)计算规则:
+1) params_concat =  p1 + p2 ... + timestamp
+2) hash = sha256(params_concat)
+3) signature = ecdsa(hash, addr_private), 用私钥签名hash
+
 错误码：  
 {"code":"100101","验证时间超时"}  
 {"code":"100102","验证错误"}  
@@ -31,12 +38,14 @@ java implementation freedrive, see [architecture](./Freedrive-architecture.pdf)
 {"code":"200213","token余额和链上不对应请稍后重试"}
 {"code":"100456","该driveid已经结束"}
 
-计费说明：（每次请求扣除一次）
+计费说明: (每次请求即时扣除)
 {put:                  10积分}
 {update:               10积分}
 {get:                  2积分}
 {get_drive_id:         2积分}
 {terminate_drive_id:   10积分}
+{auth:                 10积分}
+{get_auth:             2积分}
 
 更新日志：
 2020/4/10
@@ -48,8 +57,10 @@ put, update, get, get_drive_id
 1) get 接口增加"type"字段
 2) 增加计费相关接口, get_balance, get_tx_history
 3) 增加终止修改drive_id: terminate_drive_id
-
-```	  
+2020/7/1
+1) 所有接口增加timestamp字段防止重复请求,且按新签名规则签名所有参数
+2) 增加授权接口: get_auth, auth
+```
 
 ### put   
 >存数据到freedrive      
@@ -59,12 +70,11 @@ put, update, get, get_drive_id
 {
 "fch_addr": ["F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT"], 
 "metadata":"61869fb46ccc915c36e2366d77ef8d", (hex 字符串)
-"data": "010101010",(hex 字符串)
-"signature": sign(data) 用fch_addr 签名data字段内容的签名
+"data": "010101010",(hex 字符串),
+"timestamp": "1593550887",
+"signature": "xxxxxxx"
 }   
 
-注：下一个版本signature = sign(sha256(data)). 这样对data比较大的时候处理更好.
-   
 返回结果         
 {
   "code": 200,
@@ -85,12 +95,11 @@ curl http://freedrive.fchwallet.com:8442/api/put  -X POST  -d @put.json  --heade
 {
 "fch_addr": ["F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT"], 
 "metadata":"044bfc161869fb46ccc915c36e2366d77ef8d",(hex 字符串)
-"data": "010101010",(hex 字符串)
-"signature": sign(data),用fch_addr 签名data字段内容的签名
-"drive_id":  需要更新的drive_id
+"data": "010101010",(hex 字符串),
+"drive_id":  需要更新的drive_id,
+"timestamp": "1593550887",
+"signature": "xxxxxxxxx"
 }   
-
-注：下一个版本signature = sign(sha256(data)). 这样对data比较大的时候处理更好.   
 
 返回结果：         
 {
@@ -112,7 +121,7 @@ curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  -
 查询单个drive_id的所有变更记录(type = 1 data的数据为链接 type = 0  data数据为正常数据)
 ```
 参数类型: ["application/x-www-form-urlencoded"]  
-'fch_addr=F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT&drive_id=1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce'
+'fch_addr=F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT&drive_id=1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce&timestamp=1593550887&signature=xxxxxxxx'
   
 返回结果：
 {
@@ -143,7 +152,7 @@ curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  -
 或者参数传update_id, 查询某次更新记录    
 ```
 参数类型: ["application/x-www-form-urlencoded"]  
-'fch_addr=F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT&update_id=1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce'
+'fch_addr=F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT&update_id=1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce&timestamp=1593550887&signature=xxxxxxx'
     
 返回结果
 {
@@ -166,7 +175,7 @@ curl http://freedrive.fchwallet.com:8442/api/get -X POST  -d 'fch_addr=F8Z2aQkHk
 >接口名称: /api/get_drive_id
 ```
 参数类型: ["application/x-www-form-urlencoded"]    
-'fch_addr=f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce'
+'fch_addr=f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce&timestamp=1593550887&signature=xxxxxxxxxxxxx'
    
 	    
 返回结果：
@@ -185,7 +194,7 @@ curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d 'fch_addr=
 >接口名称: /api/get_balance
 ```
 参数类型: ["application/x-www-form-urlencoded"]    
-'fch_addr=f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce'
+'fch_addr=f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce&timestamp=1593550887&signature=xxxxxxxxxx'
 
 返回结果:
 {
@@ -204,7 +213,7 @@ curl http://freedrive.fchwallet.com:8442/api/get_balance -X POST  -d 'fch_addr=F
 >接口名称: /api/get_tx_history
 ```
 参数类型: ["application/x-www-form-urlencoded"]    
-'fch_addr=1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM'	
+'fch_addr=1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM&timestamp=1593550887&signature=xxxxxxxxxxxx'	
 
 
 返回结果:
@@ -232,7 +241,9 @@ curl http://freedrive.fchwallet.com:8442/api/get_tx_history -X POST  -d 'fch_add
 参数类型: ["application/json"]    
 {
   "fch_addr':"1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM",	
-  "drive_id":"f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce"
+  "drive_id":"f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce",
+  "timestamp":"1593550887",
+  "signature":"xxxxxxxxxxxxx"
 }
 
 返回结果:
@@ -246,3 +257,53 @@ curl example
 curl http://freedrive.fchwallet.com:8442/api/terminate_drive_id  -X POST  -d @terminate_drive_id.json  --header "Content-Type:application/json"
 ```
 
+
+
+
+### get auth 
+>获取drive_id 授权信息。     
+>接口名称: /api/get_auth
+
+参数类型: ["application/x-www-form-urlencoded"]    
+'fch_addr=1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM&drive_id=xxxxxxxxxx&timestamp=1593550887&signature=xxxxxxxxxxxx'	
+
+```
+返回结果:
+{
+  "code": 200,
+  "data": {	
+  "drive_id":"f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce",
+  "admin":[addr1, addr2, ..., addrn],
+  "member":[addr11, addr22, ..., addrn2]
+  }
+}
+
+admin 只有admin权限的地址才能更改授权
+member 可以有多个地址，可以修改drive_id, 但不能修改权限
+
+```
+
+
+### auth 
+>授权addrs, drive_id     
+>接口名称: /api/auth
+```
+参数类型: ["application/json"]    
+{
+  "fch_addr':"1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM",	
+  "drive_id":"f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce",
+  "admin":[addr1, addr2, ..., addrn],
+  "member":[addr11, addr22, ..., addrn2],
+  "timestamp":"1593550887",
+  "signature":"xxxxxxxxxxxxx"
+}
+
+
+admin 只有admin权限的地址才能更改授权
+member 可以有多个地址，可以修改drive_id, 但不能修改权限
+
+返回结果:
+{
+   "code": 200,
+}
+```
