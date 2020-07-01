@@ -3,6 +3,7 @@ package com.upload.app.modular.api;
 import com.alibaba.fastjson.JSONObject;
 import com.upload.app.core.rpc.Api;
 import com.upload.app.modular.system.model.BalanceHistory;
+import com.upload.app.modular.system.model.FchXsvLink;
 import com.upload.app.modular.system.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,16 +25,34 @@ public class PointsController {
     @Autowired
     private BalanceHistoryService balanceHistoryService;
 
+    @Autowired
+    private FchXsvLinkService fchXsvLinkService;
+
     @ResponseBody
     @RequestMapping(value="/charge", method = RequestMethod.POST)
     public JSONObject charge(String address, String value) throws Exception {
 
         JSONObject ob = new JSONObject();
 
-        if ("F".equals(address) || "f".equals(address)) {
-            address = Api.fchtoxsv(address).getString("address");
-        } else if ("1".equals(address)) {
-            address = address;
+        FchXsvLink fchXsvLink = fchXsvLinkService.findByFch(address);
+
+        if (fchXsvLink == null) {
+
+            String adfrist = address.substring(0, 1);
+            FchXsvLink insert = new FchXsvLink();
+            if ("F".equals(adfrist) || "f".equals(adfrist)) {
+                address = Api.fchtoxsv(address).getString("address");
+                insert.setType(0);
+            } else if ("1".equals(adfrist)) {
+                address = address;
+                insert.setType(1);
+            }
+            insert.setFchAddress(address);
+            insert.setXsvAddress(address);
+            String addressHash = Api.ValidateAddress(address).getString("scriptPubKey").replaceFirst("76a914", "").replaceFirst("88ac", "");
+            insert.setAddressHash(addressHash);
+            fchXsvLinkService.insert(insert);
+
         }
 
         Boolean flag = sendService.Create(address, value);

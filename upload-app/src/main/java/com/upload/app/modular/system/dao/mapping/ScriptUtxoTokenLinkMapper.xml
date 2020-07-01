@@ -82,4 +82,11 @@
 		`script_utxo_token_link` where txid = #{txid} and n = #{n} limit 0,1
 	</select>
 
+	<select id="findAllList" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+		`script_utxo_token_link`
+	</select>
+
 </mapper>

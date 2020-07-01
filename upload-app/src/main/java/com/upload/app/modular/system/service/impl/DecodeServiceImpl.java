@@ -10,6 +10,7 @@ import com.upload.app.modular.system.service.*;
 import com.upload.app.core.rpc.Api;
 import com.upload.app.core.util.Sha256;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,6 +70,12 @@ public class DecodeServiceImpl implements DecodeService {
     private BalanceHistoryService balanceHistoryService;
 
     static String deposeFilesDir = "/java/testUpload/data/";
+
+    @Value("${sys.address}")
+    private String sysAddress;
+
+    @Value("${sys.tokenAddress}")
+    private String sysTokenAddress;
 
     @Override
     @Transactional(rollbackFor=Exception.class)
@@ -142,7 +149,7 @@ public class DecodeServiceImpl implements DecodeService {
                         FchXsvLink fchXsvLink1 = fchXsvLinkMapper.findByHash(address1);
 
                         if (fchXsvLink1 != null) {
-                            if (!fchXsvLink1.getXsvAddress().equals("1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx")) {
+                            if (!fchXsvLink1.getXsvAddress().equals(sysAddress)) {
                                 AddressDriveLink addressDriveLink = new AddressDriveLink();
                                 addressDriveLink.setAddress(fchXsvLink1.getAddressHash());
                                 addressDriveLink.setDriveId(driveId);
@@ -515,7 +522,7 @@ public class DecodeServiceImpl implements DecodeService {
                         FchXsvLink fchXsvLink1 = fchXsvLinkMapper.findByHash(address1);
 
                         if (fchXsvLink1 != null) {
-                            if (!fchXsvLink1.getXsvAddress().equals("1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx")) {
+                            if (!fchXsvLink1.getXsvAddress().equals(sysAddress)) {
                                 AddressDriveLink addressDriveLink = new AddressDriveLink();
                                 addressDriveLink.setAddress(fchXsvLink1.getAddressHash());
                                 addressDriveLink.setDriveId(driveId);
@@ -634,6 +641,8 @@ public class DecodeServiceImpl implements DecodeService {
                             Map<String, Object> map = tokenDecodeService.decodeToken(tx, vins, vouts, vout, content, scriptPubKey, voutn, script, addressList);
 
                             if (map != null) {
+
+                                isInsert = false;
 
                                 Object fob = map.get("flag");
 
@@ -785,6 +794,12 @@ public class DecodeServiceImpl implements DecodeService {
                                 balanceHistory.setTimestamp(new Date());
                                 balanceHistory.setChange(-10);
 
+                            } else if ("64726976656368723031".equals(typeInfo)) {                   // charge
+
+                                balanceHistory = new BalanceHistory();
+                                balanceHistory.setType("charge");
+                                balanceHistory.setTimestamp(new Date());
+
                             }
                         }
 
@@ -796,8 +811,6 @@ public class DecodeServiceImpl implements DecodeService {
 
                     if (flag && sendFlag && fromAmount.compareTo(toAmount) >= 0) {
 
-                        isInsert = false;
-
                         if (SlpSendList != null) {
                             for (ScriptSlpSend slpSend : SlpSendList) {
                                 scriptSlpSendService.insertSlpSend(slpSend);
@@ -807,6 +820,25 @@ public class DecodeServiceImpl implements DecodeService {
                         if (TokenAssetsList != null) {
                             for (ScriptTokenLink st : TokenAssetsList) {
                                 scriptTokenLinkService.insert(st);
+                                if (balanceHistory != null) {
+                                    String toScript= st.getScript();
+                                    List<String> list = addressScriptLinkService.findByScript(toScript);
+                                    for (String l : list) {
+                                        if (!l.equals("57353d54a4fc0c2d24ef12f27c4351f358855416") || !l.equals("84be1e524ff4324816f25e558dd89be1a29841b3")) {
+                                            FchXsvLink xsv = fchXsvLinkMapper.findByHash(l);
+                                            balanceHistory.setAddress(xsv.getFchAddress());
+                                            if ("charge".equals(balanceHistory.getType())) {
+                                                BigInteger token = TokenAssetsList.get(0).getToken().divide(new BigInteger("100000000"));
+                                                balanceHistory.setChange(token.intValue());
+                                                balanceHistoryService.insert(balanceHistory);
+                                            } else {
+                                                balanceHistoryService.insert(balanceHistory);
+                                            }
+                                        }
+
+                                    }
+
+                                }
                             }
                         }
 
@@ -822,9 +854,7 @@ public class DecodeServiceImpl implements DecodeService {
                             }
                         }
 
-                        if (balanceHistory != null) {
-                            balanceHistoryService.insert(balanceHistory);
-                        }
+
 
                         if (fromAmount.compareTo(toAmount) > 0) {
                             BigInteger amt = fromAmount.subtract(toAmount);
@@ -867,7 +897,7 @@ public class DecodeServiceImpl implements DecodeService {
                         List<String> adHash = addressScriptLinkService.findByScript(scriptTokenLink.get(0).getScript());
                         for (String ad : adHash) {
                             FchXsvLink address = fchXsvLinkMapper.findByHash(ad);
-                            if (address != null && (!"1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx".equals(address.getFchAddress()) && !"18x7ZqhUHV3NgCGAw3NPEsGbEZ5i6beyD6".equals(address.getFchAddress()))) {
+                            if (address != null && (!sysAddress.equals(address.getFchAddress()) && !sysTokenAddress.equals(address.getFchAddress()))) {
                                 bh.setAddress(address.getFchAddress());
                                 balanceHistoryService.insert(bh);
                             }
@@ -905,83 +935,87 @@ public class DecodeServiceImpl implements DecodeService {
 
                     for (AddressDriveLink addressDrive : addressDriveList) {
 
-                        DriveTxAddress driveTxAddress = new DriveTxAddress();
-                        driveTxAddress.setAddress(addressDrive.getAddress());
-                        driveTxAddress.setN(jb.getInteger("n"));
-                        driveTxAddress.setTxid(jb.getString("txid"));
-                        driveTxAddress.setCreateDate(new Date());
-                        if (driveList != null && driveList.size() > 0) {
-                            driveTxAddress.setDriveId(driveList.get(0));
-                            driveTxAddress.setUpdateId(jb.getString("driveId"));
-                            addressDrive.setStatus(1);
-                        } else {
-                            driveTxAddress.setDriveId(jb.getString("driveId"));
-                            addressDrive.setStatus(0);
+                        if (!StringUtils.isEmpty(jb.getString("driveId"))) {
+                            DriveTxAddress driveTxAddress = new DriveTxAddress();
+                            driveTxAddress.setAddress(addressDrive.getAddress());
+                            driveTxAddress.setN(jb.getInteger("n"));
+                            driveTxAddress.setTxid(jb.getString("txid"));
+                            driveTxAddress.setCreateDate(new Date());
+                            if (driveList != null && driveList.size() > 0) {
+                                driveTxAddress.setDriveId(driveList.get(0));
+                                driveTxAddress.setUpdateId(jb.getString("driveId"));
+                                addressDrive.setStatus(1);
+                            } else {
+                                driveTxAddress.setDriveId(jb.getString("driveId"));
+                                addressDrive.setStatus(0);
+                            }
+
+                            driveTxAddressMapper.insert(driveTxAddress);
+                            addressDriveLinkMapper.insert(addressDrive);
                         }
-
-                        driveTxAddressMapper.insert(driveTxAddress);
-                        addressDriveLinkMapper.insert(addressDrive);
-
                     }
 
 
                     if (driveList != null && driveList.size() > 0) {
 
-                        DriveUtxo driveUtxo = new DriveUtxo();
-                        driveUtxo.setN(jb.getInteger("n"));
-                        driveUtxo.setTxid(jb.getString("txid"));
-                        driveUtxo.setValue(consValue);
-                        driveUtxo.setDriveId(driveList.get(0));
-                        driveUtxoMapper.insert(driveUtxo);
+                        if (!StringUtils.isEmpty(jb.getString("driveId"))) {
+                            DriveUtxo driveUtxo = new DriveUtxo();
+                            driveUtxo.setN(jb.getInteger("n"));
+                            driveUtxo.setTxid(jb.getString("txid"));
+                            driveUtxo.setValue(consValue);
+                            driveUtxo.setDriveId(driveList.get(0));
+                            driveUtxoMapper.insert(driveUtxo);
 
-                        Update update = new Update();
-                        update.setMetadata(jb.getString("metadata"));
-                        update.setDriveId(driveList.get(0));
-                        update.setUpdateId(jb.getString("driveId"));
-                        update.setCreateDate(new Date());
-                        if (!StringUtils.isEmpty(jb.getString("data"))) {
-                            Integer size = jb.getString("data").getBytes().length;
-                            if (size > 51200) {
-                                String fileName = Sha256.getSHA256(jb.getString("txid") + jb.getInteger("n"));
-                                String url = ouputFile(jb.getString("data"), fileName);
-                                update.setData(url);
-                                update.setType(1);
-                            } else {
-                                update.setData(jb.getString("data"));
+                            Update update = new Update();
+                            update.setMetadata(jb.getString("metadata"));
+                            update.setDriveId(driveList.get(0));
+                            update.setUpdateId(jb.getString("driveId"));
+                            update.setCreateDate(new Date());
+                            if (!StringUtils.isEmpty(jb.getString("data"))) {
+                                Integer size = jb.getString("data").getBytes().length;
+                                if (size > 51200) {
+                                    String fileName = Sha256.getSHA256(jb.getString("txid") + jb.getInteger("n"));
+                                    String url = ouputFile(jb.getString("data"), fileName);
+                                    update.setData(url);
+                                    update.setType(1);
+                                } else {
+                                    update.setData(jb.getString("data"));
+                                }
+                                updateMapper.insert(update);
                             }
-                            updateMapper.insert(update);
                         }
 
                     } else {
 
                         if (jb.size() > 0) {
 
-                            DriveUtxo driveUtxo = new DriveUtxo();
-                            driveUtxo.setN(jb.getInteger("n"));
-                            driveUtxo.setTxid(jb.getString("txid"));
-                            driveUtxo.setValue(consValue);
-                            driveUtxo.setDriveId(jb.getString("driveId"));
-                            driveUtxoMapper.insert(driveUtxo);
+                            if (!StringUtils.isEmpty(jb.getString("driveId"))) {
+                                DriveUtxo driveUtxo = new DriveUtxo();
+                                driveUtxo.setN(jb.getInteger("n"));
+                                driveUtxo.setTxid(jb.getString("txid"));
+                                driveUtxo.setValue(consValue);
+                                driveUtxo.setDriveId(jb.getString("driveId"));
+                                driveUtxoMapper.insert(driveUtxo);
 
-                            Create create = new Create();
-                            create.setMetadata(jb.getString("metadata"));
-                            create.setDriveId(jb.getString("driveId"));
-                            create.setTxid(jb.getString("txid"));
-                            create.setCreateDate(new Date());
-                            if (!StringUtils.isEmpty(jb.getString("data"))) {
-                                Integer size = jb.getString("data").getBytes().length;
-                                if (size > 51200) {
-                                    String fileName = Sha256.getSHA256(jb.getString("txid") + jb.getInteger("n"));
-                                    String url = ouputFile(jb.getString("data"), fileName);
-                                    create.setData(url);
-                                    create.setType(1);
-                                } else {
-                                    create.setData(jb.getString("data"));
+                                Create create = new Create();
+                                create.setMetadata(jb.getString("metadata"));
+                                create.setDriveId(jb.getString("driveId"));
+                                create.setTxid(jb.getString("txid"));
+                                create.setCreateDate(new Date());
+                                if (!StringUtils.isEmpty(jb.getString("data"))) {
+                                    Integer size = jb.getString("data").getBytes().length;
+                                    if (size > 51200) {
+                                        String fileName = Sha256.getSHA256(jb.getString("txid") + jb.getInteger("n"));
+                                        String url = ouputFile(jb.getString("data"), fileName);
+                                        create.setData(url);
+                                        create.setType(1);
+                                    } else {
+                                        create.setData(jb.getString("data"));
+                                    }
                                 }
+
+                                createMapper.insert(create);
                             }
-
-                            createMapper.insert(create);
-
 
                         }
 
@@ -1068,7 +1102,7 @@ public class DecodeServiceImpl implements DecodeService {
             FchXsvLink fchXsvLink2 = fchXsvLinkMapper.findByHash(address2);
 
             if (fchXsvLink2 != null) {
-                if (!fchXsvLink2.getXsvAddress().equals("1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx")) {
+                if (!fchXsvLink2.getXsvAddress().equals(sysAddress)) {
                     AddressDriveLink addressDriveLink = new AddressDriveLink();
                     addressDriveLink.setAddress(fchXsvLink2.getAddressHash());
                     addressDriveLink.setDriveId(driveId);

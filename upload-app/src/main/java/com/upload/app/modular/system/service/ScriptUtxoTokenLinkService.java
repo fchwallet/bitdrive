@@ -15,4 +15,6 @@ public interface ScriptUtxoTokenLinkService {
 
     ScriptUtxoTokenLink findUtxoToken(String txid, Integer n);
 
+    List<ScriptUtxoTokenLink> findAllList();
+
 }

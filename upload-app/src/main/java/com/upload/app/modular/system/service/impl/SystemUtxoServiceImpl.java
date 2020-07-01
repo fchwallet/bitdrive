@@ -16,6 +16,7 @@ import com.upload.app.modular.system.service.ScriptUtxoTokenLinkService;
 import com.upload.app.modular.system.service.SystemUtxoService;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +47,8 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
     @Resource
     private ScriptUtxoTokenLinkService scriptUtxoTokenLinkService;
 
-    final String systemAddress = "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx";
+    @Value("${sys.address}")
+    private String systemAddress;
 
     private static final Object LOCKER = new Object();
 
@@ -79,7 +81,7 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
         else
             metadatafee = metadatafee;
 
-        fchAddress.add("1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
+        fchAddress.add(systemAddress);
         String[] address = fchAddress.toArray(new String[0]);
 
         BigDecimal sizefree = new BigDecimal(size).divide(new BigDecimal("2")).setScale(8);    // 设置8位小数
@@ -127,7 +129,7 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
 
         CommonTxOputDto c1 = new CommonTxOputDto(address, metadataNum, metadata, 1);
         outputs.add(c1);
-        String[] sysad = {"1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx"};
+        String[] sysad = {systemAddress};
         CommonTxOputDto c2 = new CommonTxOputDto(sysad, fvalue, 2);
         outputs.add(c2);                                //找零
 
@@ -145,7 +147,7 @@ public class SystemUtxoServiceImpl implements SystemUtxoService {
 
             if (!StringUtils.isEmpty(hex)) {
                 SystemUtxo systemUtxo = new SystemUtxo();
-                systemUtxo.setAddress("1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
+                systemUtxo.setAddress(systemAddress);
                 systemUtxo.setValue(fvalue.toString());
                 systemUtxo.setN(1);
                 systemUtxo.setTxid(hex);

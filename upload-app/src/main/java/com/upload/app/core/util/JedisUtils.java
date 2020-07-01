@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.upload.app.modular.system.model.ScriptUtxoTokenLink;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
@@ -714,6 +715,16 @@ public class JedisUtils {
      */
     public void delete(String key) {
         redisTemplate.delete(LOCK_PREFIX+key);
+    }
+
+
+    public Object blpop(String key) {
+        Object o = redisTemplate.opsForList().leftPop(key, 1, TimeUnit.SECONDS);
+        return o;
+    }
+
+    public void lpush(ScriptUtxoTokenLink scriptUtxoTokenLink) {
+        redisTemplate.opsForList().leftPushAll(scriptUtxoTokenLink.getAddress(), scriptUtxoTokenLink);
     }
 
 }

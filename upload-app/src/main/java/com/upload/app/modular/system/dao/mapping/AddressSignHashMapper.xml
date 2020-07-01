@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.upload.app.modular.system.dao.AddressSignHashMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.upload.app.modular.system.model.AddressSignHash">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result column="address" property="address" jdbcType="VARCHAR"/>
+		<result column="hash" property="hash" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id, address, hash
+	</sql>
+
+	<select id="findByAddressAndHash" resultType="com.upload.app.modular.system.model.AddressSignHash">
+		select
+		<include refid="Base_Column_List" />
+		from `address_sign_hash` where address = #{address} and  hash = #{hash}
+	</select>
+
+	<insert id="insert" parameterType="com.upload.app.modular.system.model.AddressSignHash">
+		insert into `address_sign_hash`
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="address != null" >
+				address,
+			</if>
+			<if test="hash != null" >
+				`hash`,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="address != null" >
+				#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="hash != null" >
+				#{hash,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+
+
+</mapper>

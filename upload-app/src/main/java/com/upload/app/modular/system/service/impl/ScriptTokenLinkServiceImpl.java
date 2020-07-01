@@ -94,5 +94,10 @@ public class ScriptTokenLinkServiceImpl implements ScriptTokenLinkService {
         return scriptTokenLinkMapper.findDestructionByScript(script);
     }
 
+    @Override
+    public BigInteger selectFASumToken(List<String> script, String address, String tokenId) {
+        return scriptTokenLinkMapper.selectFASumToken(script, address, tokenId);
+    }
+
 
 }

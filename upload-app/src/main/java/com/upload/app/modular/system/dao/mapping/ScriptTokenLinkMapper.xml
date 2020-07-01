@@ -26,7 +26,7 @@
 
 	<select id="selectFAToken" resultType="java.math.BigInteger">
 		SELECT
-			token
+			if(isnull(sum(token)), 0, sum(token))
 		FROM
 		`script_token_link` where txid = #{txid} and vout = #{vout} and token_id = #{tokenId}
 	</select>
@@ -126,6 +126,23 @@
 			#{address}
 		</foreach>
 		and status = 3
+	</select>
+
+	<select id="selectFASumToken" resultType="java.math.BigInteger">
+
+		SELECT
+		if(isnull(sum(stl.token)), 0, sum(stl.token)) as tk
+		FROM
+		`script_token_link` stl where (stl.txid,stl.vout,stl.token_id) in (SELECT
+			txid, n, token_id
+			FROM
+			`script_utxo_token_link` where script in
+			<foreach collection="script" item="ad" index="index" open="(" close=")" separator=",">
+				(#{ad})
+			</foreach>
+			and address = #{address} and token_id = #{tokenId}
+		)
+
 	</select>
 
 </mapper>

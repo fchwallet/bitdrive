@@ -6,6 +6,7 @@ import com.upload.app.core.rpc.TxInputDto;
 import com.upload.app.modular.system.model.*;
 import com.upload.app.modular.system.service.*;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,9 +37,11 @@ public class SendServiceImpl implements SendService {
     @Resource
     private BlockingQueueService blockingQueueService;
 
-    final String payAddress = "18x7ZqhUHV3NgCGAw3NPEsGbEZ5i6beyD6";
+    @Value("${sys.tokenAddress}")
+    private String sysTokenAddress;
 
-    final String systemAddress = "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx";
+    @Value("${sys.address}")
+    private String systemAddress;
 
     final String agreement = "06534c502b2b000202010453454e4420c7f7c99fb2f9ad865ba17f702dc21e2643ac1562941888952a27aa399e26110108";
 
@@ -50,21 +53,11 @@ public class SendServiceImpl implements SendService {
 
         List<TxInputDto> inputs = new ArrayList<>();
 
-//        List<SystemUtxo> sysUtxoList = systemUtxoService.findByAddress(systemAddress);
-//        BigDecimal sysFee = new BigDecimal("0");
-//        for (SystemUtxo sysUtxo : sysUtxoList) {
-//            if (sysFee.compareTo(new BigDecimal("0.0001")) < 0) {
-//                sysFee = sysFee.add(new BigDecimal(sysUtxo.getValue()));
-//                TxInputDto tx = new TxInputDto(sysUtxo.getTxid(), sysUtxo.getN(),"");
-//                inputs.add(tx);
-//                systemUtxoService.delete(sysUtxo.getTxid(), sysUtxo.getN());
-//            } else
-//                break;
-//        }
-
         BigDecimal sysFee = new BigDecimal("0");
+        Double count = Double.valueOf(value) / 100;
+        Double fee = count * 0.000002 + 0.001;
         while (true) {
-            if (sysFee.compareTo(new BigDecimal("0.001")) < 0) {
+            if (sysFee.compareTo(new BigDecimal(fee)) < 0) {
                 SystemUtxo systemUtxo = blockingQueueService.take();
                 TxInputDto input = new TxInputDto(systemUtxo.getTxid(), systemUtxo.getN(), "");
                 sysFee = sysFee.add(new BigDecimal(systemUtxo.getValue()));
@@ -75,7 +68,7 @@ public class SendServiceImpl implements SendService {
             }
         }
 
-        FchXsvLink fchXsvLink = fchXsvLinkService.findByFch(payAddress);
+        FchXsvLink fchXsvLink = fchXsvLinkService.findByFch(sysTokenAddress);
 
         List<String> scriptList = addressScriptLinkService.findListByAddress(fchXsvLink.getAddressHash());
 
@@ -98,7 +91,6 @@ public class SendServiceImpl implements SendService {
             BigInteger amount = scriptTokenLinkService.selectFAToken(tokenId, sut.getTxid(), sut.getN());
             sumAmount = sumAmount.add(amount);
         }
-
 
 
         if (balance.compareTo(sumAmount) != 0) {
@@ -126,34 +118,47 @@ public class SendServiceImpl implements SendService {
             }
         }
 
-        String newValueHex =  newValue.multiply(new BigInteger("100000000")).toString(16);
-
-        while (true) {
-            if (newValueHex.length() >= 16) {
-                break;
-            } else {
-                newValueHex = "0"+newValueHex;
-            }
-        }
 
         List<CommonTxOputDto> outputs = new ArrayList<>();
 
-        String[] givechangeAddress1 = {systemAddress, payAddress};
+        FchXsvLink toFchXsvLink = fchXsvLinkService.findByFch(address);
+        String[] givechangeAddress2 = {toFchXsvLink.getXsvAddress(), systemAddress};
+
+        BigInteger v = (new BigDecimal("100")).multiply(new BigDecimal("100000000")).toBigInteger();
+        String[] givechangeAddress1 = {systemAddress, sysTokenAddress};
         CommonTxOputDto c1 = new CommonTxOputDto(givechangeAddress1, new BigDecimal("0.0001"), agreement+surplusHex, 1);                              // 多余找零
         outputs.add(c1);
 
-        FchXsvLink toFchXsvLink = fchXsvLinkService.findByFch(address);
-        String[] givechangeAddress2 = {toFchXsvLink.getXsvAddress(), systemAddress};
-        CommonTxOputDto c2 = new CommonTxOputDto(givechangeAddress2, new BigDecimal("0.0001"), agreement+newValueHex, 1);                              //给充值地址打钱
-        outputs.add(c2);
+        for (int i = 0; i < count; i++) {
+            String newValueHex = v.toString(16);
+            while (true) {
+                if (newValueHex.length() >= 16) {
+                    break;
+                } else {
+                    newValueHex = "0"+newValueHex;
+                }
+            }
 
-        sysFee = sysFee.subtract(new BigDecimal("0.0002"));
+            CommonTxOputDto c2 = new CommonTxOputDto(givechangeAddress2, new BigDecimal("0.00006"), agreement+newValueHex, 1);                              //给充值地址打钱
+            outputs.add(c2);
+
+        }
+
+
+        BigDecimal f1 = new BigDecimal(count).multiply(new BigDecimal("0.00002")).setScale(8, BigDecimal.ROUND_HALF_UP);
+        BigDecimal f2 = new BigDecimal(count).multiply(new BigDecimal("0.00006"));
+
+        sysFee = sysFee.subtract(new BigDecimal("0.0002")).subtract(f1).subtract(f2).setScale(8, BigDecimal.ROUND_HALF_UP);
+
         String[] sysAddress = {systemAddress};
         CommonTxOputDto c3 = new CommonTxOputDto(sysAddress, sysFee, 2);
         outputs.add(c3);
 
+        CommonTxOputDto c4 = new CommonTxOputDto("64726976656368723031", 3);                    // 充值
+        outputs.add(c4);
+
         String createHex = Api.CreateDrivetx(inputs, outputs);
-        String signHex = Api.SignDrivetx(createHex, "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
+        String signHex = Api.SignDrivetx(createHex, systemAddress);
         String hex = Api.SendRawTransaction(signHex);
 
         if (StringUtils.isEmpty(hex))
@@ -200,35 +205,6 @@ public class SendServiceImpl implements SendService {
             sutl2.setValue("0.0001");
             scriptUtxoTokenLinkService.insert(sutl2);
 
-            ScriptUtxoTokenLink sutl3 = new ScriptUtxoTokenLink();                              // 打钱
-            sutl3.setTokenId(tokenId);
-            sutl3.setScript(script.toString());
-            sutl3.setAddress("84be1e524ff4324816f25e558dd89be1a29841b3");
-            sutl3.setTxid(hex);
-            sutl3.setN(1);
-            sutl3.setValue("0.0001");
-            scriptUtxoTokenLinkService.insert(sutl3);
-
-            ScriptUtxoTokenLink sutl4 = new ScriptUtxoTokenLink();                              // 打钱
-            sutl4.setTokenId(tokenId);
-            sutl4.setScript(script.toString());
-            sutl4.setAddress(toFchXsvLink.getAddressHash());
-            sutl4.setTxid(hex);
-            sutl4.setN(1);
-            sutl4.setValue("0.0001");
-            scriptUtxoTokenLinkService.insert(sutl4);
-
-            ScriptTokenLink stl1 = new ScriptTokenLink();                                       //打给他
-            stl1.setScript(script.toString());
-            stl1.setToken(newValue.multiply(new BigInteger("100000000")));
-            stl1.setFromScript(fromscript.toString());
-            stl1.setStatus(2);
-            stl1.setTokenId(tokenId);
-            stl1.setTxid(hex);
-            stl1.setVout(1);
-            scriptTokenLinkService.insert(stl1);
-
-
             ScriptTokenLink stl2 = new ScriptTokenLink();
             stl2.setScript(fromscript.toString());
             stl2.setToken(surplus.multiply(new BigInteger("100000000")));
@@ -240,12 +216,44 @@ public class SendServiceImpl implements SendService {
             scriptTokenLinkService.insert(stl2);
 
             SystemUtxo systemUtxo = new SystemUtxo();
-            systemUtxo.setAddress("1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
+            systemUtxo.setAddress(systemAddress);
             systemUtxo.setValue(sysFee.toString());
-            systemUtxo.setN(2);
+            systemUtxo.setN(count.intValue()+1);
             systemUtxo.setTxid(hex);
             systemUtxoService.insert(systemUtxo);
 
+            for (int i = 1; i <= count; i++) {
+
+                ScriptUtxoTokenLink sutl3 = new ScriptUtxoTokenLink();                              // 打钱
+                sutl3.setTokenId(tokenId);
+                sutl3.setScript(script.toString());
+                sutl3.setAddress("84be1e524ff4324816f25e558dd89be1a29841b3");
+                sutl3.setTxid(hex);
+                sutl3.setN(i);
+                sutl3.setValue("0.00006");
+                scriptUtxoTokenLinkService.insert(sutl3);
+
+                ScriptUtxoTokenLink sutl4 = new ScriptUtxoTokenLink();                              // 打钱
+                sutl4.setTokenId(tokenId);
+                sutl4.setScript(script.toString());
+                sutl4.setAddress(toFchXsvLink.getAddressHash());
+                sutl4.setTxid(hex);
+                sutl4.setN(i);
+                sutl4.setValue("0.00006");
+                scriptUtxoTokenLinkService.insert(sutl4);
+
+                ScriptTokenLink stl1 = new ScriptTokenLink();                                       //打给他
+                stl1.setScript(script.toString());
+                stl1.setToken(v);
+                stl1.setFromScript(fromscript.toString());
+                stl1.setStatus(2);
+                stl1.setTokenId(tokenId);
+                stl1.setTxid(hex);
+                stl1.setVout(i);
+                scriptTokenLinkService.insert(stl1);
+
+
+            }
 
             return true;
         }

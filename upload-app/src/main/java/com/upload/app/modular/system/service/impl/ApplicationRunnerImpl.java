@@ -2,11 +2,17 @@ package com.upload.app.modular.system.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.upload.app.core.util.HttpUtil;
+import com.upload.app.core.util.JedisUtils;
+import com.upload.app.modular.system.model.ScriptUtxoTokenLink;
 import com.upload.app.modular.system.model.SystemUtxo;
 import com.upload.app.modular.system.service.BlockingQueueService;
+import com.upload.app.modular.system.service.RedisQueueService;
+import com.upload.app.modular.system.service.ScriptUtxoTokenLinkService;
 import com.upload.app.modular.system.service.SystemUtxoService;
 import org.apache.commons.collections.map.HashedMap;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -26,13 +32,25 @@ public class ApplicationRunnerImpl implements ApplicationRunner {
     @Resource
     private SystemUtxoService systemUtxoService;
 
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
+    @Resource
+    private ScriptUtxoTokenLinkService scriptUtxoTokenLinkService;
 
-        String sysAddress = "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx";
+    @Resource
+    private RedisQueueService redisQueueService;
+
+    @Resource
+    private JedisUtils jedisUtils;
+
+    @Value("${sys.address}")
+    private String sysAddress;
+
+
+
+    @Override
+    public void run(ApplicationArguments args) throws JsonProcessingException {
 
         Map query = new HashedMap();
-        query.put("address", "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
+        query.put("address", sysAddress);
         JSONObject utxo = (JSONObject) JSONObject.parse(HttpUtil.doPost("http://47.110.137.123:8433/rest/Api/getUtxo",query));
         JSONObject udata = utxo.getJSONObject("data");
         JSONArray utxos = udata.getJSONArray("utxo");
@@ -76,11 +94,23 @@ public class ApplicationRunnerImpl implements ApplicationRunner {
 
         }
 
-        List<SystemUtxo> list = systemUtxoService.findByAddress("1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
+        List<SystemUtxo> list = systemUtxoService.findByAddress(sysAddress);
 
         for (SystemUtxo su : list) {
             blockingQueueService.addQueue(su);
         }
+
+
+        List<ScriptUtxoTokenLink> sutlList = scriptUtxoTokenLinkService.findAllList();
+
+        for (ScriptUtxoTokenLink scut : sutlList) {
+            jedisUtils.delKey(scut.getAddress());
+        }
+
+        for (ScriptUtxoTokenLink scut : sutlList) {
+            redisQueueService.lpush(scut);
+        }
+
 
     }
 

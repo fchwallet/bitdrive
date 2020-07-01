@@ -177,4 +177,13 @@ stringBuffer.append(temp);
         return stringBuilder.toString();
     }
 
+    public static void main(String[] args) {
+        String a = "我";
+        byte[] c = a.getBytes();
+        System.out.println(c);
+        String b = str2HexStr(a);
+        System.out.println(b);
+    }
+
+
 }

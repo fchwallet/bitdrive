@@ -24,4 +24,6 @@ public interface ScriptTokenLinkMapper {
 
     BigInteger findDestructionByScript(@Param("script") List<String> script);
 
+    BigInteger selectFASumToken(@Param("script") List<String> script, @Param("address") String address, @Param("tokenId") String tokenId);
+
 }

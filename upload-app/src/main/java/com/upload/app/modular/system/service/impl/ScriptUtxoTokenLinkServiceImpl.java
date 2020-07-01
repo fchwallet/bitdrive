@@ -35,4 +35,9 @@ public class ScriptUtxoTokenLinkServiceImpl implements ScriptUtxoTokenLinkServic
         return scriptUtxoTokenLinkMapper.findUtxoToken(txid, n);
     }
 
+    @Override
+    public List<ScriptUtxoTokenLink> findAllList() {
+        return scriptUtxoTokenLinkMapper.findAllList();
+    }
+
 }

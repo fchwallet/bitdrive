@@ -15,4 +15,6 @@ public interface ScriptUtxoTokenLinkMapper {
 
     ScriptUtxoTokenLink findUtxoToken(@Param("txid") String txid, @Param("n") Integer n);
 
+    List<ScriptUtxoTokenLink> findAllList();
+
 }

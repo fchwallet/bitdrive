@@ -490,13 +490,28 @@ public class TokenDecodeServiceImpl implements TokenDecodeService {
 
         Set<String> fromAddress = new HashSet<>();
         BigInteger newBig = new BigInteger("0");
+        Map<String, Boolean> bl = new HashedMap();
 
         if (assetsList != null && assetsList.size() > 0) {
 
             for (ScriptTokenLink tokenAssets : assetsList) {
-
                 BigInteger fromToken = scriptTokenLinkService.selectFAToken(token_id_str, tokenAssets.getTxid(), tokenAssets.getVout());                 // 查询脚本的
-                fromAddress.add(tokenAssets.getScript());
+                List<String> alist = addressScriptLinkService.findByScript(tokenAssets.getScript());
+                for (String s : alist) {
+                    Boolean f = bl.get(s);
+                    if (s.equals("84be1e524ff4324816f25e558dd89be1a29841b3"))
+                        continue;
+                    if (f != null) {
+                        if (!f) {
+                            fromAddress.add(tokenAssets.getScript());
+                            bl.put(s, true);
+                        }
+                    } else {
+                        fromAddress.add(tokenAssets.getScript());
+                        bl.put(s, true);
+                    }
+                }
+
                 if (fromToken != null) {
                     newBig = newBig.add(fromToken);
                 }
@@ -506,6 +521,7 @@ public class TokenDecodeServiceImpl implements TokenDecodeService {
             result.put("flag", false);
             return result;
         }
+
 
 
         if (newBig.compareTo(quantity_int) < 0) {

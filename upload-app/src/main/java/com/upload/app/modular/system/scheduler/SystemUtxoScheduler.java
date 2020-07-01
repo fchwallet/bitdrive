@@ -10,6 +10,7 @@ import com.upload.app.modular.system.service.SystemUtxoService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -34,7 +35,8 @@ public class SystemUtxoScheduler {
     @Autowired
     private SystemUtxoService systemUtxoService;
 
-    final String sysAddress = "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx";
+    @Value("${sys.address}")
+    private String sysAddress;
 
 //    @Scheduled(cron = "0 */1 * * * ?")
     public void work() throws Exception {
@@ -45,7 +47,7 @@ public class SystemUtxoScheduler {
     public void start() {
 
         Map query = new HashedMap();
-        query.put("address", "1D6swyzdkonsw6cBwFsFqNiT1TeJk7iqmx");
+        query.put("address", sysAddress);
         JSONObject utxo = (JSONObject) JSONObject.parse(HttpUtil.doPost("http://47.110.137.123:8433/rest/Api/getUtxo",query));
         JSONObject udata = utxo.getJSONObject("data");
         JSONArray utxos = udata.getJSONArray("utxo");
