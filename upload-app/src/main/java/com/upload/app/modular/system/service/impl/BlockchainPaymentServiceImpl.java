@@ -1,8 +1,5 @@
 package com.upload.app.modular.system.service.impl;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.upload.app.core.redission.DistributedRedisLock;
 import com.upload.app.core.rpc.Api;
 import com.upload.app.core.rpc.CommonTxOputDto;
 import com.upload.app.core.rpc.TxInputDto;
@@ -26,7 +23,8 @@ import java.util.Map;
 @Service
 public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
 
-    final String tokenId = "c7f7c99fb2f9ad865ba17f702dc21e2643ac1562941888952a27aa399e261101";
+    @Value("${sys.tokenId}")
+    private String tokenId;
 
     @Value("${sys.address}")
     private String systemAddress;
@@ -67,59 +65,14 @@ public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
 
         FchXsvLink fchXsvLink = fchXsvLinkService.findByFch(fchAddress);
 
-//        List<String> scriptList = addressScriptLinkService.findListByAddress(fchXsvLink.getAddressHash());
-
-//        BigInteger toAssets = scriptTokenLinkService.findToTokenByScript(scriptList);
-//        BigInteger fromAssets = scriptTokenLinkService.findFromTokenByScript(scriptList);
-//        BigInteger destructionAssets = scriptTokenLinkService.findDestructionByScript(scriptList);
-
-//        BigInteger balance = toAssets.subtract(fromAssets).subtract(destructionAssets);
-
         List<TxInputDto> inputs = new ArrayList<>();
 
         sumAmount.set(new BigInteger("0"));
 
-        if (type == 1) {
-
-            while (true) {
-
-                if (sumAmount.get().compareTo(new BigInteger("1000000000")) < 0) {
-                    ScriptUtxoTokenLink sut = redisQueueService.blpop(fchXsvLink.getAddressHash());
-                    TxInputDto tx = new TxInputDto(sut.getTxid(), sut.getN(), "");
-                    scriptUtxoTokenLinkService.deleteUtxoToken(sut.getTxid(), sut.getN());
-                    inputs.add(tx);
-                    BigInteger amount = scriptTokenLinkService.selectFAToken(tokenId, sut.getTxid(), sut.getN());
-                    BigInteger sum = sumAmount.get().add(amount);
-                    sumAmount.set(sum);
-                } else
-                    break;
-
-            }
-
-        } else if (type == 2) {
-
-//            while (true) {
-//                if (sumAmount.get().compareTo(new BigInteger("200000000")) < 0) {
-//                    ScriptUtxoTokenLink sut = redisQueueService.blpop(fchXsvLink.getAddressHash());
-//                    TxInputDto tx = new TxInputDto(sut.getTxid(), sut.getN(), "");
-//                    scriptUtxoTokenLinkService.deleteUtxoToken(sut.getTxid(), sut.getN());
-//                    inputs.add(tx);
-//                    BigInteger amount = scriptTokenLinkService.selectFAToken(tokenId, sut.getTxid(), sut.getN());
-//                    BigInteger sum = sumAmount.get().add(amount);
-//                    sumAmount.set(sum);
-//                } else
-//                    break;
-//
-//            }
-
-
-
-        }
-
         Map<String, Object> m;
 
         synchronized (lock) {
-           m = sumAmount(sumAmount.get(), fchXsvLink.getAddressHash(), inputs);
+           m = sumAmount(sumAmount.get(), fchXsvLink.getAddressHash(), inputs, type);
         }
 
         BigInteger sumA = (BigInteger) m.get("sumAmount");
@@ -323,25 +276,47 @@ public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public synchronized Map<String, Object> sumAmount(BigInteger sumAmount, String address, List<TxInputDto> inputs) {
+    public synchronized Map<String, Object> sumAmount(BigInteger sumAmount, String address, List<TxInputDto> inputs, Integer type) {
 
         Map<String, Object> map = new HashedMap();
 
-        if (sumAmount.compareTo(new BigInteger("200000000")) < 0) {
+        if (type == 1) {
 
-            ScriptUtxoTokenLink sut = redisQueueService.blpop(address);
-            TxInputDto tx = new TxInputDto(sut.getTxid(), sut.getN(), "");
-            scriptUtxoTokenLinkService.deleteUtxoToken(sut.getTxid(), sut.getN());
-            inputs.add(tx);
-            BigInteger amount = scriptTokenLinkService.selectFAToken(tokenId, sut.getTxid(), sut.getN());
-            BigInteger sum = sumAmount.add(amount);
-            return sumAmount(sum, address, inputs);
+            if (sumAmount.compareTo(new BigInteger("1000000000")) < 0) {
+                ScriptUtxoTokenLink sut = redisQueueService.blpop(address);
+                TxInputDto tx = new TxInputDto(sut.getTxid(), sut.getN(), "");
+                scriptUtxoTokenLinkService.deleteUtxoToken(sut.getTxid(), sut.getN());
+                inputs.add(tx);
+                BigInteger amount = scriptTokenLinkService.selectFAToken(tokenId, sut.getTxid(), sut.getN());
+                BigInteger sum = sumAmount.add(amount);
+                return sumAmount(sum, address, inputs, type);
+            } else {
+                map.put("sumAmount", sumAmount);
+                map.put("inputs", inputs);
+                return map;
+            }
 
-        } else {
-            map.put("sumAmount", sumAmount);
-            map.put("inputs", inputs);
-            return map;
+        } else if (type == 2) {
+
+            if (sumAmount.compareTo(new BigInteger("200000000")) < 0) {
+
+                ScriptUtxoTokenLink sut = redisQueueService.blpop(address);
+                TxInputDto tx = new TxInputDto(sut.getTxid(), sut.getN(), "");
+                scriptUtxoTokenLinkService.deleteUtxoToken(sut.getTxid(), sut.getN());
+                inputs.add(tx);
+                BigInteger amount = scriptTokenLinkService.selectFAToken(tokenId, sut.getTxid(), sut.getN());
+                BigInteger sum = sumAmount.add(amount);
+                return sumAmount(sum, address, inputs, type);
+
+            } else {
+                map.put("sumAmount", sumAmount);
+                map.put("inputs", inputs);
+                return map;
+            }
+
         }
+
+        return map;
 
     }
 

@@ -279,6 +279,7 @@ public class DecodeServiceImpl implements DecodeService {
 
                         if ("4c".equals(length_hex)) {
 
+                            length_hex = content.substring(0,2);
                             Integer length = UnicodeUtil.decodeHEX(length_hex);
                             content = content.replaceFirst(length_hex,"");
                             String contentData = content.substring(0, length * 2);
@@ -709,6 +710,7 @@ public class DecodeServiceImpl implements DecodeService {
 
                         if ("4c".equals(length_hex)) {
 
+                            length_hex = content.substring(0,2);
                             Integer length = UnicodeUtil.decodeHEX(length_hex);
                             content = content.replaceFirst(length_hex,"");
                             contentData = content.substring(0, length * 2);
@@ -824,11 +826,11 @@ public class DecodeServiceImpl implements DecodeService {
                                     String toScript= st.getScript();
                                     List<String> list = addressScriptLinkService.findByScript(toScript);
                                     for (String l : list) {
-                                        if (!l.equals("57353d54a4fc0c2d24ef12f27c4351f358855416") || !l.equals("84be1e524ff4324816f25e558dd89be1a29841b3")) {
+                                        if (!l.equals("57353d54a4fc0c2d24ef12f27c4351f358855416") && !l.equals("84be1e524ff4324816f25e558dd89be1a29841b3")) {
                                             FchXsvLink xsv = fchXsvLinkMapper.findByHash(l);
                                             balanceHistory.setAddress(xsv.getFchAddress());
                                             if ("charge".equals(balanceHistory.getType())) {
-                                                BigInteger token = TokenAssetsList.get(0).getToken().divide(new BigInteger("100000000"));
+                                                BigInteger token = st.getToken().divide(new BigInteger("100000000"));
                                                 balanceHistory.setChange(token.intValue());
                                                 balanceHistoryService.insert(balanceHistory);
                                             } else {
@@ -929,6 +931,14 @@ public class DecodeServiceImpl implements DecodeService {
                         }
                     }
 
+                }
+
+                String md = jb.getString("metadata");
+                if (md != null && md.length() > 19) {
+                    String sub = md.substring(0, 20);
+                    if ("06534c502b2b00020201".equals(sub)) {
+                        isInsert = false;
+                    }
                 }
 
                 if (isInsert) {

@@ -45,7 +45,8 @@ public class SendServiceImpl implements SendService {
 
     final String agreement = "06534c502b2b000202010453454e4420c7f7c99fb2f9ad865ba17f702dc21e2643ac1562941888952a27aa399e26110108";
 
-    final String tokenId = "c7f7c99fb2f9ad865ba17f702dc21e2643ac1562941888952a27aa399e261101";
+    @Value("${sys.tokenId}")
+    private String tokenId;
 
     @Override
     @Transactional(rollbackFor=Exception.class)
