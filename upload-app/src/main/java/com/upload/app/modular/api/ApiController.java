@@ -96,6 +96,7 @@ public class ApiController extends BaseController {
 
     @Autowired
     private AddressSignHashService addressSignHashService;
+    final Base64.Decoder decoder = Base64.getDecoder();
 
     final String path = "/java/testUpload/data/";
 
@@ -138,7 +139,7 @@ public class ApiController extends BaseController {
 
         String timestamp = param.getString("timestamp");
 
-        String signautre = param.getString("signature");
+        String signautre = new String(decoder.decode(param.getString("signature")));
 
         if (fch_addr == null || fch_addr.size() < 0 || StringUtils.isEmpty(metadata) || StringUtils.isEmpty(data) || StringUtils.isEmpty(signautre) || StringUtils.isEmpty(timestamp)) {
             result.put("code", 400);
@@ -308,7 +309,7 @@ public class ApiController extends BaseController {
 
         String data = param.getString("data");
 
-        String signautre = param.getString("signature");
+        String signautre = new String(decoder.decode(param.getString("signature")));
 
         String drive_id = param.getString("drive_id");
 
@@ -503,7 +504,16 @@ public class ApiController extends BaseController {
 
     @ResponseBody
     @RequestMapping(value="/get", method = RequestMethod.POST)
-    public JSONObject get(String addr, String drive_id, String update_id, String timestamp, String signature) throws Exception {
+    public JSONObject get(@RequestBody String jsons) throws Exception {
+
+
+        JSONObject param = (JSONObject) JSONObject.parse(jsons);
+
+        String addr = param.getString("addr");
+        String drive_id = param.getString("drive_id");
+        String update_id = param.getString("update_id");
+        String timestamp = param.getString("timestamp");
+        String signature = param.getString("signature");
 
         JSONObject json = new JSONObject();
 
@@ -551,6 +561,8 @@ public class ApiController extends BaseController {
             fchXsvLinkService.insert(insert);
             fchXsvLink = fchXsvLinkService.findByFch(addr);
         }
+
+        signature = new String(decoder.decode(signature));
 
         Boolean b = Api.VerifyMessage(fchXsvLink.getXsvAddress(), signature, hash);
 
@@ -660,7 +672,14 @@ public class ApiController extends BaseController {
 
     @ResponseBody
     @RequestMapping(value="/get_drive_id", method = RequestMethod.POST)
-    public JSONObject getDriveId(String addr, String timestamp, String signature) throws Exception {
+    public JSONObject getDriveId(@RequestBody String jsons) throws Exception {
+
+
+        JSONObject param = (JSONObject) JSONObject.parse(jsons);
+
+        String addr = param.getString("addr");
+        String timestamp = param.getString("timestamp");
+        String signature = param.getString("signature");
 
         JSONObject json = new JSONObject();
 
@@ -702,6 +721,7 @@ public class ApiController extends BaseController {
             fchXsvLink = fchXsvLinkService.findByFch(addr);
         }
 
+        signature = new String(decoder.decode(signature));
         Boolean b = Api.VerifyMessage(fchXsvLink.getXsvAddress(), signature, hash);
 
         if (!b) {
@@ -780,7 +800,13 @@ public class ApiController extends BaseController {
     @ResponseBody
     @RequestMapping(value="/get_balance", method = RequestMethod.POST)
     @Transactional(rollbackFor=Exception.class)
-    public JSONObject query(String addr, String timestamp, String signature) throws Exception {
+    public JSONObject query(@RequestBody String json) throws Exception {
+
+        JSONObject param = (JSONObject) JSONObject.parse(json);
+
+        String addr = param.getString("addr");
+        String timestamp = param.getString("timestamp");
+        String signature = param.getString("signature");
 
         JSONObject ob = new JSONObject();
 
@@ -826,7 +852,7 @@ public class ApiController extends BaseController {
             return ob;
         }
 
-
+        signature = new String(decoder.decode(signature));
         Boolean b = Api.VerifyMessage(fchXsvLink.getXsvAddress(), signature, hash);
 
         if (!b) {
@@ -862,7 +888,15 @@ public class ApiController extends BaseController {
 
     @ResponseBody
     @RequestMapping(value="/get_tx_history", method = RequestMethod.POST)
-    public JSONObject getTxHistory(String addr, String timestamp, String signature) throws Exception {
+    public JSONObject getTxHistory(@RequestBody String json) throws Exception {
+
+        JSONObject param = (JSONObject) JSONObject.parse(json);
+
+        String addr = param.getString("addr");
+
+        String timestamp = param.getString("timestamp");
+
+        String signature = param.getString("signature");
 
         JSONObject ob = new JSONObject();
 
@@ -943,8 +977,7 @@ public class ApiController extends BaseController {
         String fch_addr = param.getString("addr");
         String drive_id = param.getString("drive_id");
         String timestamp = param.getString("timestamp");
-        String signature = param.getString("signature");
-
+        String signature = new String(decoder.decode(param.getString("signature")));
 
         if (StringUtils.isEmpty(fch_addr) || StringUtils.isEmpty(drive_id) || StringUtils.isEmpty(timestamp) || StringUtils.isEmpty(signature)) {
             result.put("code", 400);
