@@ -292,13 +292,12 @@ curl http://freedrive.fchwallet.com:8442/api/terminate_drive_id  -X POST  -d @te
 >获取drive_id 授权信息。     
 >接口名称: /api/get_auth
 
-参数类型: ["application/x-www-form-urlencoded"]    
-'addr=1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM&drive_id=xxxxxxxxxx&timestamp=1593550887&signature=xxxxxxxxxxxx'	
+参数类型: ["application/json"]    
 {
-  "addr":"",
-  "drive_id":"",
-  "timestamp":"",
-  "signature":""	
+  "addr":"1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM"",
+  "drive_id":"f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce",
+  "timestamp":"1593550887",
+  "signature":"xxxxxxxxxxx"	
 }
 
 ```
