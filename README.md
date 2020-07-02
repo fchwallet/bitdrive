@@ -68,7 +68,7 @@ put, update, get, get_drive_id
 ```
 参数类型： ["application/json"]  
 {
-"fch_addr": ["F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT"], 
+"addr": ["F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT"], 
 "metadata":"61869fb46ccc915c36e2366d77ef8d", (hex 字符串)
 "data": "010101010",(hex 字符串),
 "timestamp": "1593550887",
@@ -93,7 +93,7 @@ curl http://freedrive.fchwallet.com:8442/api/put  -X POST  -d @put.json  --heade
 ```
 参数类型: ["application/json"]    
 {
-"fch_addr": ["F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT"], 
+"addr": ["F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT"], 
 "metadata":"044bfc161869fb46ccc915c36e2366d77ef8d",(hex 字符串)
 "data": "010101010",(hex 字符串),
 "drive_id":  需要更新的drive_id,
@@ -122,7 +122,7 @@ curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  -
 ```
 参数类型: ["application/json"]  
 {
-  "fch_addr":"F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT",
+  "addr":"F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT",
   "drive_id":"1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce",
   "timestamp":"1593550887",
   "signature":"xxxxxxxx"	
@@ -159,7 +159,7 @@ curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  -
 ```
 参数类型: ["application/json"]  
 {
-  "fch_addr":"F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT",
+  "addr":"F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT",
   "drive_id":"1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce",
   "timestamp":"1593550887",
   "signature":"xxxxxxx"	
@@ -188,7 +188,7 @@ curl http://freedrive.fchwallet.com:8442/api/get -X POST  -d @get.json --header 
 ```
 参数类型: ["application/json"]    
 {
-  "fch_addr":"F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK",
+  "addr":"F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK",
   "drive_id":"8d6cc0f1f6aa1f4535262f65466871a5865b0c94bb49ea5c5695917545aead93",
   "timestamp":"1593550887",
   "signature":"xxxxxxxxxxxxx"	
@@ -213,7 +213,7 @@ curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d @get_drive
 ```
 参数类型: ["application/json"]    
 {
-  "fch_addr":"F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK",
+  "addr":"F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK",
   "timestamp":"1593550887",
   "signature":"xxxxxxxxxxx"	
 }
@@ -237,7 +237,7 @@ curl http://freedrive.fchwallet.com:8442/api/get_balance -X POST  -d @get_balanc
 ```
 参数类型: ["application/json"]    
 {
-  "fch_addr":"1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM",
+  "addr":"1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM",
   "timestamp":"1593550887",
   "signature":"xxxxxxxxxxxx"	
 }
@@ -268,7 +268,7 @@ curl http://freedrive.fchwallet.com:8442/api/get_tx_history -X POST  -d @tx_hist
 ```
 参数类型: ["application/json"]    
 {
-  "fch_addr':"1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM",	
+  "addr':"1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM",	
   "drive_id":"f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce",
   "timestamp":"1593550887",
   "signature":"xxxxxxxxxxxxx"
@@ -293,9 +293,9 @@ curl http://freedrive.fchwallet.com:8442/api/terminate_drive_id  -X POST  -d @te
 >接口名称: /api/get_auth
 
 参数类型: ["application/x-www-form-urlencoded"]    
-'fch_addr=1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM&drive_id=xxxxxxxxxx&timestamp=1593550887&signature=xxxxxxxxxxxx'	
+'addr=1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM&drive_id=xxxxxxxxxx&timestamp=1593550887&signature=xxxxxxxxxxxx'	
 {
-  "fch_addr":"",
+  "addr":"",
   "drive_id":"",
   "timestamp":"",
   "signature":""	
@@ -324,7 +324,7 @@ member 可以有多个地址，可以修改drive_id, 但不能修改权限
 ```
 参数类型: ["application/json"]    
 {
-  "fch_addr":"1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM",	
+  "addr":"1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM",	
   "drive_id":"f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce",
   "admin":[addr1, addr2, ..., addrn],
   "member":[addr11, addr22, ..., addrn2],
