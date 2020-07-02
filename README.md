@@ -18,7 +18,7 @@ java implementation freedrive, see [architecture](./Freedrive-architecture.pdf)
 接口签名参数(signature)计算规则:
 1) params_concat =  p1 + p2 ... + timestamp
 2) hash = sha256(params_concat)
-3) signature = ecdsa(hash, addr_private), 用私钥签名hash
+3) signature = base64(ecdsa(hash, addr_private)), 用私钥签名hash, 并对签名结果进行base64编码
 
 错误码：  
 {"code":"100101","验证时间超时"}  
