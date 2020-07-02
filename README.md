@@ -18,7 +18,7 @@ java implementation freedrive, see [architecture](./Freedrive-architecture.pdf)
 接口签名参数(signature)计算规则:
 1) params_concat =  p1 + p2 ... + timestamp
 2) hash = sha256(params_concat)
-3) signature = base64(ecdsa(hash, addr_private)), 用私钥签名hash, 并对签名结果进行base64编码
+3) signature = ecdsa(hash, addr_private), 用私钥签名hash  
 
 错误码：  
 {"code":"100101","验证时间超时"}  
@@ -120,8 +120,14 @@ curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  -
 
 查询单个drive_id的所有变更记录(type = 1 data的数据为链接 type = 0  data数据为正常数据)
 ```
-参数类型: ["application/x-www-form-urlencoded"]  
-'fch_addr=F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT&drive_id=1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce&timestamp=1593550887&signature=xxxxxxxx'
+参数类型: ["application/json"]  
+{
+  "fch_addr":"F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT",
+  "drive_id":"1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce",
+  "timestamp":"1593550887",
+  "signature":"xxxxxxxx"	
+}
+
   
 返回结果：
 {
@@ -151,8 +157,14 @@ curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  -
 ```   
 或者参数传update_id, 查询某次更新记录    
 ```
-参数类型: ["application/x-www-form-urlencoded"]  
-'fch_addr=F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT&update_id=1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce&timestamp=1593550887&signature=xxxxxxx'
+参数类型: ["application/json"]  
+{
+  "fch_addr":"F9A9TgNE2ixYhQmEnB15BNYcEuCvZvzqxT",
+  "drive_id":"1f6dc4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce",
+  "timestamp":"1593550887",
+  "signature":"xxxxxxx"	
+}
+
     
 返回结果
 {
@@ -167,15 +179,21 @@ curl http://freedrive.fchwallet.com:8442/api/update  -X POST  -d @update.json  -
 ```  
 curl example
 ```
-curl http://freedrive.fchwallet.com:8442/api/get -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK&drive_id=8d6cc0f1f6aa1f4535262f65466871a5865b0c94bb49ea5c5695917545aead93'      
+curl http://freedrive.fchwallet.com:8442/api/get -X POST  -d @get.json --header "Content-Type:application/json"      
 ```
     
 ### get drive_id
 >获取FCH地址的存储列表     
 >接口名称: /api/get_drive_id
 ```
-参数类型: ["application/x-www-form-urlencoded"]    
-'fch_addr=f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce&timestamp=1593550887&signature=xxxxxxxxxxxxx'
+参数类型: ["application/json"]    
+{
+  "fch_addr":"F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK",
+  "drive_id":"8d6cc0f1f6aa1f4535262f65466871a5865b0c94bb49ea5c5695917545aead93",
+  "timestamp":"1593550887",
+  "signature":"xxxxxxxxxxxxx"	
+}
+
    
 	    
 返回结果：
@@ -186,15 +204,20 @@ curl http://freedrive.fchwallet.com:8442/api/get -X POST  -d 'fch_addr=F8Z2aQkHk
 ```
 curl example
 ```
-curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK ' 
+curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d @get_drive_id.json --header "Content-Type:application/json" ' 
 ```
 
 ### get balance
 >获取FCH地址的积分余额     
 >接口名称: /api/get_balance
 ```
-参数类型: ["application/x-www-form-urlencoded"]    
-'fch_addr=f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce&timestamp=1593550887&signature=xxxxxxxxxx'
+参数类型: ["application/json"]    
+{
+  "fch_addr":"F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK",
+  "timestamp":"1593550887",
+  "signature":"xxxxxxxxxxx"	
+}
+
 
 返回结果:
 {
@@ -205,15 +228,20 @@ curl http://freedrive.fchwallet.com:8442/api/get_drive_id -X POST  -d 'fch_addr=
 
 curl example
 ```
-curl http://freedrive.fchwallet.com:8442/api/get_balance -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK ' 
+curl http://freedrive.fchwallet.com:8442/api/get_balance -X POST  -d @get_balance --header "Content-Type:application/json" ' 
 ```
 
 ### get tx history
 >获取余额变更记录     
 >接口名称: /api/get_tx_history
 ```
-参数类型: ["application/x-www-form-urlencoded"]    
-'fch_addr=1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM&timestamp=1593550887&signature=xxxxxxxxxxxx'	
+参数类型: ["application/json"]    
+{
+  "fch_addr":"1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM",
+  "timestamp":"1593550887",
+  "signature":"xxxxxxxxxxxx"	
+}
+	
 
 
 返回结果:
@@ -231,7 +259,7 @@ curl http://freedrive.fchwallet.com:8442/api/get_balance -X POST  -d 'fch_addr=F
 
 curl example
 ```
-curl http://freedrive.fchwallet.com:8442/api/get_tx_history -X POST  -d 'fch_addr=F8Z2aQkHkBFhb3GQfEWV7L88yMuApj7jMK'      
+curl http://freedrive.fchwallet.com:8442/api/get_tx_history -X POST  -d @tx_history.json --header "Content-Type:application/json"
 ```
 
 ### terminate drive_id
@@ -266,6 +294,12 @@ curl http://freedrive.fchwallet.com:8442/api/terminate_drive_id  -X POST  -d @te
 
 参数类型: ["application/x-www-form-urlencoded"]    
 'fch_addr=1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM&drive_id=xxxxxxxxxx&timestamp=1593550887&signature=xxxxxxxxxxxx'	
+{
+  "fch_addr":"",
+  "drive_id":"",
+  "timestamp":"",
+  "signature":""	
+}
 
 ```
 返回结果:
@@ -290,7 +324,7 @@ member 可以有多个地址，可以修改drive_id, 但不能修改权限
 ```
 参数类型: ["application/json"]    
 {
-  "fch_addr':"1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM",	
+  "fch_addr":"1QrD3JVeeJxT56coCwCoPxi7Bm91unnyM",	
   "drive_id":"f4adf42047b18b7e8282cd17375c41bca7c166e5d72f27b50faaa57831ce",
   "admin":[addr1, addr2, ..., addrn],
   "member":[addr11, addr22, ..., addrn2],
