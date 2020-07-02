@@ -1,5 +1,5 @@
 # freedriveJ -- own your own data.
-java implementation freedrive, see [architecture](./Freedrive-architecture.pdf)
+java implementation freedrive
 ### 目录
 [1. put](#put)  
 [2. update](#update)  
