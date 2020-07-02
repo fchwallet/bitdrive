@@ -15,7 +15,7 @@ java implementation freedrive, see [architecture](./Freedrive-architecture.pdf)
 >URL: http://freedrive.fchwallet.com:8442       
 所有接口都是post请求.
 ```
-接口签名参数(signature)计算规则:
+所有接口的参数签名(signature)字段计算规则:
 1) params_concat =  p1 + p2 ... + timestamp
 2) hash = sha256(params_concat)
 3) signature = ecdsa(hash, addr_private), 用私钥签名hash  
