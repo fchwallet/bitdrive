@@ -158,7 +158,7 @@ public class BlockchainPaymentServiceImpl implements BlockchainPaymentService {
             c4 = new CommonTxOputDto("64726976657075743031",3);
         } else if ("update".equals(methodName)) {
             c4 = new CommonTxOputDto("64726976657570643031",3);
-        } else if ("get_drive_id".equals(methodName)) {
+        } else if ("list_drive_id".equals(methodName)) {
             c4 = new CommonTxOputDto("64726976656469643031",3);
         } else if ("terminate_drive_id".equals(methodName)) {
             c4 = new CommonTxOputDto("64726976657464693031",3);

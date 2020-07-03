@@ -781,10 +781,10 @@ public class DecodeServiceImpl implements DecodeService {
                                 balanceHistory.setTimestamp(new Date());
                                 balanceHistory.setChange(-10);
 
-                            } else if ("64726976656469643031".equals(typeInfo)) {                   // get_drive_id
+                            } else if ("64726976656469643031".equals(typeInfo)) {                   // list_drive_id
 
                                 balanceHistory = new BalanceHistory();
-                                balanceHistory.setType("get_drive_id");
+                                balanceHistory.setType("list_drive_id");
                                 balanceHistory.setTimestamp(new Date());
                                 balanceHistory.setChange(-2);
 

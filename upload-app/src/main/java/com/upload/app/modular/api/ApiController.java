@@ -139,7 +139,7 @@ public class ApiController extends BaseController {
 
         String timestamp = param.getString("timestamp");
 
-        String signautre = new String(decoder.decode(param.getString("signature")));
+        String signautre = param.getString("signature");
 
         if (fch_addr == null || fch_addr.size() < 0 || StringUtils.isEmpty(metadata) || StringUtils.isEmpty(data) || StringUtils.isEmpty(signautre) || StringUtils.isEmpty(timestamp)) {
             result.put("code", 400);
@@ -195,6 +195,42 @@ public class ApiController extends BaseController {
 
         FchXsvLink fchXsvLink = fchXsvLinkService.findByFch(ad);
 
+        List<String> fchAddress = new ArrayList<>();
+
+        if (fchXsvLink == null) {
+
+            for (Object o : fch_addr) {
+
+                String addr = (String) o;
+                fchXsvLink = fchXsvLinkService.findByFch(addr);
+
+                if (fchXsvLink != null)
+                    fchXsvLink.getXsvAddress();
+                else {
+                    String xsvaddress = null;
+                    FchXsvLink insert = new FchXsvLink();
+                    if ("F".equals(adfrist) || "f".equals(adfrist)) {
+                        xsvaddress = Api.fchtoxsv(fch_addr.getString(0)).getString("address");
+                        insert.setType(0);
+                    } else if ("1".equals(adfrist)) {
+                        xsvaddress = ad;
+                        insert.setType(1);
+                    }
+
+                    insert.setFchAddress(addr);
+                    insert.setXsvAddress(xsvaddress);
+
+                    String addressHash = Api.ValidateAddress(xsvaddress).getString("scriptPubKey").replaceFirst("76a914", "").replaceFirst("88ac", "");
+                    insert.setAddressHash(addressHash);
+                    fchXsvLinkService.insert(insert);
+                    fchXsvLink = fchXsvLinkService.findByFch(addr);
+                }
+
+                fchAddress.add(fchXsvLink.getXsvAddress());
+
+            }
+        }
+
         List<String> scriptList = addressScriptLinkService.findListByAddress(fchXsvLink.getAddressHash());
 
         if (scriptList == null || scriptList.size() < 1) {
@@ -202,8 +238,6 @@ public class ApiController extends BaseController {
             result.put("msg", "用户积分不足");
             return result;
         }
-
-//        List<ScriptUtxoTokenLink> scriptUtxoTokenList = scriptUtxoTokenLinkService.findListByScript(scriptList, fchXsvLink.getAddressHash(), tokenId);
 
         BigInteger toAssets = scriptTokenLinkService.findToTokenByScript(scriptList);
         BigInteger fromAssets = scriptTokenLinkService.findFromTokenByScript(scriptList);
@@ -215,40 +249,6 @@ public class ApiController extends BaseController {
             result.put("code", 200214);
             result.put("msg", "用户积分不足");
             return result;
-        }
-
-
-        List<String> fchAddress = new ArrayList<>();
-
-        for (Object o : fch_addr) {
-
-            String addr = (String) o;
-            FchXsvLink f = fchXsvLinkService.findByFch(addr);
-
-            if (f != null)
-                f.getXsvAddress();
-            else {
-                String xsvaddress = null;
-                FchXsvLink insert = new FchXsvLink();
-                if ("F".equals(adfrist) || "f".equals(adfrist)) {
-                    xsvaddress = Api.fchtoxsv(fch_addr.getString(0)).getString("address");
-                    insert.setType(0);
-                } else if ("1".equals(adfrist)) {
-                    xsvaddress = ad;
-                    insert.setType(1);
-                }
-
-                insert.setFchAddress(addr);
-                insert.setXsvAddress(xsvaddress);
-
-                String addressHash = Api.ValidateAddress(xsvaddress).getString("scriptPubKey").replaceFirst("76a914", "").replaceFirst("88ac", "");
-                insert.setAddressHash(addressHash);
-                fchXsvLinkService.insert(insert);
-                f = fchXsvLinkService.findByFch(addr);
-            }
-
-            fchAddress.add(f.getXsvAddress());
-
         }
 
 
@@ -309,7 +309,7 @@ public class ApiController extends BaseController {
 
         String data = param.getString("data");
 
-        String signautre = new String(decoder.decode(param.getString("signature")));
+        String signautre = param.getString("signature");
 
         String drive_id = param.getString("drive_id");
 
@@ -376,6 +376,32 @@ public class ApiController extends BaseController {
 
         FchXsvLink fxl = fchXsvLinkService.findByFch(fchadd);
 
+        List<String> fchAddress = new ArrayList<>();
+        for (Object o : fch_addr) {
+            String addr = (String) o;
+            fxl= fchXsvLinkService.findByFch(addr);
+            if (fxl != null)
+                fxl.getXsvAddress();
+            else {
+                String xsvaddress = null;
+                FchXsvLink insert = new FchXsvLink();
+                if ("F".equals(adfrist) || "f".equals(adfrist)) {
+                    xsvaddress = Api.fchtoxsv(addr).getString("address");
+                    insert.setType(0);
+                } else if ("1".equals(adfrist)) {
+                    xsvaddress = fchadd;
+                    insert.setType(1);
+                }
+                insert.setFchAddress(addr);
+                insert.setXsvAddress(xsvaddress);
+                String addressHash = Api.ValidateAddress(xsvaddress).getString("scriptPubKey").replaceFirst("76a914", "").replaceFirst("88ac", "");
+                insert.setAddressHash(addressHash);
+                fchXsvLinkService.insert(insert);
+                fxl = fchXsvLinkService.findByFch(addr);
+            }
+            fchAddress.add(fxl.getXsvAddress());
+        }
+
         List<String> scriptList = addressScriptLinkService.findListByAddress(fxl.getAddressHash());
 
         if (scriptList == null || scriptList.size() < 1) {
@@ -438,31 +464,7 @@ public class ApiController extends BaseController {
             return result;
         }
 
-        List<String> fchAddress = new ArrayList<>();
-        for (Object o : fch_addr) {
-            String addr = (String) o;
-            FchXsvLink f = fchXsvLinkService.findByFch(addr);
-            if (f != null)
-                f.getXsvAddress();
-            else {
-                String xsvaddress = null;
-                FchXsvLink insert = new FchXsvLink();
-                if ("F".equals(adfrist) || "f".equals(adfrist)) {
-                    xsvaddress = Api.fchtoxsv(addr).getString("address");
-                    insert.setType(0);
-                } else if ("1".equals(adfrist)) {
-                    xsvaddress = fchadd;
-                    insert.setType(1);
-                }
-                insert.setFchAddress(addr);
-                insert.setXsvAddress(xsvaddress);
-                String addressHash = Api.ValidateAddress(xsvaddress).getString("scriptPubKey").replaceFirst("76a914", "").replaceFirst("88ac", "");
-                insert.setAddressHash(addressHash);
-                fchXsvLinkService.insert(insert);
-                f = fchXsvLinkService.findByFch(addr);
-            }
-            fchAddress.add(f.getXsvAddress());
-        }
+
 
         DriveUtxo du = driveUtxoService.findByDriveId(drive_id);
         if (du == null) {
@@ -562,7 +564,6 @@ public class ApiController extends BaseController {
             fchXsvLink = fchXsvLinkService.findByFch(addr);
         }
 
-        signature = new String(decoder.decode(signature));
 
         Boolean b = Api.VerifyMessage(fchXsvLink.getXsvAddress(), signature, hash);
 
@@ -624,6 +625,8 @@ public class ApiController extends BaseController {
                 JSONObject ob = new JSONObject();
                 ob.put("metadata", create.getMetadata());
                 ob.put("data", create.getData());
+                ob.put("type", create.getType());
+                json.put("status", create.getStatus());
                 json.put("put", ob);
 
             }
@@ -637,6 +640,7 @@ public class ApiController extends BaseController {
                 ob.put("update_id", up.getUpdateId());
                 ob.put("metadata", up.getMetadata());
                 ob.put("data", up.getData());
+                ob.put("type", up.getType());
                 obs.add(ob);
             }
 
@@ -659,6 +663,7 @@ public class ApiController extends BaseController {
             JSONObject ob = new JSONObject();
             ob.put("metadata", up.getMetadata());
             ob.put("data", up.getData());
+            ob.put("type", up.getType());
 
             json.put("update", ob);
             json.put("code", 200);
@@ -671,8 +676,8 @@ public class ApiController extends BaseController {
 
 
     @ResponseBody
-    @RequestMapping(value="/get_drive_id", method = RequestMethod.POST)
-    public JSONObject getDriveId(@RequestBody String jsons) throws Exception {
+    @RequestMapping(value="/list_drive_id", method = RequestMethod.POST)
+    public JSONObject listDriveId(@RequestBody String jsons) throws Exception {
 
 
         JSONObject param = (JSONObject) JSONObject.parse(jsons);
@@ -721,7 +726,6 @@ public class ApiController extends BaseController {
             fchXsvLink = fchXsvLinkService.findByFch(addr);
         }
 
-        signature = new String(decoder.decode(signature));
         Boolean b = Api.VerifyMessage(fchXsvLink.getXsvAddress(), signature, hash);
 
         if (!b) {
@@ -768,7 +772,7 @@ public class ApiController extends BaseController {
             return json;
         }
 
-        Boolean f = blockchainPaymentService.payment(addr, 2, "get_drive_id");         // 查询钱,付费
+        Boolean f = blockchainPaymentService.payment(addr, 2, "list_drive_id");         // 查询钱,付费
         if (f != null && !f) {
             json.put("code", 100457);
             json.put("msg", "付费失败");
@@ -852,7 +856,7 @@ public class ApiController extends BaseController {
             return ob;
         }
 
-        signature = new String(decoder.decode(signature));
+
         Boolean b = Api.VerifyMessage(fchXsvLink.getXsvAddress(), signature, hash);
 
         if (!b) {
@@ -977,7 +981,7 @@ public class ApiController extends BaseController {
         String fch_addr = param.getString("addr");
         String drive_id = param.getString("drive_id");
         String timestamp = param.getString("timestamp");
-        String signature = new String(decoder.decode(param.getString("signature")));
+        String signature = param.getString("signature");
 
         if (StringUtils.isEmpty(fch_addr) || StringUtils.isEmpty(drive_id) || StringUtils.isEmpty(timestamp) || StringUtils.isEmpty(signature)) {
             result.put("code", 400);
@@ -1076,7 +1080,7 @@ public class ApiController extends BaseController {
             return result;
         }
 
-        Boolean f = blockchainPaymentService.payment(fch_addr, 2, "get_drive_id");         // 查询钱,付费
+        Boolean f = blockchainPaymentService.payment(fch_addr, 2, "list_drive_id");         // 查询钱,付费
         if (f != null && !f) {
             result.put("code", 100457);
             result.put("msg", "付费失败");
